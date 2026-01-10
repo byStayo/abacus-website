@@ -522,12 +522,13 @@
             border-radius: 8px;
             padding: 16px;
             position: relative;
-            overflow: hidden;
         }
 
         .chart-canvas {
             width: 100%;
             height: 200px;
+            display: block;
+            overflow: hidden;
         }
 
         .chart-legend {
@@ -535,6 +536,8 @@
             gap: 16px;
             margin-top: 12px;
             flex-wrap: wrap;
+            position: relative;
+            z-index: 10;
         }
 
         .legend-item {
@@ -555,6 +558,11 @@
 
         .legend-item.disabled {
             opacity: 0.4;
+            text-decoration: line-through;
+        }
+
+        .legend-item:active {
+            transform: scale(0.95);
         }
 
         .legend-dot {
