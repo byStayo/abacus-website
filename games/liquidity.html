@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIQUIDITY - The Money Supply Simulator</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta name="theme-color" content="#0d1117">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #7d8590;
+            --text-muted: #484f58;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-yellow: #d29922;
+            --accent-blue: #58a6ff;
+            --accent-purple: #a371f7;
+            --accent-cyan: #39c5cf;
+        }
+
+        body {
+            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ============ START SCREEN ============ */
+        .start-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .start-screen.hidden {
+            display: none;
+        }
+
+        .nav-breadcrumb {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .breadcrumb-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .breadcrumb-link:hover {
+            color: var(--accent-blue);
+        }
+
+        .breadcrumb-sep {
+            color: var(--text-muted);
+        }
+
+        .breadcrumb-current {
+            color: var(--text-primary);
+        }
+
+        .game-logo {
+            font-size: 72px;
+            font-weight: 800;
+            letter-spacing: -3px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .game-tagline {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .game-description {
+            max-width: 600px;
+            margin-bottom: 40px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .game-description p {
+            margin-bottom: 16px;
+        }
+
+        .concept-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 40px;
+            max-width: 500px;
+            text-align: left;
+        }
+
+        .concept-box h3 {
+            color: var(--accent-cyan);
+            margin-bottom: 12px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .concept-box p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .money-preview {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .money-tier {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            text-align: center;
+        }
+
+        .money-tier-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .money-tier-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .m1 { color: var(--accent-green); }
+        .m2 { color: var(--accent-blue); }
+        .m3 { color: var(--accent-purple); }
+        .m4 { color: var(--accent-cyan); }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            color: var(--bg-primary);
+            border: none;
+            padding: 16px 48px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(57, 197, 207, 0.4);
+        }
+
+        /* ============ GAME CONTAINER ============ */
+        .game-container {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container.active {
+            display: block;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .turn-info {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .turn-badge {
+            background: var(--bg-tertiary);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .turn-badge span {
+            color: var(--accent-blue);
+            font-weight: 700;
+        }
+
+        .rating-badge {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .rating-a { color: var(--accent-green); }
+        .rating-b { color: var(--accent-blue); }
+        .rating-c { color: var(--accent-yellow); }
+        .rating-d { color: #f0883e; }
+        .rating-f { color: var(--accent-red); }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+        }
+
+        /* Panels */
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .panel-toggle {
+            display: flex;
+            gap: 4px;
+        }
+
+        .toggle-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn:first-child {
+            border-radius: 4px 0 0 4px;
+        }
+
+        .toggle-btn:last-child {
+            border-radius: 0 4px 4px 0;
+        }
+
+        .toggle-btn.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: var(--bg-primary);
+        }
+
+        /* Dashboard */
+        .dashboard {
+            margin-bottom: 20px;
+        }
+
+        .aggregate-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .aggregate-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .aggregate-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .aggregate-card.m1::before { background: var(--accent-green); }
+        .aggregate-card.m2::before { background: var(--accent-blue); }
+        .aggregate-card.m3::before { background: var(--accent-purple); }
+        .aggregate-card.m4::before { background: var(--accent-cyan); }
+
+        .aggregate-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .aggregate-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .aggregate-change {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .change-up { color: var(--accent-green); }
+        .change-down { color: var(--accent-red); }
+        .change-neutral { color: var(--text-muted); }
+
+        /* Comparison View */
+        .comparison-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .comparison-panel {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .comparison-title {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comparison-title .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .simple-sum .dot { background: var(--accent-yellow); }
+        .divisia .dot { background: var(--accent-cyan); }
+
+        .comparison-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .comparison-growth {
+            font-size: 14px;
+        }
+
+        .divergence-alert {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid var(--accent-red);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .divergence-alert.warning {
+            background: rgba(210, 153, 34, 0.1);
+            border-color: var(--accent-yellow);
+        }
+
+        .divergence-alert.hidden {
+            display: none;
+        }
+
+        .divergence-icon {
+            font-size: 20px;
+        }
+
+        /* Economic Indicators */
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .indicator {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .indicator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .indicator-name {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .indicator-target {
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .indicator-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .indicator-bar {
+            height: 4px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .indicator-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.5s, background 0.3s;
+        }
+
+        /* Policy Controls */
+        .policy-section {
+            margin-bottom: 20px;
+        }
+
+        .policy-tool {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .policy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .policy-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .policy-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .policy-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            outline: none;
+            margin-bottom: 8px;
+        }
+
+        .policy-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .policy-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .policy-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            border-color: var(--accent-blue);
+            background: rgba(88, 166, 255, 0.1);
+        }
+
+        .action-btn.qe {
+            border-color: var(--accent-purple);
+        }
+
+        .action-btn.qe:hover {
+            background: rgba(163, 113, 247, 0.1);
+        }
+
+        .end-turn-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            border: none;
+            color: var(--bg-primary);
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+
+        .end-turn-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(57, 197, 207, 0.3);
+        }
+
+        /* News Ticker */
+        .news-panel {
+            margin-top: 20px;
+        }
+
+        .news-feed {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .news-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-quarter {
+            color: var(--text-muted);
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .news-text {
+            color: var(--text-secondary);
+        }
+
+        .news-text.crisis {
+            color: var(--accent-red);
+        }
+
+        .news-text.positive {
+            color: var(--accent-green);
+        }
+
+        .news-text.warning {
+            color: var(--accent-yellow);
+        }
+
+        /* Money Components Detail */
+        .components-panel {
+            margin-top: 20px;
+        }
+
+        .component-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .component-row:last-child {
+            border-bottom: none;
+        }
+
+        .component-name {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .component-weight {
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .component-value {
+            font-weight: 600;
+        }
+
+        /* Crisis Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .modal-title.crisis {
+            color: var(--accent-red);
+        }
+
+        .modal-title.success {
+            color: var(--accent-green);
+        }
+
+        .modal-text {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal-btn {
+            background: var(--accent-blue);
+            border: none;
+            color: white;
+            padding: 12px 32px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* Tooltip */
+        .tooltip-trigger {
+            cursor: help;
+            border-bottom: 1px dotted var(--text-muted);
+        }
+
+        .tooltip {
+            position: absolute;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            max-width: 250px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            pointer-events: none;
+        }
+
+        .tooltip.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Game Over Screen */
+        .game-over {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s;
+        }
+
+        .game-over.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .final-rating {
+            font-size: 120px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .final-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .final-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .final-stat {
+            text-align: center;
+        }
+
+        .final-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .final-stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .play-again-btn {
+            background: var(--accent-blue);
+            border: none;
+            color: white;
+            padding: 16px 48px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .aggregate-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .game-logo {
+                font-size: 48px;
+            }
+
+            .comparison-view {
+                grid-template-columns: 1fr;
+            }
+
+            .final-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div class="start-screen" id="start-screen">
+        <div class="nav-breadcrumb">
+            <a href="https://abacuswealthgroup.com" class="breadcrumb-link">Abacus</a>
+            <span class="breadcrumb-sep">/</span>
+            <a href="/" class="breadcrumb-link">Games</a>
+            <span class="breadcrumb-sep">/</span>
+            <span class="breadcrumb-current">Liquidity</span>
+        </div>
+
+        <h1 class="game-logo">LIQUIDITY</h1>
+        <p class="game-tagline">The Money Supply Simulator</p>
+
+        <div class="game-description">
+            <p>You are the newly appointed Chair of the Federal Reserve. Your mission: manage the nation's money supply to maintain economic stability.</p>
+            <p>But here's the secret the textbooks don't teach — <strong>not all money is created equal</strong>.</p>
+        </div>
+
+        <div class="concept-box">
+            <h3>The Divisia Difference</h3>
+            <p>A dollar in your pocket isn't the same as a dollar locked in a 5-year CD. The old Fed just added them up equally. You'll use <strong>Divisia-weighted aggregates</strong> to see the TRUE liquidity in the system.</p>
+            <div class="money-preview">
+                <div class="money-tier">
+                    <div class="money-tier-label">M1</div>
+                    <div class="money-tier-value m1">Cash</div>
+                </div>
+                <div class="money-tier">
+                    <div class="money-tier-label">M2</div>
+                    <div class="money-tier-value m2">+ Savings</div>
+                </div>
+                <div class="money-tier">
+                    <div class="money-tier-label">M3</div>
+                    <div class="money-tier-value m3">+ Large CDs</div>
+                </div>
+                <div class="money-tier">
+                    <div class="money-tier-label">M4</div>
+                    <div class="money-tier-value m4">+ T-Bills</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="start-btn" onclick="startGame()">Begin Your Term</button>
+    </div>
+
+    <!-- Game Container -->
+    <div class="game-container" id="game-container">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="game-title">LIQUIDITY</div>
+            <div class="turn-info">
+                <div class="turn-badge">
+                    <span id="current-quarter">Q1</span> <span id="current-year">2024</span>
+                </div>
+                <div class="turn-badge">
+                    Turn <span id="current-turn">1</span> / 20
+                </div>
+                <div class="rating-badge rating-a" id="current-rating">A</div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Column - Dashboard -->
+            <div class="left-column">
+                <!-- Money Supply Dashboard -->
+                <div class="panel dashboard">
+                    <div class="panel-header">
+                        <div class="panel-title">Money Supply Aggregates</div>
+                        <div class="panel-toggle">
+                            <button class="toggle-btn active" id="toggle-divisia" onclick="setView('divisia')">Divisia</button>
+                            <button class="toggle-btn" id="toggle-simple" onclick="setView('simple')">Simple Sum</button>
+                        </div>
+                    </div>
+
+                    <div class="aggregate-grid">
+                        <div class="aggregate-card m1">
+                            <div class="aggregate-label">M1 (Currency + Checking)</div>
+                            <div class="aggregate-value" id="m1-value">$4.2T</div>
+                            <div class="aggregate-change change-up" id="m1-change">
+                                <span>+2.1%</span>
+                            </div>
+                        </div>
+                        <div class="aggregate-card m2">
+                            <div class="aggregate-label">M2 (+ Savings)</div>
+                            <div class="aggregate-value" id="m2-value">$18.7T</div>
+                            <div class="aggregate-change change-up" id="m2-change">
+                                <span>+1.8%</span>
+                            </div>
+                        </div>
+                        <div class="aggregate-card m3">
+                            <div class="aggregate-label">M3 (+ Large CDs)</div>
+                            <div class="aggregate-value" id="m3-value">$22.1T</div>
+                            <div class="aggregate-change change-neutral" id="m3-change">
+                                <span>+0.5%</span>
+                            </div>
+                        </div>
+                        <div class="aggregate-card m4">
+                            <div class="aggregate-label">M4 (+ T-Bills)</div>
+                            <div class="aggregate-value" id="m4-value">$28.4T</div>
+                            <div class="aggregate-change change-down" id="m4-change">
+                                <span>-0.3%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comparison View -->
+                    <div class="comparison-view">
+                        <div class="comparison-panel simple-sum">
+                            <div class="comparison-title">
+                                <span class="dot"></span>
+                                Simple Sum M4
+                            </div>
+                            <div class="comparison-value" id="simple-sum-value">$28.4T</div>
+                            <div class="comparison-growth" id="simple-sum-growth">
+                                YoY Growth: <span class="change-up">+5.2%</span>
+                            </div>
+                        </div>
+                        <div class="comparison-panel divisia">
+                            <div class="comparison-title">
+                                <span class="dot"></span>
+                                Divisia M4 (Weighted)
+                            </div>
+                            <div class="comparison-value" id="divisia-value">$19.8T</div>
+                            <div class="comparison-growth" id="divisia-growth">
+                                YoY Growth: <span class="change-down">-1.3%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divergence-alert warning" id="divergence-alert">
+                        <span class="divergence-icon">⚠️</span>
+                        <span><strong>Divergence Alert:</strong> Simple sum shows growth but Divisia shows contraction. True liquidity is falling!</span>
+                    </div>
+                </div>
+
+                <!-- Economic Indicators -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Economic Indicators</div>
+                    </div>
+                    <div class="indicators-grid">
+                        <div class="indicator">
+                            <div class="indicator-header">
+                                <span class="indicator-name">Inflation (CPI)</span>
+                                <span class="indicator-target">Target: 2.0%</span>
+                            </div>
+                            <div class="indicator-value" id="inflation-value">2.4%</div>
+                            <div class="indicator-bar">
+                                <div class="indicator-fill" id="inflation-bar" style="width: 60%; background: var(--accent-green);"></div>
+                            </div>
+                        </div>
+                        <div class="indicator">
+                            <div class="indicator-header">
+                                <span class="indicator-name">Unemployment</span>
+                                <span class="indicator-target">Target: 4.0%</span>
+                            </div>
+                            <div class="indicator-value" id="unemployment-value">3.8%</div>
+                            <div class="indicator-bar">
+                                <div class="indicator-fill" id="unemployment-bar" style="width: 50%; background: var(--accent-green);"></div>
+                            </div>
+                        </div>
+                        <div class="indicator">
+                            <div class="indicator-header">
+                                <span class="indicator-name">GDP Growth</span>
+                                <span class="indicator-target">Target: 2-3%</span>
+                            </div>
+                            <div class="indicator-value" id="gdp-value">2.5%</div>
+                            <div class="indicator-bar">
+                                <div class="indicator-fill" id="gdp-bar" style="width: 65%; background: var(--accent-green);"></div>
+                            </div>
+                        </div>
+                        <div class="indicator">
+                            <div class="indicator-header">
+                                <span class="indicator-name">Financial Stability</span>
+                                <span class="indicator-target">Target: 80+</span>
+                            </div>
+                            <div class="indicator-value" id="stability-value">85</div>
+                            <div class="indicator-bar">
+                                <div class="indicator-fill" id="stability-bar" style="width: 85%; background: var(--accent-green);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- News Feed -->
+                <div class="panel news-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Economic News</div>
+                    </div>
+                    <div class="news-feed" id="news-feed">
+                        <div class="news-item">
+                            <span class="news-quarter">Q1 2024</span>
+                            <span class="news-text">You have been appointed as the new Federal Reserve Chair. Markets await your first policy decisions.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Controls -->
+            <div class="right-column">
+                <!-- Policy Tools -->
+                <div class="panel policy-section">
+                    <div class="panel-header">
+                        <div class="panel-title">Policy Tools</div>
+                    </div>
+
+                    <div class="policy-tool">
+                        <div class="policy-header">
+                            <span class="policy-name">Federal Funds Rate</span>
+                            <span class="policy-value" id="rate-value">5.25%</span>
+                        </div>
+                        <input type="range" class="policy-slider" id="rate-slider" min="0" max="20" step="0.25" value="5.25" oninput="updateRateDisplay()">
+                        <div class="policy-labels">
+                            <span>0%</span>
+                            <span>10%</span>
+                            <span>20%</span>
+                        </div>
+                    </div>
+
+                    <div class="policy-tool">
+                        <div class="policy-header">
+                            <span class="policy-name">Reserve Requirement</span>
+                            <span class="policy-value" id="reserve-value">10%</span>
+                        </div>
+                        <input type="range" class="policy-slider" id="reserve-slider" min="0" max="20" step="1" value="10" oninput="updateReserveDisplay()">
+                        <div class="policy-labels">
+                            <span>0%</span>
+                            <span>10%</span>
+                            <span>20%</span>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="action-btn" id="btn-buy" onclick="openMarketOperation('buy')">
+                            Buy Securities<br><span style="font-size:11px;color:var(--text-muted)">Inject Liquidity</span>
+                        </button>
+                        <button class="action-btn" id="btn-sell" onclick="openMarketOperation('sell')">
+                            Sell Securities<br><span style="font-size:11px;color:var(--text-muted)">Drain Liquidity</span>
+                        </button>
+                        <button class="action-btn qe" id="btn-qe" onclick="quantitativeEasing()">
+                            Quantitative Easing<br><span style="font-size:11px;color:var(--text-muted)">Emergency Expansion</span>
+                        </button>
+                        <button class="action-btn qe" id="btn-qt" onclick="quantitativeTightening()">
+                            Quantitative Tightening<br><span style="font-size:11px;color:var(--text-muted)">Emergency Contraction</span>
+                        </button>
+                    </div>
+
+                    <button class="end-turn-btn" onclick="endTurn()">
+                        End Quarter →
+                    </button>
+                </div>
+
+                <!-- Money Components -->
+                <div class="panel components-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Money Components (Divisia Weights)</div>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            Currency
+                            <span class="component-weight">1.00</span>
+                        </span>
+                        <span class="component-value" id="comp-currency">$2.3T</span>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            Demand Deposits
+                            <span class="component-weight">0.95</span>
+                        </span>
+                        <span class="component-value" id="comp-demand">$1.9T</span>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            Savings Deposits
+                            <span class="component-weight">0.70</span>
+                        </span>
+                        <span class="component-value" id="comp-savings">$12.4T</span>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            Small Time Deposits
+                            <span class="component-weight">0.40</span>
+                        </span>
+                        <span class="component-value" id="comp-smallcd">$2.1T</span>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            Large Time Deposits
+                            <span class="component-weight">0.25</span>
+                        </span>
+                        <span class="component-value" id="comp-largecd">$1.8T</span>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            Money Market Funds
+                            <span class="component-weight">0.20</span>
+                        </span>
+                        <span class="component-value" id="comp-mmf">$1.6T</span>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            T-Bills & Commercial Paper
+                            <span class="component-weight">0.10</span>
+                        </span>
+                        <span class="component-value" id="comp-tbills">$6.3T</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crisis Modal -->
+    <div class="modal-overlay" id="crisis-modal">
+        <div class="modal">
+            <div class="modal-icon" id="modal-icon">⚠️</div>
+            <h2 class="modal-title crisis" id="modal-title">Crisis Alert</h2>
+            <p class="modal-text" id="modal-text">A financial crisis is unfolding...</p>
+            <button class="modal-btn" onclick="closeModal()">Understood</button>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div class="game-over" id="game-over">
+        <div class="final-rating rating-a" id="final-rating">A</div>
+        <h2 class="final-title" id="final-title">Excellent Stewardship</h2>
+        <div class="final-stats">
+            <div class="final-stat">
+                <div class="final-stat-value" id="final-inflation">2.1%</div>
+                <div class="final-stat-label">Avg. Inflation</div>
+            </div>
+            <div class="final-stat">
+                <div class="final-stat-value" id="final-unemployment">4.2%</div>
+                <div class="final-stat-label">Avg. Unemployment</div>
+            </div>
+            <div class="final-stat">
+                <div class="final-stat-value" id="final-gdp">2.4%</div>
+                <div class="final-stat-label">Avg. GDP Growth</div>
+            </div>
+            <div class="final-stat">
+                <div class="final-stat-value" id="final-crises">0</div>
+                <div class="final-stat-label">Crises Averted</div>
+            </div>
+        </div>
+        <button class="play-again-btn" onclick="restartGame()">Serve Another Term</button>
+    </div>
+
+    <script>
+        // ============ GAME STATE ============
+        const state = {
+            turn: 1,
+            maxTurns: 20,
+            year: 2024,
+            quarter: 1,
+            view: 'divisia', // 'divisia' or 'simple'
+
+            // Policy settings
+            fedFundsRate: 5.25,
+            reserveRequirement: 10,
+
+            // Money supply components (in trillions)
+            components: {
+                currency: 2.3,
+                demandDeposits: 1.9,
+                savingsDeposits: 12.4,
+                smallTimeDeposits: 2.1,
+                largeTimeDeposits: 1.8,
+                moneyMarketFunds: 1.6,
+                tbillsCommercialPaper: 6.3
+            },
+
+            // Divisia weights (liquidity weights)
+            weights: {
+                currency: 1.00,
+                demandDeposits: 0.95,
+                savingsDeposits: 0.70,
+                smallTimeDeposits: 0.40,
+                largeTimeDeposits: 0.25,
+                moneyMarketFunds: 0.20,
+                tbillsCommercialPaper: 0.10
+            },
+
+            // Economic indicators
+            inflation: 2.4,
+            unemployment: 3.8,
+            gdpGrowth: 2.5,
+            financialStability: 85,
+
+            // Tracking
+            inflationHistory: [2.4],
+            unemploymentHistory: [3.8],
+            gdpHistory: [2.5],
+            crisesAvoided: 0,
+
+            // Previous values for change calculation
+            prevDivisia: 0,
+            prevSimpleSum: 0,
+
+            // QE/QT usage this turn
+            qeUsed: false,
+            qtUsed: false,
+            omoUsed: false,
+
+            // Crisis tracking
+            activeCrisis: null,
+            crisisCountdown: 0
+        };
+
+        // ============ CALCULATIONS ============
+        function calculateM1() {
+            return state.components.currency + state.components.demandDeposits;
+        }
+
+        function calculateM2() {
+            return calculateM1() + state.components.savingsDeposits + state.components.smallTimeDeposits;
+        }
+
+        function calculateM3() {
+            return calculateM2() + state.components.largeTimeDeposits + state.components.moneyMarketFunds;
+        }
+
+        function calculateM4() {
+            return calculateM3() + state.components.tbillsCommercialPaper;
+        }
+
+        function calculateSimpleSum() {
+            return calculateM4();
+        }
+
+        function calculateDivisia() {
+            let total = 0;
+            for (const [key, value] of Object.entries(state.components)) {
+                total += value * state.weights[key];
+            }
+            return total;
+        }
+
+        function formatTrillion(value) {
+            return '$' + value.toFixed(1) + 'T';
+        }
+
+        function formatPercent(value) {
+            return value.toFixed(1) + '%';
+        }
+
+        // ============ UI UPDATES ============
+        function updateDisplay() {
+            // Calculate aggregates
+            const m1 = calculateM1();
+            const m2 = calculateM2();
+            const m3 = calculateM3();
+            const m4 = calculateM4();
+            const simpleSum = calculateSimpleSum();
+            const divisia = calculateDivisia();
+
+            // Update aggregate cards
+            document.getElementById('m1-value').textContent = formatTrillion(m1);
+            document.getElementById('m2-value').textContent = formatTrillion(m2);
+            document.getElementById('m3-value').textContent = formatTrillion(m3);
+            document.getElementById('m4-value').textContent = formatTrillion(m4);
+
+            // Update comparison view
+            document.getElementById('simple-sum-value').textContent = formatTrillion(simpleSum);
+            document.getElementById('divisia-value').textContent = formatTrillion(divisia);
+
+            // Calculate and show growth
+            if (state.prevSimpleSum > 0) {
+                const simpleGrowth = ((simpleSum - state.prevSimpleSum) / state.prevSimpleSum * 100);
+                const divisiaGrowth = ((divisia - state.prevDivisia) / state.prevDivisia * 100);
+
+                document.getElementById('simple-sum-growth').innerHTML =
+                    `YoY Growth: <span class="${simpleGrowth >= 0 ? 'change-up' : 'change-down'}">${simpleGrowth >= 0 ? '+' : ''}${simpleGrowth.toFixed(1)}%</span>`;
+                document.getElementById('divisia-growth').innerHTML =
+                    `YoY Growth: <span class="${divisiaGrowth >= 0 ? 'change-up' : 'change-down'}">${divisiaGrowth >= 0 ? '+' : ''}${divisiaGrowth.toFixed(1)}%</span>`;
+
+                // Divergence alert
+                const divergence = Math.abs(simpleGrowth - divisiaGrowth);
+                const alert = document.getElementById('divergence-alert');
+                if (divergence > 3 && simpleGrowth > 0 && divisiaGrowth < 0) {
+                    alert.classList.remove('hidden', 'warning');
+                    alert.classList.add('active');
+                    alert.innerHTML = `<span class="divergence-icon">🚨</span><span><strong>Critical Divergence:</strong> Simple sum shows +${simpleGrowth.toFixed(1)}% but Divisia shows ${divisiaGrowth.toFixed(1)}%. True liquidity is falling!</span>`;
+                } else if (divergence > 2) {
+                    alert.classList.remove('hidden');
+                    alert.classList.add('warning');
+                    alert.innerHTML = `<span class="divergence-icon">⚠️</span><span><strong>Divergence Alert:</strong> ${divergence.toFixed(1)}% gap between simple sum and Divisia. Monitor closely.</span>`;
+                } else {
+                    alert.classList.add('hidden');
+                }
+            }
+
+            // Update economic indicators
+            document.getElementById('inflation-value').textContent = formatPercent(state.inflation);
+            document.getElementById('unemployment-value').textContent = formatPercent(state.unemployment);
+            document.getElementById('gdp-value').textContent = formatPercent(state.gdpGrowth);
+            document.getElementById('stability-value').textContent = Math.round(state.financialStability);
+
+            // Update indicator bars
+            updateIndicatorBar('inflation', state.inflation, 0, 10, 2);
+            updateIndicatorBar('unemployment', state.unemployment, 0, 15, 4);
+            updateIndicatorBar('gdp', state.gdpGrowth, -5, 10, 2.5);
+            updateIndicatorBar('stability', state.financialStability, 0, 100, 80);
+
+            // Update components
+            document.getElementById('comp-currency').textContent = formatTrillion(state.components.currency);
+            document.getElementById('comp-demand').textContent = formatTrillion(state.components.demandDeposits);
+            document.getElementById('comp-savings').textContent = formatTrillion(state.components.savingsDeposits);
+            document.getElementById('comp-smallcd').textContent = formatTrillion(state.components.smallTimeDeposits);
+            document.getElementById('comp-largecd').textContent = formatTrillion(state.components.largeTimeDeposits);
+            document.getElementById('comp-mmf').textContent = formatTrillion(state.components.moneyMarketFunds);
+            document.getElementById('comp-tbills').textContent = formatTrillion(state.components.tbillsCommercialPaper);
+
+            // Update turn info
+            document.getElementById('current-turn').textContent = state.turn;
+            document.getElementById('current-quarter').textContent = 'Q' + state.quarter;
+            document.getElementById('current-year').textContent = state.year;
+
+            // Update rating
+            updateRating();
+        }
+
+        function updateIndicatorBar(id, value, min, max, target) {
+            const bar = document.getElementById(id + '-bar');
+            const percent = ((value - min) / (max - min)) * 100;
+            bar.style.width = Math.min(100, Math.max(0, percent)) + '%';
+
+            // Color based on distance from target
+            const distance = Math.abs(value - target);
+            if (id === 'stability') {
+                if (value >= 70) bar.style.background = 'var(--accent-green)';
+                else if (value >= 50) bar.style.background = 'var(--accent-yellow)';
+                else bar.style.background = 'var(--accent-red)';
+            } else if (id === 'inflation') {
+                if (distance <= 0.5) bar.style.background = 'var(--accent-green)';
+                else if (distance <= 2) bar.style.background = 'var(--accent-yellow)';
+                else bar.style.background = 'var(--accent-red)';
+            } else if (id === 'unemployment') {
+                if (distance <= 1) bar.style.background = 'var(--accent-green)';
+                else if (distance <= 2) bar.style.background = 'var(--accent-yellow)';
+                else bar.style.background = 'var(--accent-red)';
+            } else {
+                if (value >= 2 && value <= 3.5) bar.style.background = 'var(--accent-green)';
+                else if (value >= 0 && value <= 5) bar.style.background = 'var(--accent-yellow)';
+                else bar.style.background = 'var(--accent-red)';
+            }
+        }
+
+        function updateRating() {
+            let score = 100;
+
+            // Inflation penalty
+            const inflationDist = Math.abs(state.inflation - 2);
+            score -= inflationDist * 10;
+
+            // Unemployment penalty
+            const unemploymentDist = Math.abs(state.unemployment - 4);
+            score -= unemploymentDist * 8;
+
+            // GDP penalty
+            if (state.gdpGrowth < 0) score -= 20;
+            else if (state.gdpGrowth < 1) score -= 10;
+            else if (state.gdpGrowth > 5) score -= 5;
+
+            // Stability penalty
+            if (state.financialStability < 50) score -= 30;
+            else if (state.financialStability < 70) score -= 15;
+
+            let rating, ratingClass;
+            if (score >= 85) { rating = 'A+'; ratingClass = 'rating-a'; }
+            else if (score >= 75) { rating = 'A'; ratingClass = 'rating-a'; }
+            else if (score >= 65) { rating = 'B+'; ratingClass = 'rating-b'; }
+            else if (score >= 55) { rating = 'B'; ratingClass = 'rating-b'; }
+            else if (score >= 45) { rating = 'C+'; ratingClass = 'rating-c'; }
+            else if (score >= 35) { rating = 'C'; ratingClass = 'rating-c'; }
+            else if (score >= 25) { rating = 'D'; ratingClass = 'rating-d'; }
+            else { rating = 'F'; ratingClass = 'rating-f'; }
+
+            const ratingEl = document.getElementById('current-rating');
+            ratingEl.textContent = rating;
+            ratingEl.className = 'rating-badge ' + ratingClass;
+
+            return { rating, score };
+        }
+
+        function updateRateDisplay() {
+            const value = parseFloat(document.getElementById('rate-slider').value);
+            document.getElementById('rate-value').textContent = value.toFixed(2) + '%';
+            state.fedFundsRate = value;
+        }
+
+        function updateReserveDisplay() {
+            const value = parseInt(document.getElementById('reserve-slider').value);
+            document.getElementById('reserve-value').textContent = value + '%';
+            state.reserveRequirement = value;
+        }
+
+        function setView(view) {
+            state.view = view;
+            document.getElementById('toggle-divisia').classList.toggle('active', view === 'divisia');
+            document.getElementById('toggle-simple').classList.toggle('active', view === 'simple');
+        }
+
+        // ============ POLICY ACTIONS ============
+        function openMarketOperation(type) {
+            if (state.omoUsed) {
+                addNews('Policy action already taken this quarter.', 'warning');
+                return;
+            }
+
+            const amount = 0.3; // $300B
+            if (type === 'buy') {
+                // Fed buys securities = injects reserves = increases money supply
+                state.components.demandDeposits += amount * 0.5;
+                state.components.savingsDeposits += amount * 0.3;
+                state.components.moneyMarketFunds += amount * 0.2;
+                addNews('Fed purchases $300B in securities. Liquidity injected into the system.');
+            } else {
+                // Fed sells securities = drains reserves = decreases money supply
+                state.components.demandDeposits -= amount * 0.4;
+                state.components.savingsDeposits -= amount * 0.3;
+                state.components.moneyMarketFunds -= amount * 0.3;
+                addNews('Fed sells $300B in securities. Liquidity drained from the system.');
+            }
+            state.omoUsed = true;
+            updateDisplay();
+        }
+
+        function quantitativeEasing() {
+            if (state.qeUsed) {
+                addNews('QE already deployed this quarter.', 'warning');
+                return;
+            }
+
+            const amount = 1.0; // $1T
+            state.components.demandDeposits += amount * 0.3;
+            state.components.savingsDeposits += amount * 0.4;
+            state.components.tbillsCommercialPaper += amount * 0.3;
+            state.financialStability += 10;
+
+            addNews('EMERGENCY: Fed announces $1T quantitative easing program.', 'positive');
+            state.qeUsed = true;
+            updateDisplay();
+        }
+
+        function quantitativeTightening() {
+            if (state.qtUsed) {
+                addNews('QT already deployed this quarter.', 'warning');
+                return;
+            }
+
+            const amount = 0.8;
+            state.components.demandDeposits -= amount * 0.3;
+            state.components.savingsDeposits -= amount * 0.3;
+            state.components.moneyMarketFunds -= amount * 0.2;
+            state.components.tbillsCommercialPaper -= amount * 0.2;
+
+            addNews('Fed accelerates balance sheet reduction. $800B in QT announced.', 'warning');
+            state.qtUsed = true;
+            updateDisplay();
+        }
+
+        // ============ NEWS SYSTEM ============
+        function addNews(text, type = '') {
+            const feed = document.getElementById('news-feed');
+            const item = document.createElement('div');
+            item.className = 'news-item';
+            item.innerHTML = `
+                <span class="news-quarter">Q${state.quarter} ${state.year}</span>
+                <span class="news-text ${type}">${text}</span>
+            `;
+            feed.insertBefore(item, feed.firstChild);
+
+            // Keep only last 20 items
+            while (feed.children.length > 20) {
+                feed.removeChild(feed.lastChild);
+            }
+        }
+
+        // ============ SIMULATION ENGINE ============
+        function simulateEconomy() {
+            // Store previous values
+            state.prevSimpleSum = calculateSimpleSum();
+            state.prevDivisia = calculateDivisia();
+
+            // Calculate effective money growth using Divisia
+            const divisia = calculateDivisia();
+            const divisiaGrowth = state.prevDivisia > 0 ? (divisia - state.prevDivisia) / state.prevDivisia : 0;
+
+            // Interest rate effects
+            const rateEffect = (state.fedFundsRate - 5) / 100; // Normalized around 5%
+
+            // Money supply affects inflation with lag
+            state.inflation += divisiaGrowth * 30 - rateEffect * 2;
+            state.inflation = Math.max(-2, Math.min(15, state.inflation));
+
+            // Unemployment inverse to money/growth
+            state.unemployment -= divisiaGrowth * 10 - rateEffect * 1.5;
+            state.unemployment += (Math.random() - 0.5) * 0.3;
+            state.unemployment = Math.max(2, Math.min(15, state.unemployment));
+
+            // GDP affected by both
+            state.gdpGrowth = 2.5 + divisiaGrowth * 20 - rateEffect * 3;
+            state.gdpGrowth += (Math.random() - 0.5) * 0.5;
+            state.gdpGrowth = Math.max(-5, Math.min(8, state.gdpGrowth));
+
+            // Financial stability
+            if (state.inflation > 6 || state.inflation < 0) state.financialStability -= 5;
+            if (state.unemployment > 8) state.financialStability -= 3;
+            if (state.gdpGrowth < 0) state.financialStability -= 5;
+            state.financialStability += (Math.random() - 0.3) * 2;
+            state.financialStability = Math.max(0, Math.min(100, state.financialStability));
+
+            // Natural money supply movement
+            const baseGrowth = 0.02; // 2% natural growth per quarter
+            for (const key of Object.keys(state.components)) {
+                state.components[key] *= (1 + baseGrowth + (Math.random() - 0.5) * 0.01);
+            }
+
+            // High rates push money into time deposits
+            if (state.fedFundsRate > 5) {
+                const shift = (state.fedFundsRate - 5) * 0.02;
+                state.components.savingsDeposits -= shift;
+                state.components.smallTimeDeposits += shift * 0.6;
+                state.components.largeTimeDeposits += shift * 0.4;
+            }
+
+            // Record history
+            state.inflationHistory.push(state.inflation);
+            state.unemploymentHistory.push(state.unemployment);
+            state.gdpHistory.push(state.gdpGrowth);
+        }
+
+        function checkForCrisis() {
+            // Random crisis events
+            const crisisChance = Math.random();
+
+            if (crisisChance < 0.08 && state.financialStability < 70) {
+                triggerCrisis('bank_run');
+            } else if (crisisChance < 0.05 && state.inflation > 5) {
+                triggerCrisis('inflation_spiral');
+            } else if (crisisChance < 0.03 && calculateDivisia() / calculateSimpleSum() < 0.65) {
+                triggerCrisis('liquidity_crisis');
+            }
+        }
+
+        function triggerCrisis(type) {
+            let title, text, icon;
+
+            switch (type) {
+                case 'bank_run':
+                    title = 'Bank Run Developing';
+                    text = 'Depositors are withdrawing funds en masse. Money is fleeing savings accounts to currency. The Divisia aggregate is collapsing even as simple sum stays stable.';
+                    icon = '🏦';
+                    state.components.currency += 0.5;
+                    state.components.savingsDeposits -= 0.8;
+                    state.financialStability -= 15;
+                    break;
+
+                case 'inflation_spiral':
+                    title = 'Inflation Expectations Unanchored';
+                    text = 'Businesses and consumers expect higher inflation, creating a self-fulfilling prophecy. The velocity of money is accelerating.';
+                    icon = '📈';
+                    state.inflation += 2;
+                    state.financialStability -= 10;
+                    break;
+
+                case 'liquidity_crisis':
+                    title = 'Shadow Banking Stress';
+                    text = 'Money market funds are experiencing redemption pressure. The divergence between simple sum and Divisia aggregates has reached critical levels.';
+                    icon = '⚠️';
+                    state.components.moneyMarketFunds -= 0.4;
+                    state.components.tbillsCommercialPaper -= 0.3;
+                    state.financialStability -= 12;
+                    break;
+            }
+
+            showModal(icon, title, text, true);
+            addNews('CRISIS: ' + title, 'crisis');
+            state.crisesAvoided++;
+        }
+
+        // ============ MODALS ============
+        function showModal(icon, title, text, isCrisis = false) {
+            document.getElementById('modal-icon').textContent = icon;
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-title').className = 'modal-title ' + (isCrisis ? 'crisis' : 'success');
+            document.getElementById('modal-text').textContent = text;
+            document.getElementById('crisis-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('crisis-modal').classList.remove('active');
+        }
+
+        // ============ GAME FLOW ============
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-container').classList.add('active');
+
+            // Initialize previous values
+            state.prevSimpleSum = calculateSimpleSum();
+            state.prevDivisia = calculateDivisia();
+
+            updateDisplay();
+        }
+
+        function endTurn() {
+            // Simulate economy
+            simulateEconomy();
+
+            // Check for crisis
+            checkForCrisis();
+
+            // Advance time
+            state.turn++;
+            state.quarter++;
+            if (state.quarter > 4) {
+                state.quarter = 1;
+                state.year++;
+            }
+
+            // Reset turn-based flags
+            state.qeUsed = false;
+            state.qtUsed = false;
+            state.omoUsed = false;
+
+            // Check for game over
+            if (state.turn > state.maxTurns) {
+                endGame();
+                return;
+            }
+
+            // Check for failure conditions
+            if (state.inflation > 12) {
+                showModal('💥', 'Hyperinflation', 'Inflation has spiraled out of control. Your term ends in disgrace.', true);
+                setTimeout(endGame, 2000);
+                return;
+            }
+            if (state.unemployment > 12) {
+                showModal('📉', 'Depression', 'Unemployment has reached depression levels. You have failed the American people.', true);
+                setTimeout(endGame, 2000);
+                return;
+            }
+            if (state.financialStability < 20) {
+                showModal('🏚️', 'Financial Collapse', 'The banking system has collapsed. A new Great Depression begins.', true);
+                setTimeout(endGame, 2000);
+                return;
+            }
+
+            updateDisplay();
+
+            // Quarterly news
+            generateQuarterlyNews();
+        }
+
+        function generateQuarterlyNews() {
+            const headlines = [
+                `Markets react to Fed policy. ${state.gdpGrowth > 2 ? 'Stocks rally.' : 'Investors cautious.'}`,
+                `Inflation at ${state.inflation.toFixed(1)}%. ${state.inflation > 3 ? 'Consumer groups express concern.' : 'Prices remain stable.'}`,
+                `Labor market ${state.unemployment < 5 ? 'remains strong' : 'shows weakness'}. Unemployment at ${state.unemployment.toFixed(1)}%.`,
+                `Fed Chair's approval ${updateRating().score > 60 ? 'holds steady' : 'under pressure'}.`
+            ];
+            addNews(headlines[Math.floor(Math.random() * headlines.length)]);
+        }
+
+        function endGame() {
+            const { rating, score } = updateRating();
+
+            // Calculate averages
+            const avgInflation = state.inflationHistory.reduce((a, b) => a + b) / state.inflationHistory.length;
+            const avgUnemployment = state.unemploymentHistory.reduce((a, b) => a + b) / state.unemploymentHistory.length;
+            const avgGdp = state.gdpHistory.reduce((a, b) => a + b) / state.gdpHistory.length;
+
+            // Set final stats
+            document.getElementById('final-rating').textContent = rating;
+            document.getElementById('final-rating').className = 'final-rating ' + (score >= 55 ? 'rating-a' : score >= 35 ? 'rating-c' : 'rating-f');
+
+            let title;
+            if (score >= 85) title = 'Legendary Fed Chair';
+            else if (score >= 70) title = 'Excellent Stewardship';
+            else if (score >= 55) title = 'Adequate Performance';
+            else if (score >= 40) title = 'Troubled Tenure';
+            else title = 'Economic Disaster';
+
+            document.getElementById('final-title').textContent = title;
+            document.getElementById('final-inflation').textContent = avgInflation.toFixed(1) + '%';
+            document.getElementById('final-unemployment').textContent = avgUnemployment.toFixed(1) + '%';
+            document.getElementById('final-gdp').textContent = avgGdp.toFixed(1) + '%';
+            document.getElementById('final-crises').textContent = state.crisesAvoided;
+
+            document.getElementById('game-over').classList.add('active');
+        }
+
+        function restartGame() {
+            // Reset state
+            state.turn = 1;
+            state.year = 2024;
+            state.quarter = 1;
+            state.fedFundsRate = 5.25;
+            state.reserveRequirement = 10;
+            state.inflation = 2.4;
+            state.unemployment = 3.8;
+            state.gdpGrowth = 2.5;
+            state.financialStability = 85;
+            state.components = {
+                currency: 2.3,
+                demandDeposits: 1.9,
+                savingsDeposits: 12.4,
+                smallTimeDeposits: 2.1,
+                largeTimeDeposits: 1.8,
+                moneyMarketFunds: 1.6,
+                tbillsCommercialPaper: 6.3
+            };
+            state.inflationHistory = [2.4];
+            state.unemploymentHistory = [3.8];
+            state.gdpHistory = [2.5];
+            state.crisesAvoided = 0;
+            state.qeUsed = false;
+            state.qtUsed = false;
+            state.omoUsed = false;
+
+            // Reset UI
+            document.getElementById('rate-slider').value = 5.25;
+            document.getElementById('reserve-slider').value = 10;
+            document.getElementById('news-feed').innerHTML = `
+                <div class="news-item">
+                    <span class="news-quarter">Q1 2024</span>
+                    <span class="news-text">You have been appointed as the new Federal Reserve Chair. Markets await your first policy decisions.</span>
+                </div>
+            `;
+
+            document.getElementById('game-over').classList.remove('active');
+
+            state.prevSimpleSum = calculateSimpleSum();
+            state.prevDivisia = calculateDivisia();
+
+            updateDisplay();
+            updateRateDisplay();
+            updateReserveDisplay();
+        }
+
+        // Initialize
+        updateRateDisplay();
+        updateReserveDisplay();
+    </script>
+</body>
+</html>
