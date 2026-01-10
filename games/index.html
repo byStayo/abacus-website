@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Abacus Games</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #7d8590;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 24px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #58a6ff;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .logo {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ff6b35;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #e6edf3;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #7d8590;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .game-card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+        }
+
+        .game-card:hover,
+        .game-card:focus {
+            border-color: #58a6ff;
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 16px 48px rgba(88, 166, 255, 0.15);
+            outline: none;
+        }
+
+        .game-card:focus-visible {
+            box-shadow: 0 16px 48px rgba(88, 166, 255, 0.15), 0 0 0 3px #58a6ff;
+        }
+
+        .game-card:hover .game-preview {
+            filter: brightness(1.1);
+        }
+
+        .game-card:hover .game-icon {
+            transform: scale(1.1);
+        }
+
+        .new-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, #f85149 0%, #da3633 100%);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 10;
+            animation: pulse-badge 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(248, 81, 73, 0); }
+        }
+
+        .game-preview {
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            position: relative;
+            overflow: hidden;
+            transition: filter 0.25s ease;
+        }
+
+        .game-preview.g2048 {
+            background: linear-gradient(135deg, #1a2f23 0%, #1a3a4a 100%);
+        }
+
+        .game-preview.tycoon {
+            background: linear-gradient(135deg, #2d2050 0%, #1a2f23 100%);
+        }
+
+        .game-preview.trading {
+            background: linear-gradient(135deg, #1a3a4a 0%, #0d1117 100%);
+        }
+
+        .game-preview.flappy {
+            background: linear-gradient(135deg, #3d2a20 0%, #1a2f23 100%);
+        }
+
+        .game-preview.snake {
+            background: linear-gradient(135deg, #1a3a4a 0%, #1a2f4a 100%);
+        }
+
+        .game-preview.breakout {
+            background: linear-gradient(135deg, #3d2020 0%, #2d2050 100%);
+        }
+
+        .game-preview.memory {
+            background: linear-gradient(135deg, #1a2f23 0%, #2d2050 100%);
+        }
+
+        .game-preview.minesweeper {
+            background: linear-gradient(135deg, #2d1f20 0%, #1a3a4a 100%);
+        }
+
+        .game-preview.options {
+            background: linear-gradient(135deg, #1a4a2f 0%, #2d1f20 100%);
+        }
+
+        .game-preview.balancer {
+            background: linear-gradient(135deg, #1a2f4a 0%, #2d2050 100%);
+        }
+
+        .game-preview.ipo {
+            background: linear-gradient(135deg, #4a3a1a 0%, #2d2050 100%);
+        }
+
+        .game-preview.dividend {
+            background: linear-gradient(135deg, #1a4a3a 0%, #1a2f23 100%);
+        }
+
+        .game-preview.great-game {
+            background: linear-gradient(135deg, #2d2010 0%, #1a1510 100%);
+            border-bottom: 3px solid #d4a821;
+        }
+
+        /* Featured Game Section */
+        .featured-section {
+            margin-bottom: 48px;
+        }
+
+        .featured-label {
+            font-size: 12px;
+            color: #d4a821;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .featured-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, #d4a821, transparent);
+        }
+
+        .featured-card {
+            background: linear-gradient(135deg, #1a1510 0%, #161b22 100%);
+            border: 2px solid #d4a821;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .featured-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(212, 168, 33, 0.1), transparent);
+            pointer-events: none;
+        }
+
+        .featured-card:hover {
+            border-color: #f0c040;
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(212, 168, 33, 0.2);
+        }
+
+        .featured-preview {
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+            background: linear-gradient(135deg, #2d2010 0%, #1a1510 100%);
+            position: relative;
+        }
+
+        .featured-preview::after {
+            content: '👑';
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-size: 24px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .featured-info {
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .featured-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #d4a821;
+            font-family: 'Georgia', serif;
+        }
+
+        .featured-tagline {
+            font-size: 14px;
+            color: #8b949e;
+            font-style: italic;
+            margin-bottom: 16px;
+        }
+
+        .featured-desc {
+            font-size: 15px;
+            color: #c9d1d9;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .featured-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #d4a821, #a17f1a);
+            color: #0d1117;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: fit-content;
+            transition: all 0.2s;
+        }
+
+        .featured-card:hover .featured-cta {
+            background: linear-gradient(135deg, #f0c040, #d4a821);
+        }
+
+        @media (max-width: 768px) {
+            .featured-card {
+                grid-template-columns: 1fr;
+            }
+
+            .featured-preview {
+                height: 160px;
+            }
+
+            .featured-info {
+                padding: 24px;
+            }
+
+            .featured-title {
+                font-size: 24px;
+            }
+        }
+
+        .game-icon {
+            font-size: 64px;
+            opacity: 0.9;
+            transition: transform 0.25s ease;
+        }
+
+        .game-info {
+            padding: 20px;
+        }
+
+        .game-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e6edf3;
+            margin-bottom: 8px;
+        }
+
+        .game-desc {
+            font-size: 14px;
+            color: #7d8590;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 16px;
+        }
+
+        .game-stat {
+            font-size: 12px;
+            color: #7d8590;
+        }
+
+        .game-stat strong {
+            color: #58a6ff;
+            font-weight: 600;
+        }
+
+        .play-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #238636;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            text-decoration: none;
+        }
+
+        .play-btn:hover {
+            background-color: #2ea043;
+        }
+
+        footer {
+            text-align: center;
+            padding-top: 24px;
+            border-top: 1px solid #21262d;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: #484f58;
+        }
+
+        .footer-brand {
+            color: #ff6b35;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 32px; }
+            .games-grid { gap: 16px; }
+            .game-preview { height: 120px; }
+            .game-icon { font-size: 48px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="../index.html" class="back-link">← Back to Abacus</a>
+            <div class="logo">Terminal Games</div>
+            <h1>Abacus Games</h1>
+            <p class="subtitle">Finance-themed games for the aspiring trader</p>
+        </header>
+
+        <!-- Featured Game -->
+        <div class="featured-section">
+            <div class="featured-label">Crown Jewel</div>
+            <a href="great-game.html" class="featured-card">
+                <div class="featured-preview">🏛️</div>
+                <div class="featured-info">
+                    <h2 class="featured-title">The Great Game</h2>
+                    <p class="featured-tagline">Global Dominance Through Strategic Capital</p>
+                    <p class="featured-desc">Command Apex Global Partners through geopolitical crises, seize opportunities, and shape the world order. Navigate Taiwan tensions, acquire Greenland, counter cyber attacks, and make the hard choices that define empires. Every decision ripples across continents.</p>
+                    <div class="featured-cta">Begin Your Term →</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="games-grid">
+            <a href="capital-compounding.html" class="game-card">
+                <div class="game-preview g2048">
+                    <span class="game-icon">$</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Capital Compounding</h2>
+                    <p class="game-desc">Merge assets to reach $10M. The classic 2048 with a finance twist.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best: <strong id="cc-best">$0</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="hedge-fund-tycoon.html" class="game-card">
+                <div class="game-preview tycoon">
+                    <span class="game-icon">📈</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Hedge Fund Tycoon</h2>
+                    <p class="game-desc">Build your fund from $10K to $1B. Hire traders, unlock strategies.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">AUM: <strong id="hft-aum">$0</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="market-maker.html" class="game-card">
+                <div class="game-preview trading">
+                    <span class="game-icon">⚡</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Market Maker</h2>
+                    <p class="game-desc">Fast-paced trading. React to price movements. Beat the market.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">High Score: <strong id="bt-best">$0</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="flappy-markets.html" class="game-card">
+                <div class="game-preview flappy">
+                    <span class="game-icon">💵</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Flappy Markets</h2>
+                    <p class="game-desc">Navigate through volatile markets. Dodge the red candles.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best: <strong id="fm-best">0</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="snake.html" class="game-card">
+                <div class="game-preview snake">
+                    <span class="game-icon">🐍</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Stock Snake</h2>
+                    <p class="game-desc">Collect ticker symbols to grow your portfolio. Don't hit the walls!</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best: <strong id="ss-best">0</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="breakout.html" class="game-card">
+                <div class="game-preview breakout">
+                    <span class="game-icon">🧱</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Market Breakout</h2>
+                    <p class="game-desc">Break through price levels. Smash resistance, ride support.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">High Score: <strong id="mb-best">0</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="memory.html" class="game-card">
+                <div class="game-preview memory">
+                    <span class="game-icon">🃏</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Ticker Match</h2>
+                    <p class="game-desc">Match stock ticker pairs. Test your memory under pressure.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best Moves: <strong id="tm-best">--</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="minesweeper.html" class="game-card">
+                <div class="game-preview minesweeper">
+                    <span class="game-icon">🔍</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Fraud Finder</h2>
+                    <p class="game-desc">Uncover fraudulent trades hidden in the data. Flag the suspicious ones.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best Time: <strong id="ff-best">--</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="options-trader.html" class="game-card">
+                <span class="new-badge">New</span>
+                <div class="game-preview options">
+                    <span class="game-icon">📊</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Options Trader</h2>
+                    <p class="game-desc">Predict if stocks go up or down. Binary options-style trading game.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best: <strong id="ot-best">$10K</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="portfolio-balancer.html" class="game-card">
+                <span class="new-badge">New</span>
+                <div class="game-preview balancer">
+                    <span class="game-icon">🎯</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Portfolio Balancer</h2>
+                    <p class="game-desc">Match target allocations with sliders. Speed and accuracy matter.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best: <strong id="pb-best">0</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="ipo-frenzy.html" class="game-card">
+                <span class="new-badge">New</span>
+                <div class="game-preview ipo">
+                    <span class="game-icon">🚀</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">IPO Frenzy</h2>
+                    <p class="game-desc">Buy hot IPOs and sell before they crash. Time your exits perfectly.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best: <strong id="if-best">$50K</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="dividend-dynasty.html" class="game-card">
+                <span class="new-badge">New</span>
+                <div class="game-preview dividend">
+                    <span class="game-icon">💰</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Dividend Dynasty</h2>
+                    <p class="game-desc">Build passive income. Buy dividend stocks and watch your wealth grow.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Income: <strong id="dd-income">$0/s</strong></span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <footer>
+            <p class="footer-text">
+                <span class="footer-brand">Abacus Games</span> — Toy models. Real markets are harder.
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Load best scores from localStorage with error handling
+        function formatMoney(value) {
+            if (isNaN(value) || value === null) return '$0';
+            if (value >= 1000000000) return '$' + (value / 1000000000).toFixed(1) + 'B';
+            if (value >= 1000000) return '$' + (value / 1000000).toFixed(1) + 'M';
+            if (value >= 1000) return '$' + (value / 1000).toFixed(0) + 'K';
+            return '$' + value;
+        }
+
+        function safeGetNumber(key, fallback = 0) {
+            try {
+                const value = localStorage.getItem(key);
+                if (value === null) return fallback;
+                const num = parseInt(value);
+                return isNaN(num) ? fallback : num;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        function safeGetJSON(key) {
+            try {
+                const value = localStorage.getItem(key);
+                if (value === null) return null;
+                return JSON.parse(value);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Capital Compounding
+        const ccBest = safeGetNumber('capitalCompoundingBest');
+        if (ccBest > 0) document.getElementById('cc-best').textContent = formatMoney(ccBest);
+
+        // Hedge Fund Tycoon
+        const hftData = safeGetJSON('hedgeFundTycoon');
+        if (hftData && hftData.money > 0) {
+            document.getElementById('hft-aum').textContent = formatMoney(Math.floor(hftData.money));
+        }
+
+        // Market Maker
+        const btBest = safeGetNumber('marketMakerBest');
+        if (btBest > 0) document.getElementById('bt-best').textContent = formatMoney(btBest);
+
+        // Flappy Markets
+        const fmBest = safeGetNumber('flappyMarketsBest');
+        if (fmBest > 0) document.getElementById('fm-best').textContent = fmBest + ' pts';
+
+        // Stock Snake
+        const ssBest = safeGetNumber('stockSnakeBest');
+        if (ssBest > 0) document.getElementById('ss-best').textContent = ssBest + ' pts';
+
+        // Market Breakout
+        const mbBest = safeGetNumber('marketBreakoutBest');
+        if (mbBest > 0) document.getElementById('mb-best').textContent = mbBest + ' pts';
+
+        // Ticker Match (store best moves - lower is better)
+        const tmBest = safeGetNumber('tickerMatchBest');
+        if (tmBest > 0) document.getElementById('tm-best').textContent = tmBest + ' moves';
+
+        // Fraud Finder (store best time - string format like "1:23")
+        const ffBest = localStorage.getItem('fraudFinderBest');
+        if (ffBest && ffBest !== '0' && ffBest !== '') {
+            document.getElementById('ff-best').textContent = ffBest;
+        }
+
+        // Options Trader
+        const otBest = safeGetNumber('optionsTraderBest');
+        if (otBest > 10000) document.getElementById('ot-best').textContent = formatMoney(otBest);
+
+        // Portfolio Balancer
+        const pbBest = safeGetNumber('portfolioBalancerBest');
+        if (pbBest > 0) document.getElementById('pb-best').textContent = pbBest + ' pts';
+
+        // IPO Frenzy
+        const ifBest = safeGetNumber('ipoFrenzyBest');
+        if (ifBest > 50000) document.getElementById('if-best').textContent = formatMoney(ifBest);
+
+        // Dividend Dynasty
+        const ddData = safeGetJSON('dividendDynastyData');
+        if (ddData && ddData.prestigeLevel > 1) {
+            document.getElementById('dd-income').textContent = ddData.prestigeLevel + 'x prestige';
+        }
+    </script>
+</body>
+</html>

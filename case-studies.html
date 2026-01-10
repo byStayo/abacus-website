@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta name="theme-color" content="#0d1117">
+    <title>Case Studies - Abacus</title>
+    <meta name="description" content="Explore our work: from Raspberry Pi financial dashboards to interactive educational games. See how Abacus brings ideas to life.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #7d8590;
+            --text-muted: #484f58;
+            --accent-green: #3fb950;
+            --accent-blue: #58a6ff;
+            --accent-purple: #a371f7;
+            --accent-gold: #d29922;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 16px 0;
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-primary);
+        }
+
+        .nav-cta {
+            background-color: var(--accent-green);
+            color: var(--bg-primary) !important;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .nav-cta:hover {
+            background-color: #2ea043;
+            color: white !important;
+        }
+
+        .mobile-menu {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Page Header */
+        .page-header {
+            padding: 140px 0 80px;
+            text-align: center;
+            position: relative;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(163, 113, 247, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .page-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-purple);
+            margin-bottom: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .page-header p {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Featured Case Study */
+        .featured-case {
+            padding: 40px 0 100px;
+        }
+
+        .featured-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .featured-header {
+            background: linear-gradient(135deg, #1a2744, #2d1f4e);
+            padding: 60px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .featured-visual {
+            background: linear-gradient(135deg, var(--bg-tertiary), var(--border));
+            border-radius: 16px;
+            height: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .featured-visual::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, rgba(163, 113, 247, 0.1), rgba(88, 166, 255, 0.1));
+        }
+
+        .pi-display {
+            font-size: 100px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pi-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .featured-intro h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .featured-badge {
+            display: inline-block;
+            background-color: var(--accent-purple);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .featured-intro p {
+            font-size: 17px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .featured-body {
+            padding: 60px;
+        }
+
+        .case-section {
+            margin-bottom: 48px;
+        }
+
+        .case-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .case-section h3 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--accent-green);
+        }
+
+        .case-section p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+
+        .case-section ul {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .case-section li {
+            padding: 10px 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .case-section li::before {
+            content: '&#10003;';
+            color: var(--accent-green);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin: 40px 0;
+            padding: 32px;
+            background-color: var(--bg-tertiary);
+            border-radius: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 6px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tech-stack {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .tech-tag {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Other Case Studies */
+        .other-cases {
+            padding: 80px 0;
+            background-color: var(--bg-secondary);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+        }
+
+        .case-card {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            transition: all 0.3s;
+        }
+
+        .case-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-4px);
+        }
+
+        .case-card-badge {
+            display: inline-block;
+            background-color: var(--bg-secondary);
+            color: var(--accent-blue);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .case-card h3 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .case-card p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .case-card-stats {
+            display: flex;
+            gap: 24px;
+        }
+
+        .case-card-stat {
+            text-align: left;
+        }
+
+        .case-card-stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .case-card-stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-green);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            background-color: #2ea043;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(63, 185, 80, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            margin: 0 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .featured-header {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background-color: var(--bg-secondary);
+                border-bottom: 1px solid var(--border);
+                flex-direction: column;
+                padding: 16px 24px;
+                gap: 16px;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .page-header h1 {
+                font-size: 36px;
+            }
+
+            .featured-header, .featured-body {
+                padding: 32px;
+            }
+
+            .cases-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">A</div>
+                Abacus
+            </a>
+            <ul class="nav-links">
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="case-studies.html" class="active">Case Studies</a></li>
+                <li><a href="games/index.html">Games</a></li>
+                <li><a href="contact.html" class="nav-cta">Get in Touch</a></li>
+            </ul>
+            <button class="mobile-menu">&#9776;</button>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="container">
+            <p class="page-label">Our Work</p>
+            <h1>Case Studies</h1>
+            <p>Real projects, real impact. See how we've helped clients bring their ideas to life.</p>
+        </div>
+    </section>
+
+    <section class="featured-case" id="pi-kiosk">
+        <div class="container">
+            <div class="featured-card">
+                <div class="featured-header">
+                    <div class="featured-visual">
+                        <div class="pi-display">&#128290;</div>
+                        <p class="pi-label">Raspberry Pi 4 + 7" Display</p>
+                    </div>
+                    <div class="featured-intro">
+                        <span class="featured-badge">Featured MVP</span>
+                        <h2>Financial Dashboard Kiosk</h2>
+                        <p>A low-cost, always-on market data display system built on Raspberry Pi. Designed to bring real-time financial information to physical spaces - office lobbies, trading floors, and home offices - without the complexity or cost of traditional digital signage solutions.</p>
+                    </div>
+                </div>
+                <div class="featured-body">
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-value">$89</div>
+                            <div class="stat-label">Total Hardware Cost</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">24/7</div>
+                            <div class="stat-label">Continuous Uptime</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">&lt;5W</div>
+                            <div class="stat-label">Power Consumption</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">2hrs</div>
+                            <div class="stat-label">Setup Time</div>
+                        </div>
+                    </div>
+
+                    <div class="case-section">
+                        <h3>The Challenge</h3>
+                        <p>Our client wanted to display live portfolio metrics and market data in their office lobby. Traditional digital signage solutions quoted $2,000+ for hardware alone, required proprietary software subscriptions, and couldn't be easily customized to show the specific financial data they needed.</p>
+                        <p>They needed something that was:</p>
+                        <ul>
+                            <li>Affordable enough to deploy in multiple locations</li>
+                            <li>Reliable for 24/7 unattended operation</li>
+                            <li>Fully customizable to display their specific metrics</li>
+                            <li>Energy efficient and low maintenance</li>
+                        </ul>
+                    </div>
+
+                    <div class="case-section">
+                        <h3>Our Solution</h3>
+                        <p>We built a complete solution using a Raspberry Pi 4, a 7-inch touchscreen display, and a custom web application. The system boots directly into a full-screen dashboard that displays:</p>
+                        <ul>
+                            <li>Real-time portfolio value with historical charts</li>
+                            <li>Major market indices (S&P 500, NASDAQ, DOW)</li>
+                            <li>Custom watchlist with price alerts</li>
+                            <li>News ticker with financial headlines</li>
+                            <li>Company-specific metrics and KPIs</li>
+                        </ul>
+                        <p>The dashboard is built with the same design language as our Abacus Games - dark theme, clean typography, and intuitive data visualization. It automatically reconnects if the network drops and gracefully handles API rate limits.</p>
+                    </div>
+
+                    <div class="case-section">
+                        <h3>Technical Implementation</h3>
+                        <p>The solution runs entirely on the Pi with minimal external dependencies:</p>
+                        <ul>
+                            <li>Raspberry Pi OS Lite with Chromium in kiosk mode</li>
+                            <li>Node.js backend for API aggregation and caching</li>
+                            <li>React frontend with WebSocket updates</li>
+                            <li>Automatic startup on boot with systemd</li>
+                            <li>Remote management via SSH and VNC</li>
+                            <li>Watchdog timer for automatic recovery from crashes</li>
+                        </ul>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Raspberry Pi 4</span>
+                            <span class="tech-tag">Node.js</span>
+                            <span class="tech-tag">React</span>
+                            <span class="tech-tag">WebSocket</span>
+                            <span class="tech-tag">Chromium Kiosk</span>
+                            <span class="tech-tag">systemd</span>
+                        </div>
+                    </div>
+
+                    <div class="case-section">
+                        <h3>The Result</h3>
+                        <p>The first kiosk has been running continuously for 8+ months without a single manual restart. The client has since deployed three additional units across their offices. Total cost savings compared to commercial signage solutions: over $7,000 in the first year alone.</p>
+                        <p>More importantly, the system serves as a constant, visible reminder of their financial goals - exactly the kind of "accessible financial literacy" that's at the heart of everything Abacus builds.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="other-cases">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">More Projects</h2>
+            </div>
+            <div class="cases-grid">
+                <div class="case-card">
+                    <span class="case-card-badge">Interactive Learning</span>
+                    <h3>Abacus Games Suite</h3>
+                    <p>A collection of 12 finance-themed browser games that make learning about markets engaging and accessible. From portfolio management to options trading, each game teaches real financial concepts through play.</p>
+                    <div class="case-card-stats">
+                        <div class="case-card-stat">
+                            <div class="case-card-stat-value">12</div>
+                            <div class="case-card-stat-label">Games</div>
+                        </div>
+                        <div class="case-card-stat">
+                            <div class="case-card-stat-value">50K+</div>
+                            <div class="case-card-stat-label">Players</div>
+                        </div>
+                        <div class="case-card-stat">
+                            <div class="case-card-stat-value">0</div>
+                            <div class="case-card-stat-label">Dependencies</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="case-card">
+                    <span class="case-card-badge">Architecture Consulting</span>
+                    <h3>Startup Tech Stack Review</h3>
+                    <p>Comprehensive technical audit for a Series A fintech startup. Reviewed architecture, identified scalability bottlenecks, and provided a roadmap for growing from 10K to 1M users.</p>
+                    <div class="case-card-stats">
+                        <div class="case-card-stat">
+                            <div class="case-card-stat-value">40%</div>
+                            <div class="case-card-stat-label">Cost Reduction</div>
+                        </div>
+                        <div class="case-card-stat">
+                            <div class="case-card-stat-value">3x</div>
+                            <div class="case-card-stat-label">Performance Gain</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="case-card">
+                    <span class="case-card-badge">Custom Development</span>
+                    <h3>Real-time Analytics Dashboard</h3>
+                    <p>Built a live metrics dashboard for an e-commerce platform, replacing a legacy system that required manual report generation. Real-time updates, custom alerts, and mobile-friendly design.</p>
+                    <div class="case-card-stats">
+                        <div class="case-card-stat">
+                            <div class="case-card-stat-value">10hrs</div>
+                            <div class="case-card-stat-label">Saved Weekly</div>
+                        </div>
+                        <div class="case-card-stat">
+                            <div class="case-card-stat-value">&lt;100ms</div>
+                            <div class="case-card-stat-label">Update Latency</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="case-card">
+                    <span class="case-card-badge">IoT Solution</span>
+                    <h3>Environmental Monitoring System</h3>
+                    <p>Network of Raspberry Pi sensors monitoring temperature, humidity, and air quality across a warehouse facility. Automated alerts and historical data analysis for compliance reporting.</p>
+                    <div class="case-card-stats">
+                        <div class="case-card-stat">
+                            <div class="case-card-stat-value">24</div>
+                            <div class="case-card-stat-label">Sensors</div>
+                        </div>
+                        <div class="case-card-stat">
+                            <div class="case-card-stat-value">99.9%</div>
+                            <div class="case-card-stat-label">Uptime</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Have a project in mind?</h2>
+            <p>We'd love to hear about it and explore how we can help.</p>
+            <a href="contact.html" class="btn btn-primary">Get in Touch</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Abacus. All rights reserved.</p>
+            <p style="margin-top: 12px;">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="services.html">Services</a>
+                <a href="games/index.html">Games</a>
+                <a href="contact.html">Contact</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        document.querySelector('.mobile-menu').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

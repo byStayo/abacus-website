@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta name="theme-color" content="#0d1117">
+    <title>About Us - Abacus</title>
+    <meta name="description" content="Learn about Abacus - our mission, values, and the team behind our software solutions and technical consulting.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #7d8590;
+            --text-muted: #484f58;
+            --accent-green: #3fb950;
+            --accent-blue: #58a6ff;
+            --accent-purple: #a371f7;
+            --accent-gold: #d29922;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 16px 0;
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-primary);
+        }
+
+        .nav-cta {
+            background-color: var(--accent-green);
+            color: var(--bg-primary) !important;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .nav-cta:hover {
+            background-color: #2ea043;
+            color: white !important;
+        }
+
+        .mobile-menu {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Page Header */
+        .page-header {
+            padding: 140px 0 80px;
+            text-align: center;
+            position: relative;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(88, 166, 255, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .page-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-blue);
+            margin-bottom: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .page-header p {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Mission Section */
+        .mission {
+            padding: 80px 0;
+        }
+
+        .mission-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .mission-content h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .mission-content p {
+            font-size: 17px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .mission-image {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mission-image::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, rgba(63, 185, 80, 0.1), rgba(88, 166, 255, 0.1));
+        }
+
+        /* Values Section */
+        .values {
+            padding: 80px 0;
+            background-color: var(--bg-secondary);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-green);
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .value-card {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .value-card:hover {
+            border-color: var(--accent-green);
+            transform: translateY(-4px);
+        }
+
+        .value-icon {
+            font-size: 48px;
+            margin-bottom: 24px;
+        }
+
+        .value-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .value-card p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        /* Story Section */
+        .story {
+            padding: 100px 0;
+        }
+
+        .story-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .story-content h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .story-text {
+            font-size: 18px;
+            color: var(--text-secondary);
+            line-height: 1.9;
+        }
+
+        .story-text p {
+            margin-bottom: 24px;
+        }
+
+        .story-text strong {
+            color: var(--text-primary);
+        }
+
+        /* Philosophy Section */
+        .philosophy {
+            padding: 80px 0;
+            background-color: var(--bg-secondary);
+        }
+
+        .philosophy-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        .philosophy-card {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px;
+        }
+
+        .philosophy-card h3 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .philosophy-card h3 span {
+            font-size: 28px;
+        }
+
+        .philosophy-card p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .cta-section p {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-green);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            background-color: #2ea043;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(63, 185, 80, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            margin: 0 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .mission-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .values-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background-color: var(--bg-secondary);
+                border-bottom: 1px solid var(--border);
+                flex-direction: column;
+                padding: 16px 24px;
+                gap: 16px;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .page-header h1 {
+                font-size: 36px;
+            }
+
+            .values-grid, .philosophy-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">A</div>
+                Abacus
+            </a>
+            <ul class="nav-links">
+                <li><a href="about.html" class="active">About</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="case-studies.html">Case Studies</a></li>
+                <li><a href="games/index.html">Games</a></li>
+                <li><a href="contact.html" class="nav-cta">Get in Touch</a></li>
+            </ul>
+            <button class="mobile-menu">&#9776;</button>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="container">
+            <p class="page-label">About Us</p>
+            <h1>Building with Purpose</h1>
+            <p>We believe technology should empower, educate, and inspire. That's the philosophy behind everything we build.</p>
+        </div>
+    </section>
+
+    <section class="mission">
+        <div class="container">
+            <div class="mission-grid">
+                <div class="mission-content">
+                    <h2>Our Mission</h2>
+                    <p>Abacus was founded on a simple idea: complex concepts don't have to be inaccessible. Whether it's financial literacy, technical architecture, or user experience - we find ways to make the complicated feel intuitive.</p>
+                    <p>We combine deep technical expertise with a passion for creating experiences that resonate. From interactive educational games to enterprise consulting, our work is united by a commitment to clarity, quality, and impact.</p>
+                </div>
+                <div class="mission-image">&#129518;</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="values">
+        <div class="container">
+            <div class="section-header">
+                <p class="section-label">What Drives Us</p>
+                <h2 class="section-title">Our Values</h2>
+            </div>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">&#127919;</div>
+                    <h3>Clarity Over Complexity</h3>
+                    <p>Simple solutions are harder to create but easier to use. We invest the effort upfront so users don't have to.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">&#128640;</div>
+                    <h3>Ship & Iterate</h3>
+                    <p>Perfect is the enemy of good. We believe in launching early, learning from users, and continuously improving.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">&#128161;</div>
+                    <h3>Teach Through Doing</h3>
+                    <p>The best way to learn is by engaging. We build experiences that make discovery active, not passive.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="story">
+        <div class="container">
+            <div class="story-content">
+                <h2>Our Story</h2>
+                <div class="story-text">
+                    <p>Abacus started with a question: <strong>Why is financial literacy so boring?</strong> Markets, investing, and money management are fascinating topics that affect everyone's life - yet most educational content around them felt dry and disconnected.</p>
+                    <p>We set out to change that. Our first project was a collection of finance-themed games - not simulators, but actual games that happened to teach financial concepts through play. The response was overwhelming. People who'd never engaged with investing were suddenly discussing portfolio allocation strategies after playing for 10 minutes.</p>
+                    <p>That success led to broader work: technical consulting for startups, IoT solutions for enterprises, and custom software development for clients who shared our values. <strong>Every project we take on shares a common thread: making the complex accessible.</strong></p>
+                    <p>Today, Abacus is a small but focused team that punches above its weight. We're selective about the work we take on because we believe in doing fewer things exceptionally well.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="philosophy">
+        <div class="container">
+            <div class="section-header">
+                <p class="section-label">How We Work</p>
+                <h2 class="section-title">Our Approach</h2>
+            </div>
+            <div class="philosophy-grid">
+                <div class="philosophy-card">
+                    <h3><span>&#128269;</span> Deep Understanding First</h3>
+                    <p>Before writing code, we invest time to deeply understand the problem, the users, and the context. This upfront investment pays dividends throughout the project.</p>
+                </div>
+                <div class="philosophy-card">
+                    <h3><span>&#128736;</span> Pragmatic Engineering</h3>
+                    <p>We choose the right tool for the job, not the trendiest. Our solutions are built to be maintainable, scalable, and - most importantly - understandable.</p>
+                </div>
+                <div class="philosophy-card">
+                    <h3><span>&#128172;</span> Transparent Communication</h3>
+                    <p>No surprises. We believe in proactive, honest communication throughout every engagement. If there's a challenge, you'll know about it early.</p>
+                </div>
+                <div class="philosophy-card">
+                    <h3><span>&#127891;</span> Knowledge Transfer</h3>
+                    <p>Our goal isn't to create dependencies. We document, explain, and train - ensuring our clients are empowered to maintain and extend what we build.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Let's work together</h2>
+            <p>Have a project in mind? We'd love to hear about it.</p>
+            <a href="contact.html" class="btn btn-primary">Get in Touch</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Abacus. All rights reserved.</p>
+            <p style="margin-top: 12px;">
+                <a href="index.html">Home</a>
+                <a href="services.html">Services</a>
+                <a href="case-studies.html">Case Studies</a>
+                <a href="games/index.html">Games</a>
+                <a href="contact.html">Contact</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        document.querySelector('.mobile-menu').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

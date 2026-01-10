@@ -1,0 +1,6 @@
+# Abacus - robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://abacuswealthgroup.com/sitemap.xml
