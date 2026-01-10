@@ -1,6 +1,5 @@
-# Abacus - robots.txt
+# Abacus Games - robots.txt
 User-agent: *
 Allow: /
 
-# Sitemap
-Sitemap: https://abacuswealthgroup.com/sitemap.xml
+Sitemap: https://games.abacuswealthgroup.com/sitemap.xml

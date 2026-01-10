@@ -2,27 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abacus - Software Development & Technical Consulting</title>
-    <meta name="description" content="Abacus builds engaging software solutions and provides technical consulting. From interactive applications to IoT systems, we bring ideas to life.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Abacus Games - Finance-Themed Games & Simulations</title>
+    <meta name="description" content="Play free finance-themed games. Master trading, build hedge funds, dominate global markets. Learn financial concepts through interactive gameplay.">
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
-    <!-- Open Graph / Social -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Abacus - Software Development & Technical Consulting">
-    <meta property="og:description" content="We create engaging software solutions and provide technical consulting that transforms complex ideas into elegant, impactful products.">
-    <meta property="og:url" content="https://abacuswealthgroup.com/">
+    <meta property="og:title" content="Abacus Games - Finance-Themed Games">
+    <meta property="og:description" content="Master trading, build hedge funds, dominate global markets. Free finance games and simulations.">
+    <meta property="og:url" content="https://games.abacuswealthgroup.com/">
 
-    <!-- Twitter Card -->
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Abacus - Build. Ship. Inspire.">
-    <meta name="twitter:description" content="Software development and technical consulting that transforms ideas into impactful products.">
+    <meta name="twitter:title" content="Abacus Games">
+    <meta name="twitter:description" content="Free finance-themed games. Learn while you play.">
 
-    <!-- Theme Color -->
     <meta name="theme-color" content="#0d1117">
-
     <style>
         * {
             margin: 0;
@@ -30,851 +28,760 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --bg-primary: #0d1117;
-            --bg-secondary: #161b22;
-            --bg-tertiary: #21262d;
-            --border: #30363d;
-            --text-primary: #e6edf3;
-            --text-secondary: #7d8590;
-            --text-muted: #484f58;
-            --accent-green: #3fb950;
-            --accent-blue: #58a6ff;
-            --accent-purple: #a371f7;
-            --accent-gold: #d29922;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-        }
-
-        a {
-            color: var(--accent-blue);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        a:hover {
-            color: var(--text-primary);
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            padding: 40px 20px;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 24px;
         }
 
-        /* Navigation */
-        nav {
+        /* Sticky Navigation */
+        .top-nav {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background-color: rgba(13, 17, 23, 0.95);
+            background: rgba(13, 17, 23, 0.95);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #30363d;
+            padding: 12px 24px;
             z-index: 1000;
-            padding: 16px 0;
-        }
-
-        nav .container {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .logo {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
+        .nav-brand {
             display: flex;
             align-items: center;
             gap: 10px;
+            text-decoration: none;
+            color: #e6edf3;
+            font-weight: 700;
+            font-size: 18px;
         }
 
-        .logo-icon {
+        .nav-brand-icon {
             width: 32px;
             height: 32px;
-            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            background: linear-gradient(135deg, #3fb950, #58a6ff);
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #0d1117;
         }
 
         .nav-links {
             display: flex;
-            gap: 32px;
-            list-style: none;
+            gap: 24px;
+            align-items: center;
         }
 
-        .nav-links a {
-            color: var(--text-secondary);
+        .nav-link {
+            color: #7d8590;
+            text-decoration: none;
             font-size: 14px;
             font-weight: 500;
             transition: color 0.2s;
         }
 
-        .nav-links a:hover {
-            color: var(--text-primary);
+        .nav-link:hover {
+            color: #e6edf3;
         }
 
-        .nav-cta {
-            background-color: var(--accent-green);
-            color: var(--bg-primary) !important;
-            padding: 8px 20px;
+        .nav-link-main {
+            background: #238636;
+            color: #fff !important;
+            padding: 8px 16px;
             border-radius: 6px;
             font-weight: 600;
         }
 
-        .nav-cta:hover {
-            background-color: #2ea043;
-            color: white !important;
+        .nav-link-main:hover {
+            background: #2ea043;
         }
 
-        .mobile-menu {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        /* Hero Section */
-        .hero {
-            padding: 160px 0 100px;
+        header {
             text-align: center;
-            position: relative;
-            overflow: hidden;
+            margin-bottom: 48px;
+            padding-top: 80px; /* Account for fixed nav */
         }
 
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle, rgba(63, 185, 80, 0.1) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .hero h1 {
-            font-size: 64px;
-            font-weight: 800;
-            letter-spacing: -2px;
-            margin-bottom: 24px;
-            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-blue) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero p {
-            font-size: 20px;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 40px;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-size: 16px;
+        .logo {
+            font-size: 14px;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background-color: var(--accent-green);
-            color: var(--bg-primary);
-        }
-
-        .btn-primary:hover {
-            background-color: #2ea043;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(63, 185, 80, 0.3);
-        }
-
-        .btn-secondary {
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--border);
-            transform: translateY(-2px);
-        }
-
-        /* Stats Bar */
-        .stats-bar {
-            padding: 60px 0;
-            border-top: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 32px;
-            text-align: center;
-        }
-
-        .stat-item {
-            padding: 20px;
-        }
-
-        .stat-value {
-            font-size: 48px;
-            font-weight: 700;
-            color: var(--accent-green);
+            color: #ff6b35;
+            letter-spacing: 2px;
+            text-transform: uppercase;
             margin-bottom: 8px;
         }
 
-        .stat-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Services Section */
-        .services {
-            padding: 100px 0;
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-
-        .section-label {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent-green);
-            margin-bottom: 16px;
-        }
-
-        .section-title {
+        h1 {
             font-size: 42px;
             font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .section-desc {
-            font-size: 18px;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-        }
-
-        .service-card {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 40px;
-            transition: all 0.3s;
-        }
-
-        .service-card:hover {
-            border-color: var(--accent-green);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .service-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--bg-tertiary), var(--border));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            margin-bottom: 24px;
-        }
-
-        .service-card h3 {
-            font-size: 22px;
-            font-weight: 600;
+            color: #e6edf3;
+            letter-spacing: -1px;
             margin-bottom: 12px;
         }
 
-        .service-card p {
-            color: var(--text-secondary);
-            font-size: 15px;
-            line-height: 1.7;
-        }
-
-        /* Games Showcase */
-        .games-showcase {
-            padding: 100px 0;
-            background-color: var(--bg-secondary);
+        .subtitle {
+            font-size: 16px;
+            color: #7d8590;
         }
 
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
         }
 
         .game-card {
-            background-color: var(--bg-tertiary);
-            border: 1px solid var(--border);
+            background-color: #161b22;
+            border: 1px solid #30363d;
             border-radius: 12px;
-            padding: 24px;
-            text-align: center;
-            transition: all 0.3s;
+            overflow: hidden;
+            transition: all 0.25s ease;
             cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
         }
 
-        .game-card:hover {
-            border-color: var(--accent-blue);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 32px rgba(88, 166, 255, 0.15);
+        .game-card:hover,
+        .game-card:focus {
+            border-color: #58a6ff;
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 16px 48px rgba(88, 166, 255, 0.15);
+            outline: none;
         }
 
-        .game-icon {
-            font-size: 40px;
-            margin-bottom: 16px;
+        .game-card:focus-visible {
+            box-shadow: 0 16px 48px rgba(88, 166, 255, 0.15), 0 0 0 3px #58a6ff;
         }
 
-        .game-card h4 {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 6px;
+        .game-card:hover .game-preview {
+            filter: brightness(1.1);
         }
 
-        .game-card p {
-            font-size: 12px;
-            color: var(--text-secondary);
+        .game-card:hover .game-icon {
+            transform: scale(1.1);
         }
 
-        .games-cta {
-            text-align: center;
-        }
-
-        /* Case Study Preview */
-        .case-study-preview {
-            padding: 100px 0;
-        }
-
-        .case-study-card {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 60px;
-        }
-
-        .case-study-image {
-            background: linear-gradient(135deg, var(--bg-tertiary), var(--border));
+        .new-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, #f85149 0%, #da3633 100%);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 10px;
             border-radius: 12px;
-            height: 300px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 10;
+            animation: pulse-badge 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(248, 81, 73, 0); }
+        }
+
+        .game-preview {
+            height: 160px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 80px;
+            font-size: 48px;
             position: relative;
             overflow: hidden;
+            transition: filter 0.25s ease;
         }
 
-        .case-study-image::before {
+        .game-preview.g2048 {
+            background: linear-gradient(135deg, #1a2f23 0%, #1a3a4a 100%);
+        }
+
+        .game-preview.tycoon {
+            background: linear-gradient(135deg, #2d2050 0%, #1a2f23 100%);
+        }
+
+        .game-preview.trading {
+            background: linear-gradient(135deg, #1a3a4a 0%, #0d1117 100%);
+        }
+
+        .game-preview.flappy {
+            background: linear-gradient(135deg, #3d2a20 0%, #1a2f23 100%);
+        }
+
+        .game-preview.snake {
+            background: linear-gradient(135deg, #1a3a4a 0%, #1a2f4a 100%);
+        }
+
+        .game-preview.breakout {
+            background: linear-gradient(135deg, #3d2020 0%, #2d2050 100%);
+        }
+
+        .game-preview.memory {
+            background: linear-gradient(135deg, #1a2f23 0%, #2d2050 100%);
+        }
+
+        .game-preview.minesweeper {
+            background: linear-gradient(135deg, #2d1f20 0%, #1a3a4a 100%);
+        }
+
+        .game-preview.options {
+            background: linear-gradient(135deg, #1a4a2f 0%, #2d1f20 100%);
+        }
+
+        .game-preview.balancer {
+            background: linear-gradient(135deg, #1a2f4a 0%, #2d2050 100%);
+        }
+
+        .game-preview.ipo {
+            background: linear-gradient(135deg, #4a3a1a 0%, #2d2050 100%);
+        }
+
+        .game-preview.dividend {
+            background: linear-gradient(135deg, #1a4a3a 0%, #1a2f23 100%);
+        }
+
+        .game-preview.great-game {
+            background: linear-gradient(135deg, #2d2010 0%, #1a1510 100%);
+            border-bottom: 3px solid #d4a821;
+        }
+
+        /* Featured Game Section */
+        .featured-section {
+            margin-bottom: 48px;
+        }
+
+        .featured-label {
+            font-size: 12px;
+            color: #d4a821;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .featured-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, #d4a821, transparent);
+        }
+
+        .featured-card {
+            background: linear-gradient(135deg, #1a1510 0%, #161b22 100%);
+            border: 2px solid #d4a821;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .featured-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(45deg, rgba(63, 185, 80, 0.1), rgba(88, 166, 255, 0.1));
+            background: linear-gradient(135deg, rgba(212, 168, 33, 0.1), transparent);
+            pointer-events: none;
         }
 
-        .case-study-badge {
-            display: inline-block;
-            background-color: var(--accent-purple);
-            color: white;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 6px 12px;
-            border-radius: 20px;
-            margin-bottom: 20px;
+        .featured-card:hover {
+            border-color: #f0c040;
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(212, 168, 33, 0.2);
         }
 
-        .case-study-content h3 {
+        .featured-preview {
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+            background: linear-gradient(135deg, #2d2010 0%, #1a1510 100%);
+            position: relative;
+        }
+
+        .featured-preview::after {
+            content: '👑';
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-size: 24px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .featured-info {
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .featured-title {
             font-size: 32px;
             font-weight: 700;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
+            color: #d4a821;
+            font-family: 'Georgia', serif;
         }
 
-        .case-study-content p {
-            color: var(--text-secondary);
-            font-size: 16px;
-            line-height: 1.7;
-            margin-bottom: 24px;
-        }
-
-        .case-study-stats {
-            display: flex;
-            gap: 32px;
-            margin-bottom: 24px;
-        }
-
-        .case-study-stat {
-            text-align: left;
-        }
-
-        .case-study-stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--accent-green);
-        }
-
-        .case-study-stat-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-        }
-
-        /* CTA Section */
-        .cta-section {
-            padding: 100px 0;
-            text-align: center;
-            background: linear-gradient(180deg, var(--bg-primary), var(--bg-secondary));
-        }
-
-        .cta-section h2 {
-            font-size: 42px;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .cta-section p {
-            font-size: 18px;
-            color: var(--text-secondary);
-            margin-bottom: 32px;
-        }
-
-        /* Footer */
-        footer {
-            padding: 60px 0 40px;
-            border-top: 1px solid var(--border);
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 60px;
-            margin-bottom: 40px;
-        }
-
-        .footer-brand p {
-            color: var(--text-secondary);
+        .featured-tagline {
             font-size: 14px;
-            margin-top: 16px;
-            max-width: 280px;
+            color: #8b949e;
+            font-style: italic;
+            margin-bottom: 16px;
         }
 
-        .footer-column h4 {
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-primary);
+        .featured-desc {
+            font-size: 15px;
+            color: #c9d1d9;
+            line-height: 1.6;
             margin-bottom: 20px;
         }
 
-        .footer-column ul {
-            list-style: none;
-        }
-
-        .footer-column li {
-            margin-bottom: 12px;
-        }
-
-        .footer-column a {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .footer-column a:hover {
-            color: var(--text-primary);
-        }
-
-        .footer-bottom {
-            display: flex;
-            justify-content: space-between;
+        .featured-cta {
+            display: inline-flex;
             align-items: center;
-            padding-top: 40px;
-            border-top: 1px solid var(--border);
+            gap: 8px;
+            background: linear-gradient(135deg, #d4a821, #a17f1a);
+            color: #0d1117;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: fit-content;
+            transition: all 0.2s;
         }
 
-        .footer-bottom p {
-            color: var(--text-muted);
-            font-size: 13px;
+        .featured-card:hover .featured-cta {
+            background: linear-gradient(135deg, #f0c040, #d4a821);
         }
 
-        .social-links {
+        @media (max-width: 768px) {
+            .featured-card {
+                grid-template-columns: 1fr;
+            }
+
+            .featured-preview {
+                height: 160px;
+            }
+
+            .featured-info {
+                padding: 24px;
+            }
+
+            .featured-title {
+                font-size: 24px;
+            }
+        }
+
+        .game-icon {
+            font-size: 64px;
+            opacity: 0.9;
+            transition: transform 0.25s ease;
+        }
+
+        .game-info {
+            padding: 20px;
+        }
+
+        .game-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e6edf3;
+            margin-bottom: 8px;
+        }
+
+        .game-desc {
+            font-size: 14px;
+            color: #7d8590;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .game-stats {
             display: flex;
             gap: 16px;
         }
 
-        .social-links a {
-            color: var(--text-secondary);
-            font-size: 20px;
+        .game-stat {
+            font-size: 12px;
+            color: #7d8590;
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .hero h1 {
-                font-size: 48px;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .games-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .case-study-card {
-                grid-template-columns: 1fr;
-            }
-
-            .footer-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .game-stat strong {
+            color: #58a6ff;
+            font-weight: 600;
         }
 
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background-color: var(--bg-secondary);
-                border-bottom: 1px solid var(--border);
-                flex-direction: column;
-                padding: 16px 24px;
-                gap: 16px;
-            }
+        .play-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #238636;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            text-decoration: none;
+        }
 
-            .nav-links.active {
-                display: flex;
-            }
+        .play-btn:hover {
+            background-color: #2ea043;
+        }
 
-            .mobile-menu {
-                display: block;
-            }
+        footer {
+            text-align: center;
+            padding-top: 24px;
+            border-top: 1px solid #21262d;
+        }
 
-            .hero h1 {
-                font-size: 36px;
-            }
+        .footer-text {
+            font-size: 12px;
+            color: #484f58;
+        }
 
-            .hero p {
-                font-size: 16px;
-            }
+        .footer-brand {
+            color: #ff6b35;
+            font-weight: 600;
+        }
 
-            .services-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .games-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .section-title {
-                font-size: 32px;
-            }
-
-            .case-study-card {
-                padding: 32px;
-            }
-
-            .footer-grid {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-
-            .footer-bottom {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-            }
+        @media (max-width: 600px) {
+            h1 { font-size: 32px; }
+            .games-grid { gap: 16px; }
+            .game-preview { height: 120px; }
+            .game-icon { font-size: 48px; }
         }
     </style>
 </head>
 <body>
-    <nav>
-        <div class="container">
-            <a href="index.html" class="logo">
-                <div class="logo-icon">A</div>
-                Abacus
-            </a>
-            <ul class="nav-links">
-                <li><a href="about.html">About</a></li>
-                <li><a href="services.html">Services</a></li>
-                <li><a href="case-studies.html">Case Studies</a></li>
-                <li><a href="games/index.html">Games</a></li>
-                <li><a href="contact.html" class="nav-cta">Get in Touch</a></li>
-            </ul>
-            <button class="mobile-menu">&#9776;</button>
+    <!-- Sticky Navigation -->
+    <nav class="top-nav">
+        <a href="/" class="nav-brand">
+            <div class="nav-brand-icon">A</div>
+            Abacus Games
+        </a>
+        <div class="nav-links">
+            <a href="#games" class="nav-link">All Games</a>
+            <a href="#featured" class="nav-link">Featured</a>
+            <a href="https://abacuswealthgroup.com" class="nav-link-main">Abacus Wealth →</a>
         </div>
     </nav>
 
-    <section class="hero">
-        <div class="container">
-            <h1>Build. Ship. Inspire.</h1>
-            <p>We create engaging software solutions and provide technical consulting that transforms complex ideas into elegant, impactful products.</p>
-            <div class="hero-buttons">
-                <a href="contact.html" class="btn btn-primary">Start a Project</a>
-                <a href="case-studies.html" class="btn btn-secondary">View Our Work</a>
-            </div>
-        </div>
-    </section>
+    <div class="container">
+        <header>
+            <div class="logo">Learn Finance Through Play</div>
+            <h1>Abacus Games</h1>
+            <p class="subtitle">Master trading, build empires, dominate markets — all for free</p>
+        </header>
 
-    <section class="stats-bar">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-value">12+</div>
-                    <div class="stat-label">Products Shipped</div>
+        <!-- Featured Game -->
+        <div id="featured" class="featured-section">
+            <div class="featured-label">Crown Jewel</div>
+            <a href="games/great-game.html" class="featured-card">
+                <div class="featured-preview">🏛️</div>
+                <div class="featured-info">
+                    <h2 class="featured-title">The Great Game</h2>
+                    <p class="featured-tagline">Global Dominance Through Strategic Capital</p>
+                    <p class="featured-desc">Command Apex Global Partners through geopolitical crises, seize opportunities, and shape the world order. Navigate Taiwan tensions, acquire Greenland, counter cyber attacks, and make the hard choices that define empires. Every decision ripples across continents.</p>
+                    <div class="featured-cta">Begin Your Term →</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value">50K+</div>
-                    <div class="stat-label">Users Engaged</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">99%</div>
-                    <div class="stat-label">Client Satisfaction</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">24/7</div>
-                    <div class="stat-label">Support Available</div>
-                </div>
-            </div>
+            </a>
         </div>
-    </section>
 
-    <section class="services" id="services">
-        <div class="container">
-            <div class="section-header">
-                <p class="section-label">What We Do</p>
-                <h2 class="section-title">Services</h2>
-                <p class="section-desc">From concept to deployment, we deliver solutions that make an impact.</p>
-            </div>
-            <div class="services-grid">
-                <div class="service-card">
-                    <div class="service-icon">&#128187;</div>
-                    <h3>Software Development</h3>
-                    <p>Full-stack web applications, interactive experiences, and robust backend systems. We build software that scales and delights users.</p>
+        <div id="games" class="games-grid">
+            <a href="games/capital-compounding.html" class="game-card">
+                <div class="game-preview g2048">
+                    <span class="game-icon">$</span>
                 </div>
-                <div class="service-card">
-                    <div class="service-icon">&#128161;</div>
-                    <h3>Technical Consulting</h3>
-                    <p>Strategic guidance on architecture, technology stack selection, and engineering best practices. We help you make informed decisions.</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">&#128225;</div>
-                    <h3>IoT & Embedded Systems</h3>
-                    <p>Connected devices, Raspberry Pi solutions, and edge computing implementations. We bring intelligence to the physical world.</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">&#128200;</div>
-                    <h3>Interactive Experiences</h3>
-                    <p>Gamification, educational tools, and engaging interfaces that teach while they entertain. Learning should be fun.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="games-showcase">
-        <div class="container">
-            <div class="section-header">
-                <p class="section-label">Featured Project</p>
-                <h2 class="section-title">Abacus Games</h2>
-                <p class="section-desc">A suite of finance-themed games that make learning about markets engaging and accessible.</p>
-            </div>
-            <div class="games-grid">
-                <a href="games/great-game.html" class="game-card" style="border-color: var(--accent-gold);">
-                    <div class="game-icon">&#127942;</div>
-                    <h4>The Great Game</h4>
-                    <p>World domination</p>
-                </a>
-                <a href="games/capital-compounding.html" class="game-card">
-                    <div class="game-icon">&#128176;</div>
-                    <h4>Capital Compounding</h4>
-                    <p>2048-style merger</p>
-                </a>
-                <a href="games/options-trader.html" class="game-card">
-                    <div class="game-icon">&#128200;</div>
-                    <h4>Options Trader</h4>
-                    <p>Predict the market</p>
-                </a>
-                <a href="games/portfolio-balancer.html" class="game-card">
-                    <div class="game-icon">&#128202;</div>
-                    <h4>Portfolio Balancer</h4>
-                    <p>Optimize allocations</p>
-                </a>
-                <a href="games/hedge-fund-tycoon.html" class="game-card">
-                    <div class="game-icon">&#127970;</div>
-                    <h4>Hedge Fund Tycoon</h4>
-                    <p>Build your empire</p>
-                </a>
-                <a href="games/ipo-frenzy.html" class="game-card">
-                    <div class="game-icon">&#128640;</div>
-                    <h4>IPO Frenzy</h4>
-                    <p>Trade new listings</p>
-                </a>
-                <a href="games/market-maker.html" class="game-card">
-                    <div class="game-icon">&#9878;</div>
-                    <h4>Market Maker</h4>
-                    <p>Provide liquidity</p>
-                </a>
-                <a href="games/dividend-dynasty.html" class="game-card">
-                    <div class="game-icon">&#127793;</div>
-                    <h4>Dividend Dynasty</h4>
-                    <p>Passive income idle</p>
-                </a>
-                <a href="games/flappy-markets.html" class="game-card">
-                    <div class="game-icon">&#128181;</div>
-                    <h4>Flappy Markets</h4>
-                    <p>Navigate volatility</p>
-                </a>
-            </div>
-            <div class="games-cta">
-                <a href="games/index.html" class="btn btn-primary">Play All Games</a>
-            </div>
-        </div>
-    </section>
-
-    <section class="case-study-preview" id="case-studies">
-        <div class="container">
-            <div class="section-header">
-                <p class="section-label">Featured Case Study</p>
-                <h2 class="section-title">Real-World Impact</h2>
-            </div>
-            <div class="case-study-card">
-                <div class="case-study-image">&#128290;</div>
-                <div class="case-study-content">
-                    <span class="case-study-badge">Raspberry Pi MVP</span>
-                    <h3>Financial Dashboard Kiosk</h3>
-                    <p>A low-cost, always-on market data display system built on Raspberry Pi. Deployed in office lobbies and trading floors, it streams real-time portfolio metrics, market indices, and custom alerts - bringing the Abacus philosophy of accessible financial literacy to physical spaces.</p>
-                    <div class="case-study-stats">
-                        <div class="case-study-stat">
-                            <div class="case-study-stat-value">$89</div>
-                            <div class="case-study-stat-label">Hardware Cost</div>
-                        </div>
-                        <div class="case-study-stat">
-                            <div class="case-study-stat-value">24/7</div>
-                            <div class="case-study-stat-label">Uptime</div>
-                        </div>
-                        <div class="case-study-stat">
-                            <div class="case-study-stat-value">&lt;5W</div>
-                            <div class="case-study-stat-label">Power Draw</div>
-                        </div>
+                <div class="game-info">
+                    <h2 class="game-title">Capital Compounding</h2>
+                    <p class="game-desc">Merge assets to reach $10M. The classic 2048 with a finance twist.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best: <strong id="cc-best">$0</strong></span>
                     </div>
-                    <a href="case-studies.html" class="btn btn-secondary">Read Full Case Study</a>
                 </div>
-            </div>
-        </div>
-    </section>
+            </a>
 
-    <section class="cta-section">
-        <div class="container">
-            <h2>Ready to build something great?</h2>
-            <p>Let's discuss your project and see how we can help.</p>
-            <a href="contact.html" class="btn btn-primary">Get in Touch</a>
-        </div>
-    </section>
-
-    <footer>
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <div class="logo">
-                        <div class="logo-icon">A</div>
-                        Abacus
+            <a href="games/hedge-fund-tycoon.html" class="game-card">
+                <div class="game-preview tycoon">
+                    <span class="game-icon">📈</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Hedge Fund Tycoon</h2>
+                    <p class="game-desc">Build your fund from $10K to $1B. Hire traders, unlock strategies.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">AUM: <strong id="hft-aum">$0</strong></span>
                     </div>
-                    <p>Building engaging software solutions that transform complex ideas into elegant, impactful products.</p>
                 </div>
-                <div class="footer-column">
-                    <h4>Company</h4>
-                    <ul>
-                        <li><a href="about.html">About Us</a></li>
-                        <li><a href="services.html">Services</a></li>
-                        <li><a href="case-studies.html">Case Studies</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-                    </ul>
+            </a>
+
+            <a href="games/market-maker.html" class="game-card">
+                <div class="game-preview trading">
+                    <span class="game-icon">⚡</span>
                 </div>
-                <div class="footer-column">
-                    <h4>Projects</h4>
-                    <ul>
-                        <li><a href="games/index.html">Abacus Games</a></li>
-                        <li><a href="case-studies.html#pi-kiosk">Pi Dashboard</a></li>
-                    </ul>
+                <div class="game-info">
+                    <h2 class="game-title">Market Maker</h2>
+                    <p class="game-desc">Fast-paced trading. React to price movements. Beat the market.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">High Score: <strong id="bt-best">$0</strong></span>
+                    </div>
                 </div>
-                <div class="footer-column">
-                    <h4>Connect</h4>
-                    <ul>
-                        <li><a href="mailto:hello@abacus.dev">hello@abacus.dev</a></li>
-                        <li><a href="#">GitHub</a></li>
-                        <li><a href="#">LinkedIn</a></li>
-                    </ul>
+            </a>
+
+            <a href="games/flappy-markets.html" class="game-card">
+                <div class="game-preview flappy">
+                    <span class="game-icon">💵</span>
                 </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Abacus. All rights reserved.</p>
-                <div class="social-links">
-                    <a href="#" title="GitHub">&#128187;</a>
-                    <a href="#" title="LinkedIn">&#128101;</a>
-                    <a href="#" title="Twitter">&#128038;</a>
+                <div class="game-info">
+                    <h2 class="game-title">Flappy Markets</h2>
+                    <p class="game-desc">Navigate through volatile markets. Dodge the red candles.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best: <strong id="fm-best">0</strong></span>
+                    </div>
                 </div>
-            </div>
+            </a>
+
+            <a href="games/snake.html" class="game-card">
+                <div class="game-preview snake">
+                    <span class="game-icon">🐍</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Stock Snake</h2>
+                    <p class="game-desc">Collect ticker symbols to grow your portfolio. Don't hit the walls!</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best: <strong id="ss-best">0</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="games/breakout.html" class="game-card">
+                <div class="game-preview breakout">
+                    <span class="game-icon">🧱</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Market Breakout</h2>
+                    <p class="game-desc">Break through price levels. Smash resistance, ride support.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">High Score: <strong id="mb-best">0</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="games/memory.html" class="game-card">
+                <div class="game-preview memory">
+                    <span class="game-icon">🃏</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Ticker Match</h2>
+                    <p class="game-desc">Match stock ticker pairs. Test your memory under pressure.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best Moves: <strong id="tm-best">--</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="games/minesweeper.html" class="game-card">
+                <div class="game-preview minesweeper">
+                    <span class="game-icon">🔍</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Fraud Finder</h2>
+                    <p class="game-desc">Uncover fraudulent trades hidden in the data. Flag the suspicious ones.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best Time: <strong id="ff-best">--</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="games/options-trader.html" class="game-card">
+                <span class="new-badge">New</span>
+                <div class="game-preview options">
+                    <span class="game-icon">📊</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Options Trader</h2>
+                    <p class="game-desc">Predict if stocks go up or down. Binary options-style trading game.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best: <strong id="ot-best">$10K</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="games/portfolio-balancer.html" class="game-card">
+                <span class="new-badge">New</span>
+                <div class="game-preview balancer">
+                    <span class="game-icon">🎯</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Portfolio Balancer</h2>
+                    <p class="game-desc">Match target allocations with sliders. Speed and accuracy matter.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best: <strong id="pb-best">0</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="games/ipo-frenzy.html" class="game-card">
+                <span class="new-badge">New</span>
+                <div class="game-preview ipo">
+                    <span class="game-icon">🚀</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">IPO Frenzy</h2>
+                    <p class="game-desc">Buy hot IPOs and sell before they crash. Time your exits perfectly.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Best: <strong id="if-best">$50K</strong></span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="games/dividend-dynasty.html" class="game-card">
+                <span class="new-badge">New</span>
+                <div class="game-preview dividend">
+                    <span class="game-icon">💰</span>
+                </div>
+                <div class="game-info">
+                    <h2 class="game-title">Dividend Dynasty</h2>
+                    <p class="game-desc">Build passive income. Buy dividend stocks and watch your wealth grow.</p>
+                    <div class="game-stats">
+                        <span class="game-stat">Income: <strong id="dd-income">$0/s</strong></span>
+                    </div>
+                </div>
+            </a>
         </div>
-    </footer>
+
+        <footer>
+            <p class="footer-text">
+                <span class="footer-brand">Abacus Games</span> — Toy models. Real markets are harder.
+            </p>
+            <p class="footer-text" style="margin-top: 12px; font-size: 13px;">
+                A project by <a href="https://abacuswealthgroup.com" style="color: #58a6ff;">Abacus Wealth Group</a>
+            </p>
+        </footer>
+    </div>
 
     <script>
-        document.querySelector('.mobile-menu').addEventListener('click', function() {
-            document.querySelector('.nav-links').classList.toggle('active');
-        });
+        // Load best scores from localStorage with error handling
+        function formatMoney(value) {
+            if (isNaN(value) || value === null) return '$0';
+            if (value >= 1000000000) return '$' + (value / 1000000000).toFixed(1) + 'B';
+            if (value >= 1000000) return '$' + (value / 1000000).toFixed(1) + 'M';
+            if (value >= 1000) return '$' + (value / 1000).toFixed(0) + 'K';
+            return '$' + value;
+        }
+
+        function safeGetNumber(key, fallback = 0) {
+            try {
+                const value = localStorage.getItem(key);
+                if (value === null) return fallback;
+                const num = parseInt(value);
+                return isNaN(num) ? fallback : num;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        function safeGetJSON(key) {
+            try {
+                const value = localStorage.getItem(key);
+                if (value === null) return null;
+                return JSON.parse(value);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Capital Compounding
+        const ccBest = safeGetNumber('capitalCompoundingBest');
+        if (ccBest > 0) document.getElementById('cc-best').textContent = formatMoney(ccBest);
+
+        // Hedge Fund Tycoon
+        const hftData = safeGetJSON('hedgeFundTycoon');
+        if (hftData && hftData.money > 0) {
+            document.getElementById('hft-aum').textContent = formatMoney(Math.floor(hftData.money));
+        }
+
+        // Market Maker
+        const btBest = safeGetNumber('marketMakerBest');
+        if (btBest > 0) document.getElementById('bt-best').textContent = formatMoney(btBest);
+
+        // Flappy Markets
+        const fmBest = safeGetNumber('flappyMarketsBest');
+        if (fmBest > 0) document.getElementById('fm-best').textContent = fmBest + ' pts';
+
+        // Stock Snake
+        const ssBest = safeGetNumber('stockSnakeBest');
+        if (ssBest > 0) document.getElementById('ss-best').textContent = ssBest + ' pts';
+
+        // Market Breakout
+        const mbBest = safeGetNumber('marketBreakoutBest');
+        if (mbBest > 0) document.getElementById('mb-best').textContent = mbBest + ' pts';
+
+        // Ticker Match (store best moves - lower is better)
+        const tmBest = safeGetNumber('tickerMatchBest');
+        if (tmBest > 0) document.getElementById('tm-best').textContent = tmBest + ' moves';
+
+        // Fraud Finder (store best time - string format like "1:23")
+        const ffBest = localStorage.getItem('fraudFinderBest');
+        if (ffBest && ffBest !== '0' && ffBest !== '') {
+            document.getElementById('ff-best').textContent = ffBest;
+        }
+
+        // Options Trader
+        const otBest = safeGetNumber('optionsTraderBest');
+        if (otBest > 10000) document.getElementById('ot-best').textContent = formatMoney(otBest);
+
+        // Portfolio Balancer
+        const pbBest = safeGetNumber('portfolioBalancerBest');
+        if (pbBest > 0) document.getElementById('pb-best').textContent = pbBest + ' pts';
+
+        // IPO Frenzy
+        const ifBest = safeGetNumber('ipoFrenzyBest');
+        if (ifBest > 50000) document.getElementById('if-best').textContent = formatMoney(ifBest);
+
+        // Dividend Dynasty
+        const ddData = safeGetJSON('dividendDynastyData');
+        if (ddData && ddData.prestigeLevel > 1) {
+            document.getElementById('dd-income').textContent = ddData.prestigeLevel + 'x prestige';
+        }
     </script>
 </body>
 </html>
