@@ -425,6 +425,7 @@
             text-align: center;
             position: relative;
             overflow: hidden;
+            contain: content;
         }
 
         .aggregate-card::before {
@@ -461,6 +462,7 @@
         .sparkline-container {
             height: 30px;
             margin-top: 4px;
+            overflow: hidden;
         }
 
         .sparkline-container canvas {
@@ -485,6 +487,7 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 16px;
+            overflow: hidden;
         }
 
         .market-label {
@@ -506,6 +509,7 @@
         .market-sparkline {
             height: 30px;
             margin-top: 8px;
+            overflow: hidden;
         }
 
         /* Chart Panel */
@@ -518,6 +522,7 @@
             border-radius: 8px;
             padding: 16px;
             position: relative;
+            overflow: hidden;
         }
 
         .chart-canvas {
@@ -570,6 +575,7 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 16px;
+            overflow: hidden;
         }
 
         .comparison-title {
@@ -2021,6 +2027,10 @@
 
             const ctx = canvas.getContext('2d');
             const rect = canvas.getBoundingClientRect();
+
+            // Skip if canvas is not visible yet
+            if (rect.width === 0 || rect.height === 0) return;
+
             canvas.width = rect.width * 2;
             canvas.height = rect.height * 2;
             ctx.scale(2, 2);
@@ -2034,7 +2044,7 @@
             const max = Math.max(...displayData) * 1.02;
             const range = max - min || 1;
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath();
             ctx.strokeStyle = color;
             ctx.lineWidth = 1.5;
@@ -2055,6 +2065,10 @@
 
             const ctx = canvas.getContext('2d');
             const rect = canvas.getBoundingClientRect();
+
+            // Skip if canvas is not visible yet
+            if (rect.width === 0 || rect.height === 0) return;
+
             canvas.width = rect.width * 2;
             canvas.height = rect.height * 2;
             ctx.scale(2, 2);
@@ -2063,7 +2077,7 @@
             const height = rect.height;
             const padding = { top: 20, right: 20, bottom: 30, left: 50 };
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Get data
             const datasets = [];
@@ -2775,12 +2789,42 @@
             state.prevSimpleSum = calculateSimpleSum();
             state.prevDivisia = calculateDivisia();
 
-            // Initialize history
-            state.history.stock.push(state.stockMarket.index);
+            // Initialize history with starting values (need 2+ points for sparklines)
+            const m1Init = calculateM1();
+            const m2Init = calculateM2();
+            const m3Init = calculateM3();
+            const m4Init = calculateM4();
+            const simpleSumInit = calculateSimpleSum();
+            const divisiaInit = calculateDivisia();
+
+            // Push initial values twice to have starting baseline
+            state.history.m1.push(m1Init, m1Init);
+            state.history.m2.push(m2Init, m2Init);
+            state.history.m3.push(m3Init, m3Init);
+            state.history.m4.push(m4Init, m4Init);
+            state.history.simpleSum.push(simpleSumInit, simpleSumInit);
+            state.history.divisia.push(divisiaInit, divisiaInit);
+            state.history.inflation.push(state.inflation, state.inflation);
+            state.history.unemployment.push(state.unemployment, state.unemployment);
+            state.history.gdp.push(state.gdpGrowth, state.gdpGrowth);
+            state.history.stability.push(state.financialStability, state.financialStability);
+            state.history.fedFunds.push(state.fedFundsRate, state.fedFundsRate);
+            state.history.stock.push(state.stockMarket.index, state.stockMarket.index);
+            state.history.balanceSheet.push(state.balanceSheet, state.balanceSheet);
 
             updateDisplay();
             updateRateDisplay();
             updateReserveDisplay();
+
+            // Re-render charts after DOM layout settles
+            requestAnimationFrame(() => {
+                renderMainChart();
+                renderSparkline('sparkline-m1', state.history.m1, '#3fb950');
+                renderSparkline('sparkline-m2', state.history.m2, '#58a6ff');
+                renderSparkline('sparkline-m3', state.history.m3, '#a371f7');
+                renderSparkline('sparkline-m4', state.history.m4, '#39c5cf');
+                renderSparkline('sparkline-stock', state.history.stock, '#3fb950');
+            });
         }
 
         function endTurn() {
