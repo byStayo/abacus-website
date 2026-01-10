@@ -2175,10 +2175,6 @@
                 <div class="panel dashboard">
                     <div class="panel-header">
                         <div class="panel-title">Money Supply Aggregates</div>
-                        <div class="panel-toggle">
-                            <button class="toggle-btn active" id="toggle-divisia" onclick="setView('divisia')">Divisia</button>
-                            <button class="toggle-btn" id="toggle-simple" onclick="setView('simple')">Simple Sum</button>
-                        </div>
                     </div>
 
                     <div class="aggregate-grid">
@@ -3212,12 +3208,6 @@
             const value = parseInt(document.getElementById('reserve-slider').value);
             document.getElementById('reserve-value').textContent = value + '%';
             state.reserveRequirement = value;
-        }
-
-        function setView(view) {
-            state.view = view;
-            document.getElementById('toggle-divisia').classList.toggle('active', view === 'divisia');
-            document.getElementById('toggle-simple').classList.toggle('active', view === 'simple');
         }
 
         // ============ POLICY ACTIONS ============
