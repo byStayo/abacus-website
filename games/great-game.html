@@ -600,19 +600,23 @@
         }
 
         .resource-item.highlight-up {
-            animation: resUp 0.5s ease;
+            animation: resUp 1.2s ease;
         }
 
         .resource-item.highlight-down {
-            animation: resDown 0.5s ease;
+            animation: resDown 1.2s ease;
         }
 
         @keyframes resUp {
-            50% { background: rgba(63, 185, 80, 0.3); border-color: var(--green); }
+            0% { background: rgba(63, 185, 80, 0.5); border-color: var(--green); transform: scale(1.05); }
+            30% { background: rgba(63, 185, 80, 0.4); border-color: var(--green); transform: scale(1.02); }
+            100% { background: transparent; border-color: transparent; transform: scale(1); }
         }
 
         @keyframes resDown {
-            50% { background: rgba(248, 81, 73, 0.3); border-color: var(--red); }
+            0% { background: rgba(248, 81, 73, 0.5); border-color: var(--red); transform: scale(1.05); }
+            30% { background: rgba(248, 81, 73, 0.4); border-color: var(--red); transform: scale(1.02); }
+            100% { background: transparent; border-color: transparent; transform: scale(1); }
         }
 
         .resource-icon {
@@ -1029,14 +1033,43 @@
             background: var(--bg-tertiary);
         }
 
+        .ticker-item.crashed {
+            animation: crashShake 0.5s ease;
+            background: rgba(248, 81, 73, 0.15);
+        }
+
         .ticker-item.crashed .ticker-symbol {
             color: var(--red);
             text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+            animation: crashFlash 0.3s ease 3;
+        }
+
+        @keyframes crashShake {
+            0%, 100% { transform: translateX(0); }
+            10% { transform: translateX(-3px) rotate(-1deg); }
+            20% { transform: translateX(3px) rotate(1deg); }
+            30% { transform: translateX(-3px) rotate(-1deg); }
+            40% { transform: translateX(3px) rotate(1deg); }
+            50% { transform: translateX(-2px); }
+            60% { transform: translateX(2px); }
+            70% { transform: translateX(-1px); }
+            80% { transform: translateX(1px); }
+        }
+
+        @keyframes crashFlash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
         .ticker-item.ath .ticker-symbol {
             color: var(--gold);
             text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+            animation: athGlow 1s ease infinite;
+        }
+
+        @keyframes athGlow {
+            0%, 100% { text-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+            50% { text-shadow: 0 0 20px rgba(241, 196, 15, 0.8), 0 0 30px rgba(241, 196, 15, 0.4); }
         }
 
         .ticker-symbol {
@@ -1663,16 +1696,88 @@
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 14px;
+            padding-left: 18px;
             text-align: left;
             cursor: pointer;
             transition: all 0.2s;
             color: var(--text-primary);
+            border-left: 4px solid var(--border);
+            position: relative;
         }
 
         .choice-btn:hover {
             border-color: var(--gold);
+            border-left-color: var(--gold);
             background: rgba(212, 168, 33, 0.1);
             transform: translateX(4px);
+        }
+
+        .choice-btn:active {
+            transform: scale(0.98);
+            background: rgba(212, 168, 33, 0.2);
+        }
+
+        /* Risk-based visual differentiation */
+        .choice-btn.risk-low {
+            border-left-color: var(--green);
+        }
+        .choice-btn.risk-low::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--green);
+            border-radius: 8px 0 0 8px;
+        }
+
+        .choice-btn.risk-medium {
+            border-left-color: var(--gold);
+        }
+        .choice-btn.risk-medium::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--gold);
+            border-radius: 8px 0 0 8px;
+        }
+
+        .choice-btn.risk-high {
+            border-left-color: var(--red);
+        }
+        .choice-btn.risk-high::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--red);
+            border-radius: 8px 0 0 8px;
+        }
+
+        .choice-btn.risk-critical {
+            border-left-color: var(--purple);
+            animation: criticalPulse 2s infinite;
+        }
+        .choice-btn.risk-critical::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--purple);
+            border-radius: 8px 0 0 8px;
+        }
+
+        @keyframes criticalPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(163, 113, 247, 0); }
+            50% { box-shadow: 0 0 8px 2px rgba(163, 113, 247, 0.3); }
         }
 
         .choice-title {
@@ -1747,6 +1852,11 @@
             background: var(--bg-panel);
         }
 
+        .tool-btn:active:not(:disabled) {
+            transform: scale(0.97);
+            background: rgba(212, 168, 33, 0.15);
+        }
+
         .tool-btn.defensive {
             border-color: rgba(46, 204, 113, 0.3);
         }
@@ -1754,6 +1864,10 @@
         .tool-btn.defensive:hover {
             border-color: var(--green);
             background: rgba(46, 204, 113, 0.1);
+        }
+
+        .tool-btn.defensive:active:not(:disabled) {
+            background: rgba(46, 204, 113, 0.2);
         }
 
         .tool-btn:disabled {
@@ -1836,10 +1950,18 @@
             align-items: center;
             z-index: 1000;
             padding: 20px;
+            opacity: 0;
+            backdrop-filter: blur(4px);
         }
 
         .modal-overlay.active {
             display: flex;
+            animation: overlayFadeIn 0.25s ease forwards;
+        }
+
+        @keyframes overlayFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal-card {
@@ -1849,12 +1971,42 @@
             max-width: 500px;
             width: 100%;
             overflow: hidden;
-            animation: modalIn 0.3s ease;
+            animation: modalSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        @keyframes modalIn {
-            from { opacity: 0; transform: scale(0.95) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Success/failure outcome specific animations */
+        .modal-card.success-outcome {
+            animation: modalSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                       successGlow 0.5s ease 0.2s;
+        }
+
+        .modal-card.failure-outcome {
+            animation: modalSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                       failureShake 0.4s ease 0.2s;
+        }
+
+        @keyframes successGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0); }
+            50% { box-shadow: 0 0 30px 5px rgba(63, 185, 80, 0.3); }
+        }
+
+        @keyframes failureShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
         }
 
         .modal-header {
@@ -1938,10 +2090,17 @@
             border-radius: 6px;
             text-transform: uppercase;
             letter-spacing: 2px;
+            transition: transform 0.1s, box-shadow 0.1s;
         }
 
         .modal-btn:hover {
             opacity: 0.9;
+            box-shadow: 0 4px 15px rgba(212, 168, 33, 0.3);
+        }
+
+        .modal-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 8px rgba(212, 168, 33, 0.2);
         }
 
         /* ============ GAME OVER ============ */
@@ -2058,19 +2217,27 @@
 
         .float-text {
             position: fixed;
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 700;
             pointer-events: none;
             z-index: 9999;
-            animation: float 1.5s ease-out forwards;
+            animation: float 2s ease-out forwards;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
         }
 
-        .float-text.positive { color: var(--green); }
-        .float-text.negative { color: var(--red); }
+        .float-text.positive {
+            color: var(--green);
+            text-shadow: 0 0 10px rgba(63, 185, 80, 0.5), 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+        .float-text.negative {
+            color: var(--red);
+            text-shadow: 0 0 10px rgba(248, 81, 73, 0.5), 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
 
         @keyframes float {
             0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-60px) scale(1.2); }
+            20% { opacity: 1; transform: translateY(-20px) scale(1.15); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1); }
         }
 
         /* ============ FOCUS STATES (Keyboard Accessibility) ============ */
@@ -6585,7 +6752,7 @@
 
     <!-- Outcome Modal -->
     <div class="modal-overlay" id="outcome-modal">
-        <div class="modal-card">
+        <div class="modal-card" id="outcome-modal-card">
             <div class="modal-header" id="modal-header">
                 <div class="modal-icon" id="modal-icon">⚡</div>
                 <div class="modal-title" id="modal-title">Outcome</div>
@@ -9176,16 +9343,43 @@
             // Sort by score descending
             scoredActions.sort((a, b) => b.score - a.score);
 
-            // Safety check - don't pick action if below threshold
-            const safetyThreshold = archetype.thresholds.minStability > 50 ? 25 : 15;
-            const topAction = scoredActions[0];
+            // Safety check - dynamic threshold based on game state
+            let safetyThreshold = archetype.thresholds.minStability > 50 ? 25 : 15;
 
-            if (topAction && topAction.score >= safetyThreshold) {
-                return topAction;
+            // Dynamic difficulty: AI gets more aggressive when player is winning
+            if (state.year >= 2028) {
+                const playerWinning = state.resources.gdp > 30 && state.resources.stability > 60;
+                const playerLosing = state.resources.gdp < 15 || state.resources.stability < 30;
+
+                if (playerWinning) {
+                    safetyThreshold = 5; // AI takes more risks
+                } else if (playerLosing) {
+                    safetyThreshold = 40; // AI plays safer, give player a chance
+                }
             }
 
-            // Fallback to waiting if no good action
-            return { action: 'wait', target: null, score: 10 };
+            // Filter actions above safety threshold
+            const viableActions = scoredActions.filter(a => a.score >= safetyThreshold);
+
+            if (viableActions.length === 0) {
+                return { action: 'wait', target: null, score: 10 };
+            }
+
+            // Weighted random selection from top 3 viable actions
+            // Top action: 60% chance, #2: 30%, #3: 10%
+            const top3 = viableActions.slice(0, 3);
+            const weights = [6, 3, 1];
+            const weightedPool = [];
+
+            top3.forEach((action, i) => {
+                const weight = weights[i] || 1;
+                for (let w = 0; w < weight; w++) {
+                    weightedPool.push(action);
+                }
+            });
+
+            const chosen = weightedPool[Math.floor(Math.random() * weightedPool.length)];
+            return chosen;
         }
 
         function getPossibleAITargets(powerId) {
@@ -9193,23 +9387,35 @@
             const targets = Object.keys(COUNTRIES).filter(id => {
                 // Can't target self
                 if (id === powerId) return false;
-                // Can't target the player (US) directly in some cases
-                // For now, include all
                 return true;
             });
 
-            // Prioritize based on relationships
+            // Prioritize based on relationships + random perturbation for variety
             const aiState = aiPowers[powerId];
             if (aiState) {
-                // Sort targets - prioritize grudges and enemies
+                // Sort targets - prioritize grudges, enemies, and player (US)
                 targets.sort((a, b) => {
-                    const grudgeA = aiState.memory.grudges[a]?.intensity || 0;
-                    const grudgeB = aiState.memory.grudges[b]?.intensity || 0;
-                    return grudgeB - grudgeA;
+                    let scoreA = aiState.memory.grudges[a]?.intensity || 0;
+                    let scoreB = aiState.memory.grudges[b]?.intensity || 0;
+
+                    // Player (US) always gets priority consideration
+                    if (a === 'us') scoreA += 30;
+                    if (b === 'us') scoreB += 30;
+
+                    // Add random perturbation for unpredictability
+                    scoreA += Math.random() * 15;
+                    scoreB += Math.random() * 15;
+
+                    return scoreB - scoreA;
                 });
             }
 
-            return targets.slice(0, 10); // Limit consideration to top 10
+            // Ensure player (US) is always in the list if not already
+            const result = targets.slice(0, 15); // Expanded from 10 to 15
+            if (!result.includes('us') && powerId !== 'us') {
+                result.push('us');
+            }
+            return result;
         }
 
         // Execute an AI action and apply its effects
@@ -9228,10 +9434,33 @@
 
             let result = { success: true, message: '', effects: [] };
 
-            // Calculate success chance based on action risk and AI state
-            const baseChance = 70 + (aiState.stability / 2) - (action.exposureRisk || 0);
+            // Calculate success chance based on action risk, AI state, and player defenses
+            let successChance = 70 + (aiState.stability / 2) - (action.exposureRisk || 0);
+
+            // Player's defensive strength reduces AI success
+            const playerDefense = (state.resources.military * 0.5) + (state.resources.tech * 0.3);
+            successChance -= (playerDefense / 10);
+
+            // If targeting a player ally, they're harder to influence
+            if (target && state.influence[target] > 30) {
+                const allyStrength = Math.floor(state.influence[target] / 20);
+                successChance -= allyStrength * 3;
+            }
+
+            // If targeting a country the player has good relations with
+            if (target && state.relations[target] > 60) {
+                successChance -= 10;
+            }
+
+            // AI archetype modifiers
+            if (aiState.archetype === 'aggressive_hawk') successChance += 5;
+            if (aiState.archetype === 'cautious_diplomat') successChance -= 5;
+
+            // Clamp to reasonable range
+            successChance = Math.max(25, Math.min(90, successChance));
+
             const roll = rollD100();
-            const success = roll <= baseChance;
+            const success = roll <= successChance;
 
             // Apply action effects - matches AI_ACTIONS definitions
             switch (actionData.action) {
@@ -10830,6 +11059,27 @@
                             aiMessages.push(result.message);
                         }
 
+                        // Show notification for actions targeting the player
+                        if (result && actionData.target === 'us') {
+                            const powerName = COUNTRIES[powerId]?.name || 'Unknown Power';
+                            const actionName = AI_ACTIONS[actionData.action]?.name || actionData.action;
+                            const notifType = result.success ? 'warning' : 'info';
+                            const notifMsg = result.success
+                                ? `${powerName} targets you: ${result.message}`
+                                : `${powerName} attempted action against you failed`;
+                            showNotification(notifMsg, notifType);
+                        }
+
+                        // Show notification for major actions affecting US markets
+                        if (result && result.effects) {
+                            const marketEffect = result.effects.find(e => e.target === 'us' && e.type === 'market');
+                            const dollarEffect = result.effects.find(e => e.type === 'dollar');
+                            if (marketEffect || dollarEffect) {
+                                const powerName = COUNTRIES[powerId]?.name || 'Unknown Power';
+                                showNotification(`${powerName}'s actions impact US markets`, 'warning');
+                            }
+                        }
+
                         // Apply difficulty bonus to success
                         if (result && result.success && settings.successBonus !== 0) {
                             // Bonus effect based on difficulty
@@ -11753,10 +12003,26 @@
             const countryEl = document.getElementById(scenario.country);
             if (countryEl) countryEl.classList.add('crisis');
 
-            // Render choices
+            // Render choices with risk classification
             const container = document.getElementById('choices-container');
-            container.innerHTML = scenario.choices.map((choice, i) => `
-                <button class="choice-btn" data-index="${i}">
+            container.innerHTML = scenario.choices.map((choice, i) => {
+                // Calculate risk level based on effects
+                const negativeEffects = choice.effects.filter(e => e.val < 0);
+                const positiveEffects = choice.effects.filter(e => e.val > 0);
+                const totalNegative = negativeEffects.reduce((sum, e) => sum + Math.abs(e.val), 0);
+                const hasRiskTag = choice.effects.some(e => e.label?.toLowerCase().includes('risk'));
+
+                let riskClass = 'risk-low';
+                if (hasRiskTag || totalNegative > 15) {
+                    riskClass = 'risk-critical';
+                } else if (totalNegative > 10 || negativeEffects.length >= 2) {
+                    riskClass = 'risk-high';
+                } else if (totalNegative > 5 || negativeEffects.length >= 1) {
+                    riskClass = 'risk-medium';
+                }
+
+                return `
+                <button class="choice-btn ${riskClass}" data-index="${i}">
                     <div class="choice-title">${choice.title}</div>
                     <div class="choice-desc">${choice.desc}</div>
                     <div class="choice-effects">
@@ -11765,8 +12031,8 @@
                             return `<span class="effect-tag ${cls}">${e.label}</span>`;
                         }).join('')}
                     </div>
-                </button>
-            `).join('');
+                </button>`;
+            }).join('');
 
             // Use event delegation to avoid memory leak from adding listeners on every scenario
             container.onclick = (e) => {
@@ -11820,7 +12086,11 @@
 
         function showOutcome(outcome, changes) {
             const modal = document.getElementById('outcome-modal');
+            const modalCard = document.getElementById('outcome-modal-card');
             const header = document.getElementById('modal-header');
+
+            // Reset modal card classes
+            modalCard.className = 'modal-card';
 
             header.className = 'modal-header ' + outcome.type;
             document.getElementById('modal-icon').textContent = outcome.icon;
@@ -11836,6 +12106,13 @@
                     </div>
                 </div>
             `).join('');
+
+            // Add outcome-specific animation class
+            if (outcome.type === 'success') {
+                modalCard.classList.add('success-outcome');
+            } else if (outcome.type === 'failure') {
+                modalCard.classList.add('failure-outcome');
+            }
 
             modal.classList.add('active');
 
