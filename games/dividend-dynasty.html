@@ -2,16 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Dividend Dynasty</title>
     <style>
         :root {
             --bg-primary: #0a0f1a;
             --bg-secondary: #0d1520;
-            --bg-card: rgba(15, 25, 40, 0.85);
-            --bg-card-hover: rgba(20, 35, 55, 0.9);
-            --border-color: rgba(212, 175, 55, 0.15);
-            --border-glow: rgba(212, 175, 55, 0.3);
+            --bg-card: rgba(15, 25, 40, 0.9);
+            --border-color: rgba(212, 175, 55, 0.2);
+            --border-glow: rgba(212, 175, 55, 0.4);
             --gold: #d4af37;
             --gold-light: #f4d160;
             --gold-dark: #a68b2a;
@@ -19,443 +18,330 @@
             --emerald-light: #34d399;
             --emerald-dark: #059669;
             --text-primary: #f0f4f8;
-            --text-secondary: #8892a0;
-            --text-muted: #5a6570;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
             --purple: #a855f7;
             --purple-light: #c084fc;
             --blue: #3b82f6;
-            --red: #ef4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        body::before {
-            content: '';
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 16px;
+            padding-top: 50px;
+        }
+
+        .breadcrumb {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background:
-                radial-gradient(ellipse at 20% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 50%, rgba(168, 85, 247, 0.04) 0%, transparent 60%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .container {
-            max-width: 520px;
-            margin: 0 auto;
-            padding: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Header */
-        .header {
-            text-align: center;
-            margin-bottom: 24px;
-            padding-top: 40px;
-        }
-
-        .breadcrumb {
-            position: absolute;
-            top: 20px;
-            left: 20px;
+            padding: 12px 16px;
+            background: rgba(10, 15, 26, 0.95);
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 13px;
-            z-index: 10;
+            font-size: 12px;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .breadcrumb a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
+        .breadcrumb a { color: var(--text-muted); text-decoration: none; }
         .breadcrumb a:hover { color: var(--gold); }
-        .breadcrumb span.sep { color: var(--text-muted); opacity: 0.5; }
-        .breadcrumb span.current { color: var(--text-primary); }
+        .breadcrumb .sep { opacity: 0.3; }
+        .breadcrumb .current { color: var(--text-primary); }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
         .logo {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+            background: linear-gradient(135deg, var(--gold-light), var(--gold));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: -0.5px;
-            margin-bottom: 4px;
         }
 
         .tagline {
-            font-size: 13px;
-            color: var(--text-secondary);
-            font-weight: 400;
+            font-size: 12px;
+            color: var(--text-muted);
         }
 
-        /* Main Balance Card */
-        .balance-card {
-            background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
-            border: 1px solid rgba(16, 185, 129, 0.25);
+        /* Main Click Area */
+        .collect-area {
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+            border: 2px solid var(--emerald);
             border-radius: 20px;
-            padding: 28px 24px;
+            padding: 24px;
             text-align: center;
             margin-bottom: 16px;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .balance-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 200%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
-            animation: shimmer 8s infinite;
+        .collect-area:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
         }
 
-        @keyframes shimmer {
-            0% { transform: translateX(-50%); }
-            100% { transform: translateX(50%); }
+        .collect-area:active {
+            transform: scale(0.98);
         }
 
-        .balance-label {
-            font-size: 12px;
+        .collect-area.flash {
+            animation: collectFlash 0.15s ease;
+        }
+
+        @keyframes collectFlash {
+            50% { background: rgba(16, 185, 129, 0.4); }
+        }
+
+        .cash-label {
+            font-size: 11px;
             color: var(--emerald-light);
             text-transform: uppercase;
             letter-spacing: 1.5px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
-        .balance-value {
-            font-size: 42px;
+        .cash-value {
+            font-size: 38px;
             font-weight: 800;
             color: #fff;
-            letter-spacing: -1px;
-            text-shadow: 0 0 40px rgba(16, 185, 129, 0.4);
-            transition: transform 0.2s;
+            text-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
         }
 
-        .balance-value.bounce {
-            animation: valueBounce 0.3s ease;
-        }
-
-        @keyframes valueBounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .income-rate {
-            font-size: 15px;
-            color: var(--emerald);
-            font-weight: 600;
-            margin-top: 8px;
+        .income-info {
             display: flex;
-            align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 20px;
+            margin-top: 12px;
+            font-size: 13px;
         }
 
-        .income-rate::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            background: var(--emerald);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 16px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            border-color: var(--border-glow);
-            transform: translateY(-2px);
-        }
-
-        .stat-card.flash {
-            animation: statFlash 0.5s ease;
-        }
-
-        @keyframes statFlash {
-            50% {
-                background: rgba(16, 185, 129, 0.15);
-                border-color: var(--emerald);
-                box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
-            }
-        }
-
-        .stat-label {
-            font-size: 10px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
-        }
-
-        .stat-value {
-            font-size: 22px;
-            font-weight: 700;
-        }
-
-        .stat-value.gold { color: var(--gold); }
-        .stat-value.purple { color: var(--purple-light); }
-
-        /* DRIP Toggle */
-        .drip-panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 16px 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .drip-panel:hover {
-            border-color: var(--border-glow);
-        }
-
-        .drip-panel.active {
-            border-color: var(--emerald);
-            background: rgba(16, 185, 129, 0.08);
-        }
-
-        .drip-info h3 {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 2px;
-        }
-
-        .drip-info p {
-            font-size: 12px;
+        .income-stat {
             color: var(--text-secondary);
         }
 
-        .toggle-switch {
-            width: 52px;
-            height: 28px;
-            background: var(--bg-secondary);
-            border-radius: 14px;
-            position: relative;
-            transition: all 0.3s ease;
-            border: 1px solid var(--border-color);
-        }
-
-        .toggle-switch.active {
-            background: var(--emerald);
-            border-color: var(--emerald);
-        }
-
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            width: 22px;
-            height: 22px;
-            background: #fff;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .toggle-switch.active::after {
-            transform: translateX(24px);
-        }
-
-        /* Section Headers */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .section-title {
-            font-size: 13px;
+        .income-stat span {
+            color: var(--emerald);
             font-weight: 600;
-            color: var(--text-primary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .section-badge {
+        .click-hint {
+            margin-top: 10px;
             font-size: 11px;
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            color: #000;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 600;
+            color: var(--gold);
+            opacity: 0.8;
         }
 
-        /* Stock Cards */
-        .stocks-container {
-            display: flex;
-            flex-direction: column;
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
-        .stock-card {
+        .stat-box {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 16px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .stock-card:hover {
-            border-color: var(--border-glow);
-            transform: translateY(-1px);
-        }
-
-        .stock-card.locked {
-            opacity: 0.5;
-            border-style: dashed;
-        }
-
-        .stock-card.owned {
-            border-color: var(--emerald);
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, var(--bg-card) 100%);
-        }
-
-        .stock-card.just-bought {
-            animation: cardBought 0.5s ease;
-        }
-
-        @keyframes cardBought {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(16, 185, 129, 0.3); }
-        }
-
-        .stock-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 14px;
-        }
-
-        .stock-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 2px;
-        }
-
-        .stock-symbol {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .stock-yield {
-            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
-            color: #fff;
-            font-size: 13px;
-            font-weight: 700;
-            padding: 6px 12px;
-            border-radius: 10px;
-        }
-
-        .stock-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-
-        .stock-stat {
+            border-radius: 12px;
+            padding: 12px 8px;
             text-align: center;
-            padding: 8px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 8px;
         }
 
-        .stock-stat-label {
+        .stat-label {
             font-size: 9px;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 4px;
         }
 
-        .stock-stat-value {
+        .stat-val {
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .stat-val.gold { color: var(--gold); }
+        .stat-val.emerald { color: var(--emerald); }
+        .stat-val.purple { color: var(--purple-light); }
+
+        /* DRIP Toggle */
+        .drip-row {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            cursor: pointer;
+        }
+
+        .drip-row.active {
+            border-color: var(--emerald);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .drip-label {
             font-size: 13px;
             font-weight: 600;
-            color: var(--text-primary);
         }
 
-        .stock-progress {
-            height: 4px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 2px;
-            margin-bottom: 14px;
-            overflow: hidden;
+        .drip-desc {
+            font-size: 11px;
+            color: var(--text-muted);
         }
 
-        .stock-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--emerald), var(--emerald-light));
-            border-radius: 2px;
-            transition: width 0.3s ease;
+        .toggle {
+            width: 44px;
+            height: 24px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            position: relative;
+            transition: background 0.2s;
         }
+
+        .toggle.active { background: var(--emerald); }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.2s;
+        }
+
+        .toggle.active::after { transform: translateX(20px); }
+
+        /* Section */
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .section-badge {
+            font-size: 10px;
+            background: var(--gold);
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        /* Stock List */
+        .stock-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .stock-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .stock-item.owned {
+            border-color: var(--emerald);
+        }
+
+        .stock-item.locked {
+            opacity: 0.4;
+        }
+
+        .stock-item.flash {
+            animation: stockFlash 0.3s ease;
+        }
+
+        @keyframes stockFlash {
+            50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.5); transform: scale(1.01); }
+        }
+
+        .stock-main {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stock-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stock-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .stock-yield {
+            font-size: 10px;
+            background: var(--emerald);
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .stock-info {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .stock-info span { color: var(--text-secondary); }
 
         .stock-btn {
-            width: 100%;
-            padding: 12px;
+            padding: 10px 16px;
             border: none;
-            border-radius: 10px;
-            font-size: 13px;
+            border-radius: 8px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s;
+            white-space: nowrap;
         }
 
         .stock-btn.buy {
@@ -464,216 +350,178 @@
         }
 
         .stock-btn.buy:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            transform: scale(1.05);
         }
 
         .stock-btn:disabled {
-            opacity: 0.4;
+            opacity: 0.3;
             cursor: not-allowed;
-            transform: none !important;
         }
 
-        .stock-btn.locked {
+        .stock-btn.locked-btn {
             background: var(--bg-secondary);
             color: var(--text-muted);
-            border: 1px dashed var(--border-color);
+            font-size: 10px;
         }
 
         /* Milestones */
-        .milestones-panel {
+        .milestones-box {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 16px;
+            border-radius: 12px;
+            padding: 12px;
             margin-bottom: 16px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
-        .milestone {
+        .milestone-item {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 10px 0;
+            gap: 10px;
+            padding: 8px 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        .milestone:last-child { border-bottom: none; }
+        .milestone-item:last-child { border-bottom: none; }
 
         .milestone-icon {
-            width: 36px;
-            height: 36px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            font-weight: 700;
+            font-size: 12px;
             flex-shrink: 0;
-            transition: all 0.3s ease;
         }
 
-        .milestone-icon.complete {
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+        .milestone-icon.done {
+            background: var(--gold);
             color: #000;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
         }
 
         .milestone-icon.pending {
             background: var(--bg-secondary);
             color: var(--text-muted);
-            border: 1px solid var(--border-color);
         }
 
-        .milestone-info { flex: 1; }
+        .milestone-text {
+            flex: 1;
+        }
 
         .milestone-name {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            color: var(--text-primary);
         }
 
-        .milestone-desc {
-            font-size: 11px;
-            color: var(--text-secondary);
+        .milestone-req {
+            font-size: 10px;
+            color: var(--text-muted);
         }
 
-        /* Prestige Button */
+        /* Prestige */
         .prestige-btn {
             width: 100%;
-            padding: 18px;
+            padding: 16px;
             background: linear-gradient(135deg, var(--purple), var(--purple-light));
             color: #fff;
             border: none;
-            border-radius: 14px;
-            font-size: 15px;
+            border-radius: 12px;
+            font-size: 14px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            transition: all 0.2s;
         }
 
         .prestige-btn:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(168, 85, 247, 0.4);
         }
 
         .prestige-btn:disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
-            transform: none;
         }
 
         /* Popups */
-        .dividend-popup {
+        .popup {
             position: fixed;
             pointer-events: none;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--emerald);
-            text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-            animation: floatUp 1.2s ease-out forwards;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            animation: popUp 0.8s ease-out forwards;
             z-index: 50;
         }
 
-        .dividend-popup.drip { color: var(--blue); text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+        .popup.gold { color: var(--gold); }
+        .popup.blue { color: var(--blue); }
 
-        @keyframes floatUp {
+        @keyframes popUp {
             0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+            100% { opacity: 0; transform: translateY(-50px) scale(1.2); }
         }
 
         /* Confetti */
         .confetti {
             position: fixed;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             pointer-events: none;
             z-index: 200;
-            animation: confettiFall 2.5s ease-out forwards;
+            animation: fall 2s ease-out forwards;
         }
 
-        @keyframes confettiFall {
-            0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
-            100% { opacity: 0; transform: translateY(500px) rotate(720deg) scale(0.5); }
+        @keyframes fall {
+            0% { opacity: 1; transform: translateY(0) rotate(0); }
+            100% { opacity: 0; transform: translateY(400px) rotate(720deg); }
         }
 
         /* Prestige Overlay */
-        .prestige-overlay {
+        .overlay {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(10, 15, 26, 0.97);
+            inset: 0;
+            background: rgba(10, 15, 26, 0.95);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 100;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
-        .prestige-overlay.active { display: flex; }
+        .overlay.show { display: flex; }
 
-        .prestige-content { text-align: center; }
+        .overlay-content { text-align: center; }
 
-        .prestige-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
-            animation: prestigeIcon 0.6s ease;
-        }
+        .overlay-icon { font-size: 60px; margin-bottom: 12px; }
 
-        @keyframes prestigeIcon {
-            0% { transform: scale(0) rotate(-180deg); opacity: 0; }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-
-        .prestige-title {
-            font-size: 48px;
+        .overlay-title {
+            font-size: 42px;
             font-weight: 800;
             background: linear-gradient(135deg, var(--purple-light), var(--purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 12px;
-            animation: prestigeTitle 0.5s ease 0.2s both;
+            margin-bottom: 8px;
         }
 
-        @keyframes prestigeTitle {
-            0% { transform: translateY(20px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-
-        .prestige-subtitle {
-            font-size: 18px;
+        .overlay-sub {
+            font-size: 16px;
             color: var(--text-secondary);
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
 
-        .prestige-continue {
-            background: linear-gradient(135deg, var(--purple), var(--purple-light));
+        .overlay-btn {
+            background: var(--purple);
             color: #fff;
             border: none;
-            border-radius: 12px;
-            padding: 16px 40px;
-            font-size: 16px;
+            border-radius: 10px;
+            padding: 14px 32px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
-        .prestige-continue:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
-        }
-
-        /* Mobile Adjustments */
-        @media (max-width: 480px) {
-            .container { padding: 16px; }
-            .header { padding-top: 50px; }
-            .logo { font-size: 28px; }
-            .balance-value { font-size: 36px; }
-            .breadcrumb { font-size: 11px; left: 16px; }
-        }
+        .overlay-btn:hover { background: var(--purple-light); }
     </style>
 </head>
 <body>
@@ -691,389 +539,204 @@
             <div class="tagline">Build your passive income empire</div>
         </div>
 
-        <div class="balance-card" id="income-display">
-            <div class="balance-label">Cash Balance</div>
-            <div class="balance-value" id="cash">$1,000</div>
-            <div class="income-rate" id="income-rate">+$0.00/sec</div>
+        <div class="collect-area" id="collect-area">
+            <div class="cash-label">Cash Balance</div>
+            <div class="cash-value" id="cash">$1,000</div>
+            <div class="income-info">
+                <div class="income-stat">Passive: <span id="passive-rate">$0/s</span></div>
+                <div class="income-stat">Per Click: <span id="click-rate">$1</span></div>
+            </div>
+            <div class="click-hint">Tap to collect dividends!</div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card" id="portfolio-stat">
-                <div class="stat-label">Portfolio Value</div>
-                <div class="stat-value gold" id="portfolio">$0</div>
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-label">Portfolio</div>
+                <div class="stat-val gold" id="portfolio">$0</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Prestige Level</div>
-                <div class="stat-value purple" id="prestige">1x</div>
+            <div class="stat-box">
+                <div class="stat-label">Total Earned</div>
+                <div class="stat-val emerald" id="total-earned">$0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Prestige</div>
+                <div class="stat-val purple" id="prestige">1x</div>
             </div>
         </div>
 
-        <div class="drip-panel" id="drip-container">
-            <div class="drip-info">
-                <h3>DRIP Mode</h3>
-                <p>Auto-reinvest dividends into stocks</p>
+        <div class="drip-row" id="drip-row">
+            <div>
+                <div class="drip-label">Auto-Buy (DRIP)</div>
+                <div class="drip-desc">Automatically buy best available stock</div>
             </div>
-            <div class="toggle-switch" id="drip-toggle"></div>
+            <div class="toggle" id="drip-toggle"></div>
         </div>
 
-        <div class="section-header">
+        <div class="section-head">
             <span class="section-title">Dividend Stocks</span>
             <span class="section-badge" id="stocks-owned">0 owned</span>
         </div>
-        <div class="stocks-container" id="stocks"></div>
+        <div class="stock-list" id="stocks"></div>
 
-        <div class="section-header">
+        <div class="section-head">
             <span class="section-title">Milestones</span>
         </div>
-        <div class="milestones-panel" id="milestones"></div>
+        <div class="milestones-box" id="milestones"></div>
 
         <button class="prestige-btn" id="prestige-btn" disabled>
-            Go Public (Prestige) - Requires $1M
+            Go Public - Need $1M Total
         </button>
     </div>
 
-    <div class="prestige-overlay" id="prestige-overlay">
-        <div class="prestige-content">
-            <div class="prestige-icon">&#128081;</div>
-            <div class="prestige-title">PRESTIGE!</div>
-            <div class="prestige-subtitle" id="prestige-subtitle">You are now at 2x multiplier</div>
-            <button class="prestige-continue" id="prestige-continue">Continue Building</button>
+    <div class="overlay" id="overlay">
+        <div class="overlay-content">
+            <div class="overlay-icon">👑</div>
+            <div class="overlay-title">PRESTIGE!</div>
+            <div class="overlay-sub" id="overlay-sub">Now earning at 2x speed!</div>
+            <button class="overlay-btn" id="overlay-btn">Keep Building</button>
         </div>
     </div>
 
     <script>
-        // Audio System
+        // Sound
         let audioCtx = null;
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
+        const initAudio = () => { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); };
 
-        function playTone(freq, duration = 0.1, type = 'sine', volume = 0.3) {
+        function beep(freq, dur = 0.1, vol = 0.15) {
             if (!audioCtx) return;
             try {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.type = type;
                 osc.frequency.value = freq;
-                gain.gain.setValueAtTime(volume, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
                 osc.connect(gain).connect(audioCtx.destination);
                 osc.start();
-                osc.stop(audioCtx.currentTime + duration);
+                osc.stop(audioCtx.currentTime + dur);
             } catch(e) {}
         }
 
-        function playBuy() {
-            playTone(440, 0.08, 'sine', 0.15);
-            setTimeout(() => playTone(554, 0.08, 'sine', 0.15), 60);
-            setTimeout(() => playTone(659, 0.12, 'sine', 0.15), 120);
-        }
+        const sndClick = () => beep(600, 0.05, 0.1);
+        const sndBuy = () => { beep(440, 0.08); setTimeout(() => beep(554, 0.08), 50); setTimeout(() => beep(659, 0.1), 100); };
+        const sndMilestone = () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.12, 0.2), i * 80));
+        const sndPrestige = () => [523, 659, 784, 1047, 1319].forEach((f, i) => setTimeout(() => beep(f, 0.15, 0.25), i * 100));
 
-        function playDrip() {
-            playTone(659, 0.05, 'sine', 0.1);
-            setTimeout(() => playTone(880, 0.08, 'sine', 0.1), 50);
-        }
-
-        function playMilestone() {
-            [523, 659, 784, 1047].forEach((f, i) => {
-                setTimeout(() => playTone(f, 0.15, 'sine', 0.25), i * 100);
-            });
-        }
-
-        function playPrestige() {
-            [523, 659, 784, 1047, 784, 1047, 1319, 1047, 1319].forEach((f, i) => {
-                setTimeout(() => playTone(f, 0.2, 'sine', 0.25), i * 120);
-            });
-        }
-
-        function playClick() {
-            playTone(500, 0.05, 'sine', 0.08);
-        }
-
-        function confetti(count = 50) {
-            const colors = ['#d4af37', '#10b981', '#a855f7', '#3b82f6', '#ffd700', '#f59e0b'];
-            for (let i = 0; i < count; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'confetti';
-                particle.style.left = (Math.random() * window.innerWidth) + 'px';
-                particle.style.top = '-20px';
-                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                particle.style.animationDelay = (Math.random() * 0.5) + 's';
-                particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-                document.body.appendChild(particle);
-                setTimeout(() => particle.remove(), 3000);
+        function confetti(n = 40) {
+            const colors = ['#d4af37', '#10b981', '#a855f7', '#3b82f6', '#f59e0b'];
+            for (let i = 0; i < n; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti';
+                el.style.left = Math.random() * innerWidth + 'px';
+                el.style.top = '-10px';
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.animationDelay = Math.random() * 0.3 + 's';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 2500);
             }
         }
 
+        // REBALANCED STOCKS - Much faster progression!
         const STOCKS = [
-            { name: 'Treasury Bonds', symbol: 'TBOND', price: 100, yield: 0.01, unlockAt: 0 },
-            { name: 'Utility Fund', symbol: 'UTIL', price: 500, yield: 0.015, unlockAt: 500 },
-            { name: 'Blue Chip ETF', symbol: 'BLUE', price: 2000, yield: 0.02, unlockAt: 2000 },
-            { name: 'REIT Trust', symbol: 'REIT', price: 5000, yield: 0.025, unlockAt: 5000 },
-            { name: 'Dividend Aristocrat', symbol: 'DIVA', price: 15000, yield: 0.03, unlockAt: 15000 },
-            { name: 'High Yield Corp', symbol: 'HYCB', price: 50000, yield: 0.04, unlockAt: 50000 },
-            { name: 'Private Equity', symbol: 'PRIV', price: 150000, yield: 0.05, unlockAt: 150000 },
-            { name: 'Hedge Fund', symbol: 'HEDGE', price: 500000, yield: 0.07, unlockAt: 500000 }
+            { name: 'Savings Bond', symbol: 'BOND', price: 50, income: 0.5, unlockAt: 0 },
+            { name: 'Utility ETF', symbol: 'UTIL', price: 200, income: 2.5, unlockAt: 100 },
+            { name: 'Blue Chip Fund', symbol: 'BLUE', price: 750, income: 10, unlockAt: 500 },
+            { name: 'REIT Trust', symbol: 'REIT', price: 2500, income: 40, unlockAt: 2000 },
+            { name: 'Dividend Aristocrat', symbol: 'DIVA', price: 8000, income: 150, unlockAt: 6000 },
+            { name: 'High Yield Corp', symbol: 'HYCB', price: 25000, income: 500, unlockAt: 20000 },
+            { name: 'Private Equity', symbol: 'PRIV', price: 80000, income: 1800, unlockAt: 60000 },
+            { name: 'Hedge Fund', symbol: 'HEDGE', price: 250000, income: 6000, unlockAt: 200000 }
         ];
 
         const MILESTONES = [
-            { name: 'First Dividend', desc: 'Earn $1/sec', requirement: 1 },
-            { name: 'Side Income', desc: 'Earn $10/sec', requirement: 10 },
-            { name: 'Passive Income', desc: 'Earn $100/sec', requirement: 100 },
-            { name: 'Early Retirement', desc: 'Earn $1K/sec', requirement: 1000 },
-            { name: 'Millionaire', desc: 'Earn $10K/sec', requirement: 10000 },
-            { name: 'Billionaire', desc: 'Earn $100K/sec', requirement: 100000 }
+            { name: 'First Income', desc: '$1/sec passive', req: 1 },
+            { name: 'Side Hustle', desc: '$10/sec passive', req: 10 },
+            { name: 'Real Money', desc: '$100/sec passive', req: 100 },
+            { name: 'Quit Your Job', desc: '$500/sec passive', req: 500 },
+            { name: 'Millionaire Vibes', desc: '$2K/sec passive', req: 2000 },
+            { name: 'Generational Wealth', desc: '$10K/sec passive', req: 10000 }
         ];
 
-        const PRESTIGE_REQUIREMENT = 1000000;
+        const PRESTIGE_REQ = 1000000;
 
-        let cash = 1000;
+        // State
+        let cash = 100;
         let holdings = {};
-        let dripEnabled = false;
-        let prestigeLevel = 1;
-        let lastTick = Date.now();
-        let totalDividendsEarned = 0;
+        let drip = false;
+        let prestigeLvl = 1;
+        let totalEarned = 0;
         let completedMilestones = new Set();
-        let lastDripBuy = 0;
+        let lastTick = Date.now();
+        let lastDrip = 0;
 
-        function loadGame() {
-            try {
-                const save = JSON.parse(localStorage.getItem('dividendDynastyData'));
-                if (save) {
-                    cash = save.cash || 1000;
-                    holdings = save.holdings || {};
-                    dripEnabled = save.dripEnabled || false;
-                    prestigeLevel = save.prestigeLevel || 1;
-                    totalDividendsEarned = save.totalDividendsEarned || 0;
-                    completedMilestones = new Set(save.completedMilestones || []);
+        // Helpers
+        const fmt = v => {
+            if (v >= 1e9) return '$' + (v/1e9).toFixed(2) + 'B';
+            if (v >= 1e6) return '$' + (v/1e6).toFixed(2) + 'M';
+            if (v >= 1e3) return '$' + (v/1e3).toFixed(2) + 'K';
+            return '$' + v.toFixed(v < 10 ? 2 : 0);
+        };
 
-                    const offlineTime = Math.min((Date.now() - (save.lastSave || Date.now())) / 1000, 28800);
-                    const incomePerSec = calculateIncomePerSecond();
-                    const offlineEarnings = incomePerSec * offlineTime;
+        const getPassiveIncome = () => {
+            let sum = 0;
+            STOCKS.forEach(s => sum += (holdings[s.symbol] || 0) * s.income);
+            return sum * prestigeLvl;
+        };
 
-                    if (offlineEarnings > 0) {
-                        cash += offlineEarnings;
-                        totalDividendsEarned += offlineEarnings;
-                    }
-                }
-            } catch (e) {
-                console.log('No save found');
-            }
-        }
+        const getClickValue = () => Math.max(1, Math.floor(getPassiveIncome() * 0.5 + 1)) * prestigeLvl;
 
-        function saveGame() {
-            const save = {
-                cash,
-                holdings,
-                dripEnabled,
-                prestigeLevel,
-                totalDividendsEarned,
-                completedMilestones: Array.from(completedMilestones),
-                lastSave: Date.now()
-            };
-            localStorage.setItem('dividendDynastyData', JSON.stringify(save));
-        }
+        const getPortfolio = () => {
+            let sum = 0;
+            STOCKS.forEach(s => sum += (holdings[s.symbol] || 0) * s.price);
+            return sum;
+        };
 
-        function formatMoney(value) {
-            if (value >= 1e12) return '$' + (value / 1e12).toFixed(2) + 'T';
-            if (value >= 1e9) return '$' + (value / 1e9).toFixed(2) + 'B';
-            if (value >= 1e6) return '$' + (value / 1e6).toFixed(2) + 'M';
-            if (value >= 1e3) return '$' + (value / 1e3).toFixed(2) + 'K';
-            return '$' + value.toFixed(2);
-        }
-
-        function formatRate(value) {
-            if (value >= 1e6) return '$' + (value / 1e6).toFixed(2) + 'M';
-            if (value >= 1e3) return '$' + (value / 1e3).toFixed(2) + 'K';
-            if (value >= 1) return '$' + value.toFixed(2);
-            return '$' + value.toFixed(4);
-        }
-
-        function calculateIncomePerSecond() {
-            let income = 0;
-            STOCKS.forEach(stock => {
-                const shares = holdings[stock.symbol] || 0;
-                const annualDividend = stock.price * stock.yield * shares;
-                income += annualDividend / 365 / 24 / 3600;
-            });
-            return income * prestigeLevel;
-        }
-
-        function calculatePortfolioValue() {
-            let value = 0;
-            STOCKS.forEach(stock => {
-                const shares = holdings[stock.symbol] || 0;
-                value += stock.price * shares;
-            });
-            return value;
-        }
-
-        function checkMilestones() {
-            const incomePerSec = calculateIncomePerSecond();
-
-            MILESTONES.forEach(milestone => {
-                if (incomePerSec >= milestone.requirement && !completedMilestones.has(milestone.name)) {
-                    completedMilestones.add(milestone.name);
-                    initAudio();
-                    playMilestone();
-                    confetti(30);
-
-                    showDividendPopup(milestone.name + '!', false, true);
-                }
-            });
-        }
-
+        // Core
         function tick() {
             const now = Date.now();
-            const delta = (now - lastTick) / 1000;
+            const dt = (now - lastTick) / 1000;
             lastTick = now;
 
-            const incomePerSec = calculateIncomePerSecond();
-            const earned = incomePerSec * delta;
+            const passive = getPassiveIncome();
+            const earned = passive * dt;
 
             if (earned > 0) {
-                if (dripEnabled && now - lastDripBuy > 500) {
-                    const affordable = STOCKS.filter(s => s.price <= cash + earned && s.unlockAt <= calculatePortfolioValue());
-                    if (affordable.length > 0) {
-                        const toBuy = affordable[affordable.length - 1];
-                        if (cash + earned >= toBuy.price) {
-                            holdings[toBuy.symbol] = (holdings[toBuy.symbol] || 0) + 1;
-                            cash = cash + earned - toBuy.price;
-                            lastDripBuy = now;
-                            initAudio();
-                            playDrip();
-                            showDividendPopup('DRIP: +1 ' + toBuy.symbol, true);
-                        } else {
-                            cash += earned;
-                        }
-                    } else {
-                        cash += earned;
+                cash += earned;
+                totalEarned += earned;
+            }
+
+            // Auto-buy
+            if (drip && now - lastDrip > 200) {
+                const portfolio = getPortfolio();
+                const affordable = STOCKS.filter(s => s.price <= cash && (portfolio >= s.unlockAt || s.unlockAt === 0));
+                if (affordable.length > 0) {
+                    const best = affordable[affordable.length - 1];
+                    if (cash >= best.price) {
+                        cash -= best.price;
+                        holdings[best.symbol] = (holdings[best.symbol] || 0) + 1;
+                        lastDrip = now;
+                        popup('+1 ' + best.symbol, true);
                     }
-                } else {
-                    cash += earned;
                 }
-                totalDividendsEarned += earned;
             }
 
             checkMilestones();
-            updateUI();
+            render();
         }
 
-        function updateUI() {
-            document.getElementById('cash').textContent = formatMoney(cash);
-            document.getElementById('income-rate').textContent = '+' + formatRate(calculateIncomePerSecond()) + '/sec';
-            document.getElementById('portfolio').textContent = formatMoney(calculatePortfolioValue());
-            document.getElementById('prestige').textContent = prestigeLevel + 'x';
+        function collect() {
+            initAudio();
+            sndClick();
 
-            // Update DRIP toggle
-            const dripToggle = document.getElementById('drip-toggle');
-            const dripContainer = document.getElementById('drip-container');
-            dripToggle.className = 'toggle-switch' + (dripEnabled ? ' active' : '');
-            dripContainer.className = 'drip-panel' + (dripEnabled ? ' active' : '');
+            const amt = getClickValue();
+            cash += amt;
+            totalEarned += amt;
 
-            renderStocks();
-            renderMilestones();
+            const area = document.getElementById('collect-area');
+            area.classList.remove('flash');
+            void area.offsetWidth;
+            area.classList.add('flash');
 
-            const prestigeBtn = document.getElementById('prestige-btn');
-            const totalValue = cash + calculatePortfolioValue();
-            if (totalValue >= PRESTIGE_REQUIREMENT) {
-                prestigeBtn.disabled = false;
-                prestigeBtn.textContent = `Go Public (${prestigeLevel + 1}x multiplier)`;
-            } else {
-                prestigeBtn.disabled = true;
-                prestigeBtn.textContent = `Go Public - Need ${formatMoney(PRESTIGE_REQUIREMENT - totalValue)} more`;
-            }
-        }
-
-        function renderStocks() {
-            const container = document.getElementById('stocks');
-            container.innerHTML = '';
-
-            const portfolioValue = calculatePortfolioValue();
-            let ownedCount = 0;
-
-            STOCKS.forEach(stock => {
-                const shares = holdings[stock.symbol] || 0;
-                const isUnlocked = portfolioValue >= stock.unlockAt || shares > 0 || stock.unlockAt === 0;
-                const canAfford = cash >= stock.price;
-
-                if (shares > 0) ownedCount++;
-
-                const card = document.createElement('div');
-                card.className = 'stock-card' + (shares > 0 ? ' owned' : '') + (!isUnlocked ? ' locked' : '');
-                card.dataset.symbol = stock.symbol;
-
-                const annualDiv = stock.price * stock.yield * shares * prestigeLevel;
-                const divPerSec = annualDiv / 365 / 24 / 3600;
-
-                card.innerHTML = `
-                    <div class="stock-header">
-                        <div>
-                            <div class="stock-name">${stock.name}</div>
-                            <div class="stock-symbol">${stock.symbol}</div>
-                        </div>
-                        <div class="stock-yield">${(stock.yield * 100).toFixed(1)}% APY</div>
-                    </div>
-                    <div class="stock-stats">
-                        <div class="stock-stat">
-                            <div class="stock-stat-label">Price</div>
-                            <div class="stock-stat-value">${formatMoney(stock.price)}</div>
-                        </div>
-                        <div class="stock-stat">
-                            <div class="stock-stat-label">Owned</div>
-                            <div class="stock-stat-value">${shares}</div>
-                        </div>
-                        <div class="stock-stat">
-                            <div class="stock-stat-label">Income</div>
-                            <div class="stock-stat-value">${formatRate(divPerSec)}/s</div>
-                        </div>
-                    </div>
-                    ${shares > 0 ? `
-                        <div class="stock-progress">
-                            <div class="stock-progress-fill" style="width: ${Math.min(100, (cash % stock.price) / stock.price * 100)}%;"></div>
-                        </div>
-                    ` : ''}
-                    <button class="stock-btn ${isUnlocked ? 'buy' : 'locked'}"
-                            ${!isUnlocked || !canAfford ? 'disabled' : ''}
-                            data-symbol="${stock.symbol}">
-                        ${!isUnlocked ? `Unlock at ${formatMoney(stock.unlockAt)} portfolio` : `Buy for ${formatMoney(stock.price)}`}
-                    </button>
-                `;
-
-                container.appendChild(card);
-
-                const btn = card.querySelector('.stock-btn');
-                if (isUnlocked && canAfford) {
-                    btn.addEventListener('click', () => buyStock(stock.symbol));
-                }
-            });
-
-            document.getElementById('stocks-owned').textContent = ownedCount + ' owned';
-        }
-
-        function renderMilestones() {
-            const container = document.getElementById('milestones');
-            container.innerHTML = '';
-
-            const incomePerSec = calculateIncomePerSecond();
-
-            MILESTONES.forEach(milestone => {
-                const complete = incomePerSec >= milestone.requirement;
-                const div = document.createElement('div');
-                div.className = 'milestone';
-                div.innerHTML = `
-                    <div class="milestone-icon ${complete ? 'complete' : 'pending'}">
-                        ${complete ? '&#10003;' : '&#9675;'}
-                    </div>
-                    <div class="milestone-info">
-                        <div class="milestone-name">${milestone.name}</div>
-                        <div class="milestone-desc">${milestone.desc}</div>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
+            popup('+' + fmt(amt));
         }
 
         function buyStock(symbol) {
@@ -1081,91 +744,216 @@
             if (!stock || cash < stock.price) return;
 
             initAudio();
-            playBuy();
+            sndBuy();
 
             cash -= stock.price;
             holdings[symbol] = (holdings[symbol] || 0) + 1;
 
-            // Animate card
-            const card = document.querySelector(`.stock-card[data-symbol="${symbol}"]`);
-            if (card) {
-                card.classList.add('just-bought');
-                setTimeout(() => card.classList.remove('just-bought'), 500);
+            const el = document.querySelector(`[data-sym="${symbol}"]`);
+            if (el) {
+                el.classList.remove('flash');
+                void el.offsetWidth;
+                el.classList.add('flash');
             }
 
-            // Animate portfolio stat
-            document.getElementById('portfolio-stat').classList.add('flash');
-            setTimeout(() => document.getElementById('portfolio-stat').classList.remove('flash'), 500);
-
-            showDividendPopup('+1 ' + symbol);
-
-            updateUI();
-            saveGame();
+            popup('+1 ' + symbol);
+            render();
+            save();
         }
 
-        function showDividendPopup(text, isDrip = false, isMilestone = false) {
-            const popup = document.createElement('div');
-            popup.className = 'dividend-popup' + (isDrip ? ' drip' : '');
-            if (isMilestone) {
-                popup.style.fontSize = '22px';
-                popup.style.color = '#d4af37';
-                popup.style.textShadow = '0 0 15px rgba(212, 175, 55, 0.6)';
-            }
-            popup.textContent = text;
-            popup.style.left = (Math.random() * 200 + 100) + 'px';
-            popup.style.top = (Math.random() * 100 + 150) + 'px';
-            document.body.appendChild(popup);
+        function popup(text, isDrip = false) {
+            const el = document.createElement('div');
+            el.className = 'popup' + (isDrip ? ' blue' : '');
+            el.textContent = text;
+            el.style.left = (Math.random() * 150 + 100) + 'px';
+            el.style.top = (Math.random() * 80 + 100) + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
 
-            setTimeout(() => popup.remove(), 1200);
+        function checkMilestones() {
+            const passive = getPassiveIncome();
+            MILESTONES.forEach(m => {
+                if (passive >= m.req && !completedMilestones.has(m.name)) {
+                    completedMilestones.add(m.name);
+                    initAudio();
+                    sndMilestone();
+                    confetti(25);
+
+                    const el = document.createElement('div');
+                    el.className = 'popup gold';
+                    el.textContent = m.name + '!';
+                    el.style.left = '50%';
+                    el.style.top = '40%';
+                    el.style.transform = 'translateX(-50%)';
+                    el.style.fontSize = '24px';
+                    document.body.appendChild(el);
+                    setTimeout(() => el.remove(), 1200);
+                }
+            });
         }
 
         function prestige() {
-            const totalValue = cash + calculatePortfolioValue();
-            if (totalValue < PRESTIGE_REQUIREMENT) return;
+            const total = cash + getPortfolio();
+            if (total < PRESTIGE_REQ) return;
 
             initAudio();
-            playPrestige();
-            confetti(100);
+            sndPrestige();
+            confetti(80);
 
-            prestigeLevel++;
-            cash = 1000 * prestigeLevel;
+            prestigeLvl++;
+            cash = 100 * prestigeLvl;
             holdings = {};
-            totalDividendsEarned = 0;
+            totalEarned = 0;
             completedMilestones.clear();
 
-            document.getElementById('prestige-subtitle').textContent = `You are now at ${prestigeLevel}x multiplier`;
-            document.getElementById('prestige-overlay').classList.add('active');
+            document.getElementById('overlay-sub').textContent = `Now earning at ${prestigeLvl}x speed!`;
+            document.getElementById('overlay').classList.add('show');
 
-            updateUI();
-            saveGame();
+            render();
+            save();
         }
 
-        // Event Listeners
-        document.getElementById('drip-container').addEventListener('click', () => {
+        function render() {
+            document.getElementById('cash').textContent = fmt(cash);
+            document.getElementById('passive-rate').textContent = fmt(getPassiveIncome()) + '/s';
+            document.getElementById('click-rate').textContent = fmt(getClickValue());
+            document.getElementById('portfolio').textContent = fmt(getPortfolio());
+            document.getElementById('total-earned').textContent = fmt(totalEarned);
+            document.getElementById('prestige').textContent = prestigeLvl + 'x';
+
+            document.getElementById('drip-toggle').className = 'toggle' + (drip ? ' active' : '');
+            document.getElementById('drip-row').className = 'drip-row' + (drip ? ' active' : '');
+
+            renderStocks();
+            renderMilestones();
+
+            const btn = document.getElementById('prestige-btn');
+            const total = cash + getPortfolio();
+            if (total >= PRESTIGE_REQ) {
+                btn.disabled = false;
+                btn.textContent = `Go Public (${prestigeLvl + 1}x multiplier)`;
+            } else {
+                btn.disabled = true;
+                btn.textContent = `Go Public - Need ${fmt(PRESTIGE_REQ - total)} more`;
+            }
+        }
+
+        function renderStocks() {
+            const container = document.getElementById('stocks');
+            container.innerHTML = '';
+            const portfolio = getPortfolio();
+            let owned = 0;
+
+            STOCKS.forEach(s => {
+                const qty = holdings[s.symbol] || 0;
+                const unlocked = portfolio >= s.unlockAt || qty > 0 || s.unlockAt === 0;
+                const canBuy = cash >= s.price && unlocked;
+
+                if (qty > 0) owned++;
+
+                const div = document.createElement('div');
+                div.className = 'stock-item' + (qty > 0 ? ' owned' : '') + (!unlocked ? ' locked' : '');
+                div.dataset.sym = s.symbol;
+
+                const incomePerSec = qty * s.income * prestigeLvl;
+
+                div.innerHTML = `
+                    <div class="stock-main">
+                        <div class="stock-top">
+                            <span class="stock-name">${s.name}</span>
+                            <span class="stock-yield">${fmt(s.income)}/s</span>
+                        </div>
+                        <div class="stock-info">
+                            <span>Owned: ${qty}</span>
+                            <span>Earning: ${fmt(incomePerSec)}/s</span>
+                        </div>
+                    </div>
+                    <button class="stock-btn ${unlocked ? 'buy' : 'locked-btn'}" ${!canBuy ? 'disabled' : ''}>
+                        ${unlocked ? fmt(s.price) : 'Need ' + fmt(s.unlockAt)}
+                    </button>
+                `;
+
+                container.appendChild(div);
+
+                if (canBuy) {
+                    div.querySelector('.stock-btn').onclick = () => buyStock(s.symbol);
+                }
+            });
+
+            document.getElementById('stocks-owned').textContent = owned + ' owned';
+        }
+
+        function renderMilestones() {
+            const container = document.getElementById('milestones');
+            container.innerHTML = '';
+            const passive = getPassiveIncome();
+
+            MILESTONES.forEach(m => {
+                const done = passive >= m.req;
+                const div = document.createElement('div');
+                div.className = 'milestone-item';
+                div.innerHTML = `
+                    <div class="milestone-icon ${done ? 'done' : 'pending'}">${done ? '✓' : '○'}</div>
+                    <div class="milestone-text">
+                        <div class="milestone-name">${m.name}</div>
+                        <div class="milestone-req">${m.desc}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function save() {
+            localStorage.setItem('dividendDynasty2', JSON.stringify({
+                cash, holdings, drip, prestigeLvl, totalEarned,
+                milestones: [...completedMilestones],
+                time: Date.now()
+            }));
+        }
+
+        function load() {
+            try {
+                const d = JSON.parse(localStorage.getItem('dividendDynasty2'));
+                if (d) {
+                    cash = d.cash || 100;
+                    holdings = d.holdings || {};
+                    drip = d.drip || false;
+                    prestigeLvl = d.prestigeLvl || 1;
+                    totalEarned = d.totalEarned || 0;
+                    completedMilestones = new Set(d.milestones || []);
+
+                    // Offline earnings (max 8 hours)
+                    const offlineSec = Math.min((Date.now() - (d.time || Date.now())) / 1000, 28800);
+                    const offlineEarn = getPassiveIncome() * offlineSec;
+                    if (offlineEarn > 0) {
+                        cash += offlineEarn;
+                        totalEarned += offlineEarn;
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // Events
+        document.getElementById('collect-area').addEventListener('click', collect);
+        document.getElementById('drip-row').addEventListener('click', () => {
             initAudio();
-            playClick();
-            dripEnabled = !dripEnabled;
-            updateUI();
-            saveGame();
+            sndClick();
+            drip = !drip;
+            render();
+            save();
         });
-
         document.getElementById('prestige-btn').addEventListener('click', prestige);
-        document.getElementById('prestige-continue').addEventListener('click', () => {
-            document.getElementById('prestige-overlay').classList.remove('active');
+        document.getElementById('overlay-btn').addEventListener('click', () => {
+            document.getElementById('overlay').classList.remove('show');
         });
 
-        // Initialize
-        loadGame();
-        updateUI();
-
-        // Game loop
+        // Init
+        load();
+        render();
         setInterval(tick, 100);
-
-        // Auto-save every 30 seconds
-        setInterval(saveGame, 30000);
-
-        // Save on page unload
-        window.addEventListener('beforeunload', saveGame);
+        setInterval(save, 30000);
+        window.addEventListener('beforeunload', save);
     </script>
 </body>
 </html>
