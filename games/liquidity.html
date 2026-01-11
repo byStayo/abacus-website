@@ -15,28 +15,182 @@
         }
 
         :root {
-            --bg-primary: #0d1117;
-            --bg-secondary: #161b22;
-            --bg-tertiary: #21262d;
-            --border: #30363d;
-            --text-primary: #e6edf3;
-            --text-secondary: #7d8590;
-            --text-muted: #484f58;
-            --accent-green: #3fb950;
-            --accent-red: #f85149;
-            --accent-yellow: #d29922;
-            --accent-blue: #58a6ff;
-            --accent-purple: #a371f7;
-            --accent-cyan: #39c5cf;
-            --accent-orange: #f0883e;
+            /* Enhanced dark theme colors */
+            --bg-primary: #0a0e14;
+            --bg-secondary: #12181f;
+            --bg-tertiary: #1a2230;
+            --bg-card: rgba(26, 34, 48, 0.7);
+            --bg-card-hover: rgba(30, 40, 56, 0.8);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.12);
+            --text-primary: #f0f4f8;
+            --text-secondary: #8b9cb3;
+            --text-muted: #5a6a7e;
+
+            /* Vibrant accent colors */
+            --accent-green: #00d68f;
+            --accent-green-glow: rgba(0, 214, 143, 0.3);
+            --accent-red: #ff6b6b;
+            --accent-red-glow: rgba(255, 107, 107, 0.3);
+            --accent-yellow: #ffc857;
+            --accent-yellow-glow: rgba(255, 200, 87, 0.3);
+            --accent-blue: #4dabf7;
+            --accent-blue-glow: rgba(77, 171, 247, 0.3);
+            --accent-purple: #b197fc;
+            --accent-purple-glow: rgba(177, 151, 252, 0.3);
+            --accent-cyan: #22d3ee;
+            --accent-cyan-glow: rgba(34, 211, 238, 0.3);
+            --accent-orange: #ff922b;
+
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #22d3ee, #4dabf7, #b197fc);
+            --gradient-success: linear-gradient(135deg, #00d68f, #22d3ee);
+            --gradient-danger: linear-gradient(135deg, #ff6b6b, #ff922b);
+            --gradient-card: linear-gradient(145deg, rgba(26, 34, 48, 0.9), rgba(18, 24, 31, 0.9));
+
+            /* Shadows */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 20px rgba(34, 211, 238, 0.15);
+
+            /* Spacing */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
         }
 
         body {
-            font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: var(--bg-primary);
+            background-image:
+                radial-gradient(ellipse at top, rgba(34, 211, 238, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(177, 151, 252, 0.03) 0%, transparent 50%);
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-light);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* ============ TOOLTIPS & INFO ICONS ============ */
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            font-size: 10px;
+            color: var(--text-muted);
+            cursor: help;
+            margin-left: 6px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .info-icon:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            border-color: var(--accent-cyan);
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            white-space: normal;
+            width: 220px;
+            max-width: 280px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-lg);
+            pointer-events: none;
+            text-align: left;
+            font-weight: 400;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--border-light);
+        }
+
+        .info-icon:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tooltip-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Position tooltips to left/right on edges */
+        .info-icon.tooltip-left .tooltip {
+            left: auto;
+            right: 0;
+            transform: none;
+        }
+
+        .info-icon.tooltip-left .tooltip::after {
+            left: auto;
+            right: 12px;
+        }
+
+        .info-icon.tooltip-right .tooltip {
+            left: 0;
+            transform: none;
+        }
+
+        .info-icon.tooltip-right .tooltip::after {
+            left: 12px;
         }
 
         /* ============ START SCREEN ============ */
@@ -113,13 +267,16 @@
         }
 
         .concept-box {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: var(--gradient-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
             padding: 24px;
             margin-bottom: 32px;
             max-width: 500px;
             text-align: left;
+            box-shadow: var(--shadow-md);
         }
 
         .concept-box h3 {
@@ -145,11 +302,19 @@
         }
 
         .money-tier {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             padding: 12px 16px;
             text-align: center;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .money-tier:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-light);
         }
 
         .money-tier-label {
@@ -170,13 +335,16 @@
 
         /* Game Settings */
         .game-settings {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: var(--gradient-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
             padding: 24px;
             margin-bottom: 32px;
             max-width: 500px;
             width: 100%;
+            box-shadow: var(--shadow-md);
         }
 
         .settings-title {
@@ -231,34 +399,93 @@
             padding: 16px 48px;
             font-size: 18px;
             font-weight: 700;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             cursor: pointer;
             font-family: inherit;
             text-transform: uppercase;
             letter-spacing: 2px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px var(--accent-cyan-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .start-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(57, 197, 207, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 40px var(--accent-cyan-glow);
+        }
+
+        .start-btn:active {
+            transform: translateY(-1px);
         }
 
         .tutorial-btn {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--accent-purple);
             color: var(--accent-purple);
             padding: 16px 32px;
             font-size: 14px;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             cursor: pointer;
             font-family: inherit;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
 
         .tutorial-btn:hover {
-            background: rgba(163, 113, 247, 0.1);
+            background: rgba(177, 151, 252, 0.15);
+            box-shadow: 0 0 16px var(--accent-purple-glow);
+            transform: translateY(-2px);
         }
 
         /* ============ GAME CONTAINER ============ */
@@ -270,7 +497,16 @@
 
         .game-container.active {
             display: block;
+            animation: fadeIn 0.4s ease;
         }
+
+        .game-container .panel {
+            animation: fadeInUp 0.5s ease backwards;
+        }
+
+        .game-container .panel:nth-child(1) { animation-delay: 0.1s; }
+        .game-container .panel:nth-child(2) { animation-delay: 0.2s; }
+        .game-container .panel:nth-child(3) { animation-delay: 0.3s; }
 
         /* Top Bar */
         .top-bar {
@@ -278,10 +514,13 @@
             justify-content: space-between;
             align-items: center;
             padding: 16px 24px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: var(--gradient-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
             margin-bottom: 20px;
+            box-shadow: var(--shadow-md);
         }
 
         .top-bar-left {
@@ -297,21 +536,24 @@
         }
 
         .help-btn {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border);
             color: var(--text-secondary);
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             cursor: pointer;
             font-size: 14px;
             font-weight: 700;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
         .help-btn:hover {
-            border-color: var(--accent-blue);
-            color: var(--accent-blue);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 12px var(--accent-cyan-glow);
         }
 
         .turn-info {
@@ -321,10 +563,13 @@
         }
 
         .turn-badge {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             padding: 8px 16px;
-            border-radius: 6px;
+            border-radius: var(--radius-md);
             font-size: 14px;
+            border: 1px solid var(--border);
         }
 
         .turn-badge span {
@@ -350,12 +595,20 @@
             gap: 20px;
         }
 
-        /* Panels */
+        /* Panels - Glass Morphism */
         .panel {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: var(--gradient-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
             padding: 20px;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .panel:hover {
+            box-shadow: var(--shadow-lg);
         }
 
         .panel-header {
@@ -384,25 +637,33 @@
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
             color: var(--text-secondary);
-            padding: 6px 12px;
+            padding: 8px 14px;
             font-size: 12px;
+            font-weight: 500;
             cursor: pointer;
             font-family: inherit;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
         .toggle-btn:first-child {
-            border-radius: 4px 0 0 4px;
+            border-radius: var(--radius-sm) 0 0 var(--radius-sm);
         }
 
         .toggle-btn:last-child {
-            border-radius: 0 4px 4px 0;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        .toggle-btn:hover:not(.active) {
+            background: var(--bg-card-hover);
+            border-color: var(--border-light);
         }
 
         .toggle-btn.active {
-            background: var(--accent-blue);
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
             border-color: var(--accent-blue);
             color: var(--bg-primary);
+            font-weight: 600;
+            box-shadow: 0 0 12px var(--accent-blue-glow);
         }
 
         /* Dashboard */
@@ -418,14 +679,23 @@
         }
 
         .aggregate-card {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             padding: 16px;
             text-align: center;
             position: relative;
             overflow: hidden;
             contain: content;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .aggregate-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-light);
         }
 
         .aggregate-card::before {
@@ -435,6 +705,17 @@
             left: 0;
             right: 0;
             height: 3px;
+        }
+
+        .aggregate-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 50%);
+            pointer-events: none;
         }
 
         .aggregate-card.m1::before { background: var(--accent-green); }
@@ -483,11 +764,20 @@
         }
 
         .market-card {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             padding: 16px;
             overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .market-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-light);
         }
 
         .market-label {
@@ -518,10 +808,14 @@
         }
 
         .chart-container {
-            background: var(--bg-tertiary);
-            border-radius: 8px;
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
             padding: 16px;
             position: relative;
+            box-shadow: var(--shadow-sm);
         }
 
         .chart-canvas {
@@ -579,11 +873,20 @@
         }
 
         .comparison-panel {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             padding: 16px;
             overflow: hidden;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .comparison-panel:hover {
+            border-color: var(--border-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
 
         .comparison-title {
@@ -641,25 +944,30 @@
 
         /* Dual Mandate Panel */
         .dual-mandate-panel {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: var(--gradient-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
             padding: 20px;
             margin-bottom: 20px;
-            transition: border-color 0.3s, box-shadow 0.3s;
+            box-shadow: var(--shadow-md);
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
         }
 
         .dual-mandate-panel.sweet-spot {
             border-color: var(--accent-green);
-            box-shadow: 0 0 20px rgba(63, 185, 80, 0.2);
+            box-shadow: 0 0 30px var(--accent-green-glow), var(--shadow-md);
         }
 
         .dual-mandate-panel.warning {
             border-color: var(--accent-yellow);
+            box-shadow: 0 0 20px var(--accent-yellow-glow), var(--shadow-md);
         }
 
         .dual-mandate-panel.danger {
             border-color: var(--accent-red);
+            box-shadow: 0 0 20px var(--accent-red-glow), var(--shadow-md);
         }
 
         .mandate-header {
@@ -769,28 +1077,135 @@
             color: var(--text-muted);
         }
 
-        /* Balance Scale */
+        /* Balance Scale - Animated Beam */
         .balance-scale {
             text-align: center;
-            padding: 0 16px;
+            padding: 20px 16px;
+            position: relative;
         }
 
-        .scale-icon {
-            font-size: 48px;
-            transition: transform 0.5s ease;
-            display: block;
+        .scale-beam-container {
+            position: relative;
+            width: 120px;
+            height: 80px;
+            margin: 0 auto;
         }
 
-        .scale-icon.tilt-left { transform: rotate(-15deg); }
-        .scale-icon.tilt-right { transform: rotate(15deg); }
+        /* Center pivot/fulcrum */
+        .scale-pivot {
+            position: absolute;
+            left: 50%;
+            top: 30px;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 12px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            z-index: 3;
+        }
+
+        .scale-pivot::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 20px;
+            background: var(--text-secondary);
+            border-radius: 2px;
+        }
+
+        /* The tilting beam */
+        .scale-beam {
+            position: absolute;
+            left: 50%;
+            top: 34px;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-red), var(--text-secondary), var(--accent-blue));
+            transform-origin: center center;
+            transform: translateX(-50%) rotate(0deg);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 2px;
+            z-index: 2;
+        }
+
+        /* Weight pans */
+        .scale-pan {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+
+        .scale-pan.left {
+            left: 0;
+            top: 28px;
+            background: var(--accent-red);
+            color: white;
+            box-shadow: 0 4px 12px var(--accent-red-glow);
+        }
+
+        .scale-pan.right {
+            right: 0;
+            top: 28px;
+            background: var(--accent-blue);
+            color: white;
+            box-shadow: 0 4px 12px var(--accent-blue-glow);
+        }
+
+        /* Strings connecting beam to pans */
+        .scale-string {
+            position: absolute;
+            width: 2px;
+            background: var(--text-muted);
+            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
+        }
+
+        .scale-string.left {
+            left: 13px;
+            top: 38px;
+            height: 4px;
+        }
+
+        .scale-string.right {
+            right: 13px;
+            top: 38px;
+            height: 4px;
+        }
 
         .scale-tilt {
-            font-size: 10px;
+            font-size: 11px;
             color: var(--text-muted);
-            margin-top: 4px;
+            margin-top: 8px;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        /* Success state when balanced */
+        .balance-scale.balanced .scale-beam {
+            background: var(--accent-green);
+            box-shadow: 0 0 12px var(--accent-green-glow);
+        }
+
+        .balance-scale.balanced .scale-pivot {
+            background: var(--accent-green);
+        }
+
+        .balance-scale.balanced .scale-pan {
+            background: var(--accent-green);
+            box-shadow: 0 4px 12px var(--accent-green-glow);
         }
 
         /* Policy Stance Meter */
@@ -876,13 +1291,20 @@
         }
 
         .secondary-card {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             padding: 12px;
             display: flex;
             flex-direction: column;
             gap: 4px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .secondary-card:hover {
+            border-color: var(--border-light);
         }
 
         .secondary-label {
@@ -907,11 +1329,19 @@
         }
 
         .policy-tool {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             padding: 16px;
             margin-bottom: 12px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .policy-tool:hover {
+            border-color: var(--border-light);
+            box-shadow: var(--shadow-sm);
         }
 
         .policy-header {
@@ -935,25 +1365,39 @@
         .policy-slider {
             width: 100%;
             -webkit-appearance: none;
-            height: 6px;
-            background: var(--bg-secondary);
-            border-radius: 3px;
+            height: 8px;
+            background: linear-gradient(90deg, var(--bg-tertiary), var(--bg-secondary));
+            border-radius: 4px;
             outline: none;
             margin-bottom: 8px;
+            border: 1px solid var(--border);
         }
 
         .policy-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: var(--accent-blue);
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
             border-radius: 50%;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 8px var(--accent-blue-glow);
+            border: 2px solid rgba(255,255,255,0.2);
         }
 
         .policy-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
+            transform: scale(1.15);
+            box-shadow: 0 4px 16px var(--accent-blue-glow);
+        }
+
+        .policy-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 2px 8px var(--accent-blue-glow);
         }
 
         .policy-labels {
@@ -965,16 +1409,21 @@
 
         /* QE/QT Program Status */
         .program-status {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--accent-purple);
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             padding: 12px 16px;
             margin-bottom: 12px;
+            box-shadow: 0 0 12px var(--accent-purple-glow);
+            transition: all 0.3s ease;
         }
 
         .program-status.inactive {
             border-color: var(--border);
             opacity: 0.6;
+            box-shadow: none;
         }
 
         .program-header {
@@ -1031,21 +1480,25 @@
         }
 
         .action-btn {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border);
             color: var(--text-primary);
             padding: 12px;
             font-size: 13px;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             cursor: pointer;
             font-family: inherit;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
         .action-btn:hover {
             border-color: var(--accent-blue);
-            background: rgba(88, 166, 255, 0.1);
+            background: rgba(77, 171, 247, 0.15);
+            transform: translateY(-1px);
+            box-shadow: 0 0 12px var(--accent-blue-glow);
         }
 
         .action-btn.qe {
@@ -1053,12 +1506,15 @@
         }
 
         .action-btn.qe:hover {
-            background: rgba(163, 113, 247, 0.1);
+            background: rgba(177, 151, 252, 0.15);
+            box-shadow: 0 0 12px var(--accent-purple-glow);
         }
 
         .action-btn:disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .end-turn-btn {
@@ -1069,17 +1525,39 @@
             padding: 16px;
             font-size: 16px;
             font-weight: 700;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             cursor: pointer;
             font-family: inherit;
             text-transform: uppercase;
             letter-spacing: 2px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px var(--accent-cyan-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .end-turn-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
         }
 
         .end-turn-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(57, 197, 207, 0.3);
+            box-shadow: 0 8px 32px var(--accent-cyan-glow);
+        }
+
+        .end-turn-btn:hover::before {
+            left: 100%;
+        }
+
+        .end-turn-btn:active {
+            transform: translateY(0);
         }
 
         /* News Ticker */
@@ -1165,11 +1643,18 @@
 
         /* Fed Balance Sheet */
         .balance-sheet {
-            background: var(--bg-tertiary);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             padding: 12px 16px;
             margin-top: 12px;
+            transition: border-color 0.2s ease;
+        }
+
+        .balance-sheet:hover {
+            border-color: var(--border-light);
         }
 
         .balance-label {
@@ -1211,15 +1696,18 @@
         }
 
         .modal {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 16px;
+            background: var(--gradient-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
             padding: 32px;
             max-width: 500px;
             width: 90%;
             text-align: center;
             transform: translateY(20px);
-            transition: transform 0.3s;
+            transition: transform 0.3s ease;
+            box-shadow: var(--shadow-lg);
         }
 
         .modal-overlay.active .modal {
@@ -1252,15 +1740,22 @@
         }
 
         .modal-btn {
-            background: var(--accent-blue);
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
             border: none;
-            color: white;
+            color: var(--bg-primary);
             padding: 12px 32px;
             font-size: 14px;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             cursor: pointer;
             font-family: inherit;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px var(--accent-blue-glow);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--accent-blue-glow);
         }
 
         /* QE/QT Config Modal */
@@ -1503,13 +1998,16 @@
         }
 
         .final-chart {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            background: var(--gradient-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
             padding: 20px;
             margin-bottom: 24px;
             max-width: 600px;
             width: 100%;
+            box-shadow: var(--shadow-md);
         }
 
         .final-chart-title {
@@ -1526,15 +2024,22 @@
         }
 
         .play-again-btn {
-            background: var(--accent-blue);
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
             border: none;
-            color: white;
+            color: var(--bg-primary);
             padding: 16px 48px;
             font-size: 16px;
             font-weight: 700;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             cursor: pointer;
             font-family: inherit;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px var(--accent-cyan-glow);
+        }
+
+        .play-again-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px var(--accent-cyan-glow);
         }
 
         /* ============ RESPONSIVE DESIGN ============ */
@@ -2023,25 +2528,56 @@
         /* Touch-friendly adjustments */
         @media (hover: none) and (pointer: coarse) {
             .policy-slider::-webkit-slider-thumb {
-                width: 24px;
-                height: 24px;
+                width: 28px;
+                height: 28px;
             }
 
             .action-btn {
-                min-height: 44px;
+                min-height: 48px;
             }
 
             .toggle-btn {
-                min-height: 40px;
+                min-height: 44px;
             }
 
             .legend-item {
-                min-height: 36px;
-                padding: 8px 12px;
+                min-height: 40px;
+                padding: 10px 14px;
             }
 
             .start-btn, .tutorial-btn {
+                min-height: 52px;
+            }
+
+            .end-turn-btn {
+                min-height: 52px;
+                font-size: 15px;
+            }
+
+            .help-btn {
+                width: 44px;
+                height: 44px;
+            }
+
+            .modal-btn {
                 min-height: 48px;
+                padding: 14px 36px;
+            }
+
+            /* Remove hover effects on touch */
+            .aggregate-card:hover,
+            .market-card:hover,
+            .comparison-panel:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+            /* Add active states for touch feedback */
+            .action-btn:active,
+            .toggle-btn:active,
+            .end-turn-btn:active {
+                transform: scale(0.98);
+                opacity: 0.9;
             }
         }
 
@@ -2174,12 +2710,28 @@
                 <!-- Money Supply Dashboard -->
                 <div class="panel dashboard">
                     <div class="panel-header">
-                        <div class="panel-title">Money Supply Aggregates</div>
+                        <div class="panel-title">
+                            Money Supply Aggregates
+                            <span class="info-icon">?
+                                <div class="tooltip">
+                                    <div class="tooltip-title">Money Supply</div>
+                                    M1-M4 measure different types of money. M1 is most liquid (cash you can spend immediately). Higher numbers include less liquid assets like savings and CDs.
+                                </div>
+                            </span>
+                        </div>
                     </div>
 
                     <div class="aggregate-grid">
                         <div class="aggregate-card m1">
-                            <div class="aggregate-label">M1 (Currency + Checking)</div>
+                            <div class="aggregate-label">
+                                M1 (Currency + Checking)
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">M1 - Most Liquid</div>
+                                        Physical cash plus checking accounts. This is money people can spend immediately, making it the most responsive to Fed policy.
+                                    </div>
+                                </span>
+                            </div>
                             <div class="aggregate-value" id="m1-value">$4.2T</div>
                             <div class="aggregate-change change-up" id="m1-change">+2.1%</div>
                             <div class="sparkline-container">
@@ -2187,7 +2739,15 @@
                             </div>
                         </div>
                         <div class="aggregate-card m2">
-                            <div class="aggregate-label">M2 (+ Savings)</div>
+                            <div class="aggregate-label">
+                                M2 (+ Savings)
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">M2 - Near Money</div>
+                                        M1 plus savings accounts and small CDs. These can be converted to cash quickly but aren't instantly spendable.
+                                    </div>
+                                </span>
+                            </div>
                             <div class="aggregate-value" id="m2-value">$18.7T</div>
                             <div class="aggregate-change change-up" id="m2-change">+1.8%</div>
                             <div class="sparkline-container">
@@ -2195,7 +2755,15 @@
                             </div>
                         </div>
                         <div class="aggregate-card m3">
-                            <div class="aggregate-label">M3 (+ Large CDs)</div>
+                            <div class="aggregate-label">
+                                M3 (+ Large CDs)
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">M3 - Broad Money</div>
+                                        M2 plus large time deposits and institutional money funds. This shows money held by businesses and institutions.
+                                    </div>
+                                </span>
+                            </div>
                             <div class="aggregate-value" id="m3-value">$22.1T</div>
                             <div class="aggregate-change change-neutral" id="m3-change">+0.5%</div>
                             <div class="sparkline-container">
@@ -2203,7 +2771,15 @@
                             </div>
                         </div>
                         <div class="aggregate-card m4">
-                            <div class="aggregate-label">M4 (+ T-Bills)</div>
+                            <div class="aggregate-label">
+                                M4 (+ T-Bills)
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">M4 - Broadest</div>
+                                        M3 plus Treasury bills and commercial paper. The broadest measure of liquidity in the economy.
+                                    </div>
+                                </span>
+                            </div>
                             <div class="aggregate-value" id="m4-value">$28.4T</div>
                             <div class="aggregate-change change-down" id="m4-change">-0.3%</div>
                             <div class="sparkline-container">
@@ -2223,12 +2799,28 @@
                             </div>
                         </div>
                         <div class="market-card">
-                            <div class="market-label">Fed Balance Sheet</div>
+                            <div class="market-label">
+                                Fed Balance Sheet
+                                <span class="info-icon">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Balance Sheet</div>
+                                        Total assets held by the Fed. QE increases this (buying bonds), QT decreases it (selling bonds). Affects liquidity in the system.
+                                    </div>
+                                </span>
+                            </div>
                             <div class="market-value" id="balance-value">$8.9T</div>
                             <div class="market-change" id="balance-change">Base</div>
                         </div>
                         <div class="market-card">
-                            <div class="market-label">VIX (Volatility)</div>
+                            <div class="market-label">
+                                VIX (Volatility)
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Fear Index</div>
+                                        Measures market fear/uncertainty. &lt;15 = Calm, 15-25 = Normal, 25-35 = Elevated, &gt;35 = High fear. Spikes during crises.
+                                    </div>
+                                </span>
+                            </div>
                             <div class="market-value" id="vix-value">15</div>
                             <div class="market-change change-neutral" id="vix-label">Normal</div>
                         </div>
@@ -2259,6 +2851,12 @@
                             <div class="comparison-title">
                                 <span class="dot"></span>
                                 Simple Sum M4
+                                <span class="info-icon">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Simple Sum</div>
+                                        Traditional measure that adds all money equally. A dollar in savings counts the same as a dollar in your pocket. Can be misleading!
+                                    </div>
+                                </span>
                             </div>
                             <div class="comparison-value" id="simple-sum-value">$28.4T</div>
                             <div class="comparison-growth" id="simple-sum-growth">
@@ -2269,6 +2867,12 @@
                             <div class="comparison-title">
                                 <span class="dot"></span>
                                 Divisia M4 (Weighted)
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Divisia Index</div>
+                                        Weights money by how easily it can be spent. Cash gets full weight, locked CDs get less. Shows TRUE liquidity available to the economy.
+                                    </div>
+                                </span>
                             </div>
                             <div class="comparison-value" id="divisia-value">$19.8T</div>
                             <div class="comparison-growth" id="divisia-growth">
@@ -2286,7 +2890,15 @@
                 <!-- Dual Mandate Panel -->
                 <div class="dual-mandate-panel" id="dual-mandate-panel">
                     <div class="mandate-header">
-                        <span class="mandate-title">Dual Mandate</span>
+                        <span class="mandate-title">
+                            Dual Mandate
+                            <span class="info-icon">?
+                                <div class="tooltip">
+                                    <div class="tooltip-title">Fed's Dual Mandate</div>
+                                    The Fed must balance TWO conflicting goals: low inflation (~2%) AND low unemployment (~4%). Tightening policy fights inflation but raises unemployment. Loosening helps jobs but risks inflation.
+                                </div>
+                            </span>
+                        </span>
                         <span class="sweet-spot-badge" id="sweet-spot-badge">Sweet Spot: &#10007;</span>
                     </div>
 
@@ -2294,7 +2906,15 @@
                     <div class="mandate-balance">
                         <!-- Inflation Side -->
                         <div class="mandate-metric inflation-side">
-                            <div class="metric-label">Inflation</div>
+                            <div class="metric-label">
+                                Inflation
+                                <span class="info-icon tooltip-right">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Inflation Rate</div>
+                                        Target: 2%. Rising prices erode purchasing power. Raise rates to fight high inflation (but this slows the economy).
+                                    </div>
+                                </span>
+                            </div>
                             <div class="metric-value" id="inflation-value">2.4%</div>
                             <div class="metric-bar-container">
                                 <div class="metric-bar" id="inflation-bar" style="width: 24%;"></div>
@@ -2303,15 +2923,30 @@
                             <div class="metric-target">Target: 2%</div>
                         </div>
 
-                        <!-- Balance Scale Icon -->
-                        <div class="balance-scale">
-                            <span class="scale-icon" id="scale-icon">&#9878;</span>
+                        <!-- Balance Scale - Animated Beam -->
+                        <div class="balance-scale" id="balance-scale">
+                            <div class="scale-beam-container">
+                                <div class="scale-pivot"></div>
+                                <div class="scale-beam" id="scale-beam"></div>
+                                <div class="scale-string left" id="string-left"></div>
+                                <div class="scale-string right" id="string-right"></div>
+                                <div class="scale-pan left" id="pan-left">INF</div>
+                                <div class="scale-pan right" id="pan-right">UNE</div>
+                            </div>
                             <div class="scale-tilt" id="scale-tilt">Balanced</div>
                         </div>
 
                         <!-- Unemployment Side -->
                         <div class="mandate-metric unemployment-side">
-                            <div class="metric-label">Unemployment</div>
+                            <div class="metric-label">
+                                Unemployment
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Unemployment Rate</div>
+                                        Target: ~4% (natural rate). Lower rates to stimulate job growth (but this risks inflation). Too low can overheat the economy.
+                                    </div>
+                                </span>
+                            </div>
                             <div class="metric-value" id="unemployment-value">3.8%</div>
                             <div class="metric-bar-container">
                                 <div class="metric-bar" id="unemployment-bar" style="width: 25%;"></div>
@@ -2373,12 +3008,28 @@
                 <!-- Policy Tools -->
                 <div class="panel policy-section">
                     <div class="panel-header">
-                        <div class="panel-title">Policy Tools</div>
+                        <div class="panel-title">
+                            Policy Tools
+                            <span class="info-icon tooltip-left">?
+                                <div class="tooltip">
+                                    <div class="tooltip-title">Your Controls</div>
+                                    These are the main tools you use to control the economy. Adjust rates, set reserve requirements, and run QE/QT programs.
+                                </div>
+                            </span>
+                        </div>
                     </div>
 
                     <div class="policy-tool">
                         <div class="policy-header">
-                            <span class="policy-name">Federal Funds Rate</span>
+                            <span class="policy-name">
+                                Federal Funds Rate
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Interest Rates</div>
+                                        The rate banks charge each other. Higher = tighter money (fights inflation). Lower = easier money (stimulates growth). Your primary tool!
+                                    </div>
+                                </span>
+                            </span>
                             <span class="policy-value" id="rate-value">5.25%</span>
                         </div>
                         <input type="range" class="policy-slider" id="rate-slider" min="0" max="20" step="0.25" value="5.25" oninput="updateRateDisplay()">
@@ -2391,7 +3042,15 @@
 
                     <div class="policy-tool">
                         <div class="policy-header">
-                            <span class="policy-name">Reserve Requirement</span>
+                            <span class="policy-name">
+                                Reserve Requirement
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Bank Reserves</div>
+                                        % of deposits banks must keep (can't lend). Higher = less lending = tighter money. Lower = more lending = more money creation.
+                                    </div>
+                                </span>
+                            </span>
                             <span class="policy-value" id="reserve-value">10%</span>
                         </div>
                         <input type="range" class="policy-slider" id="reserve-slider" min="0" max="20" step="1" value="10" oninput="updateReserveDisplay()">
@@ -2424,10 +3083,10 @@
                     </div>
 
                     <div class="action-buttons">
-                        <button class="action-btn qe" id="btn-qe" onclick="showQEConfig()">
+                        <button class="action-btn qe" id="btn-qe" onclick="showQEConfig()" title="Quantitative Easing: Fed buys bonds to inject money into the economy. Stimulates growth but risks inflation.">
                             Start QE Program<br><span style="font-size:11px;color:var(--text-muted)">Customize</span>
                         </button>
-                        <button class="action-btn qe" id="btn-qt" onclick="showQTConfig()">
+                        <button class="action-btn qe" id="btn-qt" onclick="showQTConfig()" title="Quantitative Tightening: Fed sells bonds to drain money from the economy. Fights inflation but can slow growth.">
                             Start QT Program<br><span style="font-size:11px;color:var(--text-muted)">Customize</span>
                         </button>
                     </div>
@@ -2440,12 +3099,20 @@
                 <!-- Money Components -->
                 <div class="panel components-panel">
                     <div class="panel-header">
-                        <div class="panel-title">Money Components</div>
+                        <div class="panel-title">
+                            Money Components
+                            <span class="info-icon tooltip-left">?
+                                <div class="tooltip">
+                                    <div class="tooltip-title">Divisia Weights</div>
+                                    The number next to each component (0.00-1.00) is its Divisia weight. Cash = 1.0 (full liquidity), while locked CDs have lower weights. This is how Divisia captures TRUE liquidity!
+                                </div>
+                            </span>
+                        </div>
                     </div>
                     <div class="component-row">
                         <span class="component-name">
                             Currency
-                            <span class="component-weight">1.00</span>
+                            <span class="component-weight" title="Divisia weight: fully liquid">1.00</span>
                         </span>
                         <span class="component-value" id="comp-currency">$2.3T</span>
                     </div>
@@ -2888,10 +3555,32 @@
         function updateDualMandate() {
             const inflationDist = Math.abs(state.inflation - 2);
             const unemploymentDist = Math.abs(state.unemployment - 4);
+            const inflationAboveTarget = state.inflation > 2;
+            const unemploymentAboveTarget = state.unemployment > 4;
 
-            // Update values
-            document.getElementById('inflation-value').textContent = formatPercent(state.inflation);
-            document.getElementById('unemployment-value').textContent = formatPercent(state.unemployment);
+            // Update values with color based on target
+            const inflationValue = document.getElementById('inflation-value');
+            const unemploymentValue = document.getElementById('unemployment-value');
+
+            inflationValue.textContent = formatPercent(state.inflation);
+            unemploymentValue.textContent = formatPercent(state.unemployment);
+
+            // Color values based on how far from target
+            if (inflationDist <= 0.5) {
+                inflationValue.style.color = 'var(--accent-green)';
+            } else if (inflationDist <= 1.5) {
+                inflationValue.style.color = 'var(--accent-yellow)';
+            } else {
+                inflationValue.style.color = 'var(--accent-red)';
+            }
+
+            if (unemploymentDist <= 0.5) {
+                unemploymentValue.style.color = 'var(--accent-green)';
+            } else if (unemploymentDist <= 1.5) {
+                unemploymentValue.style.color = 'var(--accent-yellow)';
+            } else {
+                unemploymentValue.style.color = 'var(--accent-blue)';
+            }
 
             // Update bars (0-10% scale for inflation, 0-15% for unemployment)
             const inflationWidth = Math.min(100, (state.inflation / 10) * 100);
@@ -2905,7 +3594,7 @@
 
             if (inflationDist <= 0.5) {
                 inflationBar.style.background = 'var(--accent-green)';
-            } else if (inflationDist <= 2) {
+            } else if (inflationDist <= 1.5) {
                 inflationBar.style.background = 'var(--accent-yellow)';
             } else {
                 inflationBar.style.background = 'var(--accent-red)';
@@ -2913,40 +3602,105 @@
 
             if (unemploymentDist <= 0.5) {
                 unemploymentBar.style.background = 'var(--accent-green)';
-            } else if (unemploymentDist <= 2) {
+            } else if (unemploymentDist <= 1.5) {
                 unemploymentBar.style.background = 'var(--accent-yellow)';
             } else {
                 unemploymentBar.style.background = 'var(--accent-blue)';
             }
 
-            // Update scale tilt based on which is further from target
-            const scaleIcon = document.getElementById('scale-icon');
+            // Update balance beam visualization
+            const scaleBeam = document.getElementById('scale-beam');
             const scaleTilt = document.getElementById('scale-tilt');
-            scaleIcon.className = 'scale-icon';
+            const balanceScale = document.getElementById('balance-scale');
+            const panLeft = document.getElementById('pan-left');
+            const panRight = document.getElementById('pan-right');
+            const stringLeft = document.getElementById('string-left');
+            const stringRight = document.getElementById('string-right');
 
-            if (inflationDist > unemploymentDist + 1) {
-                scaleIcon.classList.add('tilt-left');
+            // Calculate tilt based on which is further from target
+            const diffFromBalance = inflationDist - unemploymentDist;
+            const tiltDeg = Math.max(-15, Math.min(15, diffFromBalance * 6)); // Scale to degrees
+
+            // Tilt the beam
+            scaleBeam.style.transform = `translateX(-50%) rotate(${tiltDeg}deg)`;
+
+            // Move pans up/down based on tilt (one goes up, other goes down)
+            const panOffset = Math.abs(tiltDeg) * 1.2; // Vertical movement
+            if (tiltDeg > 0) {
+                // Inflation side heavier - left pan goes down
+                panLeft.style.top = (28 + panOffset) + 'px';
+                panRight.style.top = (28 - panOffset) + 'px';
+                stringLeft.style.height = (4 + panOffset) + 'px';
+                stringRight.style.height = Math.max(1, 4 - panOffset) + 'px';
+            } else if (tiltDeg < 0) {
+                // Unemployment side heavier - right pan goes down
+                panLeft.style.top = (28 - Math.abs(panOffset)) + 'px';
+                panRight.style.top = (28 + Math.abs(panOffset)) + 'px';
+                stringLeft.style.height = Math.max(1, 4 - Math.abs(panOffset)) + 'px';
+                stringRight.style.height = (4 + Math.abs(panOffset)) + 'px';
+            } else {
+                // Balanced
+                panLeft.style.top = '28px';
+                panRight.style.top = '28px';
+                stringLeft.style.height = '4px';
+                stringRight.style.height = '4px';
+            }
+
+            // Check if balanced (both within target range)
+            const isBalanced = inflationDist <= 0.5 && unemploymentDist <= 0.5;
+            balanceScale.className = 'balance-scale' + (isBalanced ? ' balanced' : '');
+
+            // Update status text
+            if (isBalanced) {
+                scaleTilt.textContent = '✓ BALANCED';
+                scaleTilt.style.color = 'var(--accent-green)';
+            } else if (inflationDist > 2 && inflationDist > unemploymentDist + 0.5) {
                 scaleTilt.textContent = 'INFLATION HIGH';
                 scaleTilt.style.color = 'var(--accent-red)';
-            } else if (unemploymentDist > inflationDist + 1) {
-                scaleIcon.classList.add('tilt-right');
-                scaleTilt.textContent = 'UNEMPLOYMENT HIGH';
+            } else if (unemploymentDist > 2 && unemploymentDist > inflationDist + 0.5) {
+                scaleTilt.textContent = 'JOBS CRISIS';
                 scaleTilt.style.color = 'var(--accent-blue)';
+            } else if (inflationDist > unemploymentDist + 0.3) {
+                scaleTilt.textContent = inflationAboveTarget ? 'INFLATION ↑' : 'DEFLATION ↓';
+                scaleTilt.style.color = 'var(--accent-yellow)';
+            } else if (unemploymentDist > inflationDist + 0.3) {
+                scaleTilt.textContent = unemploymentAboveTarget ? 'JOBS ↓' : 'OVERHEATING';
+                scaleTilt.style.color = 'var(--accent-yellow)';
             } else {
-                scaleTilt.textContent = 'BALANCED';
-                scaleTilt.style.color = 'var(--accent-green)';
+                scaleTilt.textContent = 'NEAR BALANCE';
+                scaleTilt.style.color = 'var(--text-secondary)';
             }
 
             // Update policy stance indicator (based on Fed Funds Rate)
-            // Range 0-10%, neutral around 5%
-            const stancePosition = Math.min(100, Math.max(0, (state.fedFundsRate / 10) * 100));
-            document.getElementById('stance-indicator').style.left = stancePosition + '%';
+            // Range 0-20%: High rates = TIGHT (left), Low rates = LOOSE (right)
+            const stancePosition = 100 - (state.fedFundsRate / 20) * 100;
+            const stanceIndicator = document.getElementById('stance-indicator');
+            stanceIndicator.style.left = stancePosition + '%';
+
+            // Add glow effect based on policy aggressiveness
+            if (state.fedFundsRate > 12) {
+                stanceIndicator.style.boxShadow = '0 0 12px var(--accent-blue-glow)'; // Very tight (high rates)
+            } else if (state.fedFundsRate < 3) {
+                stanceIndicator.style.boxShadow = '0 0 12px var(--accent-red-glow)'; // Very loose (low rates)
+            } else {
+                stanceIndicator.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)'; // Normal range
+            }
 
             // Update sweet spot badge
             const inSweetSpot = inflationDist <= 0.5 && unemploymentDist <= 0.5;
+            const nearSweetSpot = inflationDist <= 1 && unemploymentDist <= 1;
             const badge = document.getElementById('sweet-spot-badge');
-            badge.innerHTML = inSweetSpot ? 'Sweet Spot: &#10003;' : 'Sweet Spot: &#10007;';
-            badge.className = 'sweet-spot-badge' + (inSweetSpot ? ' achieved' : '');
+
+            if (inSweetSpot) {
+                badge.innerHTML = 'Sweet Spot: &#10003;';
+                badge.className = 'sweet-spot-badge achieved';
+            } else if (nearSweetSpot) {
+                badge.innerHTML = 'Sweet Spot: ~';
+                badge.className = 'sweet-spot-badge';
+            } else {
+                badge.innerHTML = 'Sweet Spot: &#10007;';
+                badge.className = 'sweet-spot-badge';
+            }
 
             // Update panel border based on status
             const panel = document.getElementById('dual-mandate-panel');
@@ -2959,9 +3713,27 @@
                 panel.classList.add('warning');
             }
 
-            // Update secondary indicators
-            document.getElementById('gdp-value').textContent = formatPercent(state.gdpGrowth);
-            document.getElementById('stability-value').textContent = Math.round(state.financialStability);
+            // Update secondary indicators with color coding
+            const gdpValue = document.getElementById('gdp-value');
+            const stabilityValue = document.getElementById('stability-value');
+
+            gdpValue.textContent = formatPercent(state.gdpGrowth);
+            if (state.gdpGrowth >= 2 && state.gdpGrowth <= 3) {
+                gdpValue.style.color = 'var(--accent-green)';
+            } else if (state.gdpGrowth < 0 || state.gdpGrowth > 4) {
+                gdpValue.style.color = 'var(--accent-red)';
+            } else {
+                gdpValue.style.color = 'var(--accent-yellow)';
+            }
+
+            stabilityValue.textContent = Math.round(state.financialStability);
+            if (state.financialStability >= 80) {
+                stabilityValue.style.color = 'var(--accent-green)';
+            } else if (state.financialStability >= 50) {
+                stabilityValue.style.color = 'var(--accent-yellow)';
+            } else {
+                stabilityValue.style.color = 'var(--accent-red)';
+            }
         }
 
         // Show trade-off hint when adjusting rates
@@ -3189,8 +3961,8 @@
             document.getElementById('rate-value').textContent = value.toFixed(2) + '%';
             state.fedFundsRate = value;
 
-            // Update stance indicator position
-            const stancePosition = Math.min(100, Math.max(0, (value / 10) * 100));
+            // Update stance indicator position: High rates = TIGHT (left), Low rates = LOOSE (right)
+            const stancePosition = 100 - (value / 20) * 100;
             const stanceIndicator = document.getElementById('stance-indicator');
             if (stanceIndicator) {
                 stanceIndicator.style.left = stancePosition + '%';

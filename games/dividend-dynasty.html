@@ -5,290 +5,583 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Dividend Dynasty</title>
     <style>
+        :root {
+            --bg-primary: #0a0f1a;
+            --bg-secondary: #0d1520;
+            --bg-card: rgba(15, 25, 40, 0.85);
+            --bg-card-hover: rgba(20, 35, 55, 0.9);
+            --border-color: rgba(212, 175, 55, 0.15);
+            --border-glow: rgba(212, 175, 55, 0.3);
+            --gold: #d4af37;
+            --gold-light: #f4d160;
+            --gold-dark: #a68b2a;
+            --emerald: #10b981;
+            --emerald-light: #34d399;
+            --emerald-dark: #059669;
+            --text-primary: #f0f4f8;
+            --text-secondary: #8892a0;
+            --text-muted: #5a6570;
+            --purple: #a855f7;
+            --purple-light: #c084fc;
+            --blue: #3b82f6;
+            --red: #ef4444;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background-color: #0d1117;
-            color: #c9d1d9;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
-            padding: 20px;
             overflow-x: hidden;
         }
-        .container { max-width: 500px; margin: 0 auto; }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .back-link { color: #7d8590; text-decoration: none; font-size: 14px; }
-        .back-link:hover { color: #58a6ff; }
-        h1 { font-size: 24px; font-weight: 600; color: #e6edf3; }
 
-        .income-display {
-            background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
-            border-radius: 12px;
-            padding: 24px;
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(168, 85, 247, 0.04) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-top: 40px;
+        }
+
+        .breadcrumb {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            z-index: 10;
+        }
+
+        .breadcrumb a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover { color: var(--gold); }
+        .breadcrumb span.sep { color: var(--text-muted); opacity: 0.5; }
+        .breadcrumb span.current { color: var(--text-primary); }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .tagline {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* Main Balance Card */
+        .balance-card {
+            background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 20px;
+            padding: 28px 24px;
             text-align: center;
             margin-bottom: 16px;
             position: relative;
             overflow: hidden;
-            transition: transform 0.2s;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
-        .income-display.pulse {
-            animation: incomePulse 0.3s ease;
-        }
-        @keyframes incomePulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-        .income-label { font-size: 14px; opacity: 0.9; margin-bottom: 8px; }
-        .income-value {
-            font-size: 36px;
-            font-weight: 800;
-            color: #ffffff;
-            transition: transform 0.2s;
-        }
-        .income-value.bounce { animation: bounce 0.3s ease; }
-        @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        .income-rate { font-size: 14px; opacity: 0.8; margin-top: 8px; }
 
-        .stats {
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+            animation: shimmer 8s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(50%); }
+        }
+
+        .balance-label {
+            font-size: 12px;
+            color: var(--emerald-light);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .balance-value {
+            font-size: 42px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -1px;
+            text-shadow: 0 0 40px rgba(16, 185, 129, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .balance-value.bounce {
+            animation: valueBounce 0.3s ease;
+        }
+
+        @keyframes valueBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .income-rate {
+            font-size: 15px;
+            color: var(--emerald);
+            font-weight: 600;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .income-rate::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--emerald);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* Stats Grid */
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr 1fr;
             gap: 12px;
             margin-bottom: 16px;
         }
-        .stat {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
             padding: 16px;
             text-align: center;
-            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
-        .stat.flash { animation: statFlash 0.5s ease; }
-        @keyframes statFlash {
-            0%, 100% { background-color: #161b22; }
-            50% { background-color: rgba(63, 185, 80, 0.2); border-color: #3fb950; }
-        }
-        .stat-label { font-size: 11px; color: #7d8590; text-transform: uppercase; margin-bottom: 4px; }
-        .stat-value { font-size: 20px; font-weight: 700; }
-        .stat-value.green { color: #3fb950; }
-        .stat-value.blue { color: #58a6ff; }
 
-        .drip-toggle {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 16px;
+        .stat-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-2px);
+        }
+
+        .stat-card.flash {
+            animation: statFlash 0.5s ease;
+        }
+
+        @keyframes statFlash {
+            50% {
+                background: rgba(16, 185, 129, 0.15);
+                border-color: var(--emerald);
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+            }
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .stat-value.gold { color: var(--gold); }
+        .stat-value.purple { color: var(--purple-light); }
+
+        /* DRIP Toggle */
+        .drip-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 16px 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
-        .drip-toggle:hover { border-color: #58a6ff; }
-        .drip-toggle.active { border-color: #3fb950; background-color: rgba(63, 185, 80, 0.05); }
-        .drip-info { }
-        .drip-title { font-size: 14px; font-weight: 600; color: #e6edf3; }
-        .drip-desc { font-size: 12px; color: #7d8590; }
-        .toggle {
-            width: 50px;
+
+        .drip-panel:hover {
+            border-color: var(--border-glow);
+        }
+
+        .drip-panel.active {
+            border-color: var(--emerald);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .drip-info h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .drip-info p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .toggle-switch {
+            width: 52px;
             height: 28px;
-            background-color: #21262d;
+            background: var(--bg-secondary);
             border-radius: 14px;
             position: relative;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
         }
-        .toggle.active { background-color: #238636; }
-        .toggle::after {
+
+        .toggle-switch.active {
+            background: var(--emerald);
+            border-color: var(--emerald);
+        }
+
+        .toggle-switch::after {
             content: '';
             position: absolute;
             width: 22px;
             height: 22px;
-            background-color: #e6edf3;
+            background: #fff;
             border-radius: 50%;
-            top: 3px;
-            left: 3px;
-            transition: transform 0.2s;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .toggle.active::after { transform: translateX(22px); }
 
-        .section-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #e6edf3;
-            margin-bottom: 12px;
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+
+        /* Section Headers */
+        .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        .section-badge {
-            font-size: 10px;
-            background-color: #58a6ff;
-            color: #ffffff;
-            padding: 3px 8px;
-            border-radius: 10px;
+            margin-bottom: 12px;
         }
 
-        .stocks-grid {
-            display: grid;
-            gap: 12px;
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-badge {
+            font-size: 11px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* Stock Cards */
+        .stocks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             margin-bottom: 20px;
         }
 
         .stock-card {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
             padding: 16px;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
+
+        .stock-card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-1px);
+        }
+
         .stock-card.locked {
-            opacity: 0.6;
+            opacity: 0.5;
             border-style: dashed;
         }
+
         .stock-card.owned {
-            border-color: #3fb950;
-            background-color: rgba(63, 185, 80, 0.05);
+            border-color: var(--emerald);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, var(--bg-card) 100%);
         }
+
         .stock-card.just-bought {
-            animation: cardPulse 0.5s ease;
+            animation: cardBought 0.5s ease;
         }
-        @keyframes cardPulse {
-            0%, 100% { transform: scale(1); box-shadow: none; }
-            50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(63, 185, 80, 0.4); }
+
+        @keyframes cardBought {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(16, 185, 129, 0.3); }
         }
 
         .stock-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
+            align-items: flex-start;
+            margin-bottom: 14px;
         }
-        .stock-info { flex: 1; }
-        .stock-name { font-size: 16px; font-weight: 600; color: #e6edf3; }
-        .stock-symbol { font-size: 12px; color: #7d8590; }
+
+        .stock-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .stock-symbol {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
         .stock-yield {
-            background-color: rgba(63, 185, 80, 0.15);
-            color: #3fb950;
-            font-size: 14px;
+            background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+            color: #fff;
+            font-size: 13px;
             font-weight: 700;
             padding: 6px 12px;
+            border-radius: 10px;
+        }
+
+        .stock-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .stock-stat {
+            text-align: center;
+            padding: 8px;
+            background: rgba(0,0,0,0.2);
             border-radius: 8px;
         }
 
-        .stock-details {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 13px;
+        .stock-stat-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
         }
-        .stock-detail { text-align: center; }
-        .stock-detail-label { color: #7d8590; font-size: 11px; }
-        .stock-detail-value { font-weight: 600; color: #e6edf3; }
+
+        .stock-stat-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
 
         .stock-progress {
-            height: 6px;
-            background-color: #21262d;
-            border-radius: 3px;
-            margin-bottom: 12px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin-bottom: 14px;
             overflow: hidden;
         }
+
         .stock-progress-fill {
             height: 100%;
-            background-color: #3fb950;
-            border-radius: 3px;
-            transition: width 0.3s;
+            background: linear-gradient(90deg, var(--emerald), var(--emerald-light));
+            border-radius: 2px;
+            transition: width 0.3s ease;
         }
 
         .stock-btn {
             width: 100%;
             padding: 12px;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 10px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.2s ease;
         }
-        .stock-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .stock-btn.buy { background-color: #238636; color: white; }
-        .stock-btn.buy:hover:not(:disabled) { background-color: #2ea043; transform: scale(1.02); }
-        .stock-btn.locked { background-color: #21262d; color: #7d8590; }
 
-        .milestones {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 12px;
+        .stock-btn.buy {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #000;
+        }
+
+        .stock-btn.buy:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .stock-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .stock-btn.locked {
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            border: 1px dashed var(--border-color);
+        }
+
+        /* Milestones */
+        .milestones-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
             padding: 16px;
             margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
+
         .milestone {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 8px 0;
-            border-bottom: 1px solid #21262d;
-            transition: all 0.3s;
+            gap: 14px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
+
         .milestone:last-child { border-bottom: none; }
-        .milestone.just-complete {
-            animation: milestoneComplete 0.5s ease;
-        }
-        @keyframes milestoneComplete {
-            0%, 100% { background-color: transparent; }
-            50% { background-color: rgba(63, 185, 80, 0.2); }
-        }
+
         .milestone-icon {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
-            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
         }
-        .milestone-icon.complete { background-color: rgba(63, 185, 80, 0.2); color: #3fb950; }
-        .milestone-icon.pending { background-color: #21262d; color: #7d8590; }
-        .milestone-info { flex: 1; }
-        .milestone-name { font-size: 13px; font-weight: 500; color: #e6edf3; }
-        .milestone-desc { font-size: 11px; color: #7d8590; }
 
+        .milestone-icon.complete {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #000;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .milestone-icon.pending {
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+
+        .milestone-info { flex: 1; }
+
+        .milestone-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .milestone-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Prestige Button */
         .prestige-btn {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #8957e5 0%, #a371f7 100%);
-            color: white;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--purple), var(--purple-light));
+            color: #fff;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
-        .prestige-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(137, 87, 229, 0.4); }
-        .prestige-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+        .prestige-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
+        }
+
+        .prestige-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Popups */
         .dividend-popup {
             position: fixed;
             pointer-events: none;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 700;
-            color: #3fb950;
-            animation: floatUp 1s ease-out forwards;
+            color: var(--emerald);
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+            animation: floatUp 1.2s ease-out forwards;
             z-index: 50;
         }
-        .dividend-popup.drip { color: #58a6ff; }
+
+        .dividend-popup.drip { color: var(--blue); text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+
         @keyframes floatUp {
             0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-40px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
         }
 
         /* Confetti */
@@ -298,95 +591,141 @@
             height: 10px;
             pointer-events: none;
             z-index: 200;
-            animation: confettiFall 2s ease-out forwards;
-        }
-        @keyframes confettiFall {
-            0% { opacity: 1; transform: translateY(0) rotate(0deg); }
-            100% { opacity: 0; transform: translateY(400px) rotate(720deg); }
+            animation: confettiFall 2.5s ease-out forwards;
         }
 
-        /* Prestige overlay */
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+            100% { opacity: 0; transform: translateY(500px) rotate(720deg) scale(0.5); }
+        }
+
+        /* Prestige Overlay */
         .prestige-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(13, 17, 23, 0.95);
+            background: rgba(10, 15, 26, 0.97);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 100;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
+
         .prestige-overlay.active { display: flex; }
+
         .prestige-content { text-align: center; }
+
+        .prestige-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            animation: prestigeIcon 0.6s ease;
+        }
+
+        @keyframes prestigeIcon {
+            0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
         .prestige-title {
             font-size: 48px;
             font-weight: 800;
-            background: linear-gradient(135deg, #8957e5, #a371f7);
+            background: linear-gradient(135deg, var(--purple-light), var(--purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 16px;
-            animation: prestigeAnim 0.5s ease;
+            margin-bottom: 12px;
+            animation: prestigeTitle 0.5s ease 0.2s both;
         }
-        @keyframes prestigeAnim {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+
+        @keyframes prestigeTitle {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
-        .prestige-subtitle { font-size: 18px; color: #7d8590; margin-bottom: 24px; }
+
+        .prestige-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+        }
+
         .prestige-continue {
-            background: linear-gradient(135deg, #8957e5, #a371f7);
-            color: white;
+            background: linear-gradient(135deg, var(--purple), var(--purple-light));
+            color: #fff;
             border: none;
-            border-radius: 8px;
-            padding: 14px 32px;
+            border-radius: 12px;
+            padding: 16px 40px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
         }
-        .prestige-continue:hover { transform: scale(1.05); }
+
+        .prestige-continue:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 480px) {
+            .container { padding: 16px; }
+            .header { padding-top: 50px; }
+            .logo { font-size: 28px; }
+            .balance-value { font-size: 36px; }
+            .breadcrumb { font-size: 11px; left: 16px; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div style="position:absolute;top:20px;left:20px;display:flex;align-items:center;gap:8px;font-size:14px;"><a href="/" style="color:#7d8590;text-decoration:none;">Abacus</a><span style="color:#7d8590;opacity:0.5;">/</span><a href="/" style="color:#7d8590;text-decoration:none;">Games</a><span style="color:#7d8590;opacity:0.5;">/</span><span style="color:#e6edf3;">Dividend Dynasty</span></div>
-            <h1>Dividend Dynasty</h1>
-        </header>
+    <div class="breadcrumb">
+        <a href="/">Abacus</a>
+        <span class="sep">/</span>
+        <a href="/">Games</a>
+        <span class="sep">/</span>
+        <span class="current">Dividend Dynasty</span>
+    </div>
 
-        <div class="income-display" id="income-display">
-            <div class="income-label">Cash Balance</div>
-            <div class="income-value" id="cash">$1,000</div>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Dividend Dynasty</div>
+            <div class="tagline">Build your passive income empire</div>
+        </div>
+
+        <div class="balance-card" id="income-display">
+            <div class="balance-label">Cash Balance</div>
+            <div class="balance-value" id="cash">$1,000</div>
             <div class="income-rate" id="income-rate">+$0.00/sec</div>
         </div>
 
-        <div class="stats">
-            <div class="stat" id="portfolio-stat">
+        <div class="stats-grid">
+            <div class="stat-card" id="portfolio-stat">
                 <div class="stat-label">Portfolio Value</div>
-                <div class="stat-value green" id="portfolio">$0</div>
+                <div class="stat-value gold" id="portfolio">$0</div>
             </div>
-            <div class="stat">
+            <div class="stat-card">
                 <div class="stat-label">Prestige Level</div>
-                <div class="stat-value blue" id="prestige">1x</div>
+                <div class="stat-value purple" id="prestige">1x</div>
             </div>
         </div>
 
-        <div class="drip-toggle" id="drip-container">
+        <div class="drip-panel" id="drip-container">
             <div class="drip-info">
-                <div class="drip-title">DRIP (Auto-Reinvest)</div>
-                <div class="drip-desc">Automatically reinvest dividends</div>
+                <h3>DRIP Mode</h3>
+                <p>Auto-reinvest dividends into stocks</p>
             </div>
-            <div class="toggle" id="drip-toggle"></div>
+            <div class="toggle-switch" id="drip-toggle"></div>
         </div>
 
-        <div class="section-title">
-            Dividend Stocks
+        <div class="section-header">
+            <span class="section-title">Dividend Stocks</span>
             <span class="section-badge" id="stocks-owned">0 owned</span>
         </div>
-        <div class="stocks-grid" id="stocks"></div>
+        <div class="stocks-container" id="stocks"></div>
 
-        <div class="section-title">Milestones</div>
-        <div class="milestones" id="milestones"></div>
+        <div class="section-header">
+            <span class="section-title">Milestones</span>
+        </div>
+        <div class="milestones-panel" id="milestones"></div>
 
         <button class="prestige-btn" id="prestige-btn" disabled>
             Go Public (Prestige) - Requires $1M
@@ -395,9 +734,10 @@
 
     <div class="prestige-overlay" id="prestige-overlay">
         <div class="prestige-content">
+            <div class="prestige-icon">&#128081;</div>
             <div class="prestige-title">PRESTIGE!</div>
             <div class="prestige-subtitle" id="prestige-subtitle">You are now at 2x multiplier</div>
-            <button class="prestige-continue" id="prestige-continue">Continue</button>
+            <button class="prestige-continue" id="prestige-continue">Continue Building</button>
         </div>
     </div>
 
@@ -426,14 +766,14 @@
         }
 
         function playBuy() {
-            playTone(400, 0.08, 'square', 0.15);
-            setTimeout(() => playTone(500, 0.08, 'square', 0.15), 60);
-            setTimeout(() => playTone(600, 0.1, 'square', 0.15), 120);
+            playTone(440, 0.08, 'sine', 0.15);
+            setTimeout(() => playTone(554, 0.08, 'sine', 0.15), 60);
+            setTimeout(() => playTone(659, 0.12, 'sine', 0.15), 120);
         }
 
         function playDrip() {
-            playTone(600, 0.05, 'sine', 0.1);
-            setTimeout(() => playTone(800, 0.08, 'sine', 0.1), 50);
+            playTone(659, 0.05, 'sine', 0.1);
+            setTimeout(() => playTone(880, 0.08, 'sine', 0.1), 50);
         }
 
         function playMilestone() {
@@ -449,11 +789,11 @@
         }
 
         function playClick() {
-            playTone(500, 0.05, 'square', 0.1);
+            playTone(500, 0.05, 'sine', 0.08);
         }
 
         function confetti(count = 50) {
-            const colors = ['#3fb950', '#58a6ff', '#d29922', '#a371f7', '#ffd700', '#f0883e'];
+            const colors = ['#d4af37', '#10b981', '#a855f7', '#3b82f6', '#ffd700', '#f59e0b'];
             for (let i = 0; i < count; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'confetti';
@@ -463,7 +803,7 @@
                 particle.style.animationDelay = (Math.random() * 0.5) + 's';
                 particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
                 document.body.appendChild(particle);
-                setTimeout(() => particle.remove(), 2500);
+                setTimeout(() => particle.remove(), 3000);
             }
         }
 
@@ -630,8 +970,8 @@
             // Update DRIP toggle
             const dripToggle = document.getElementById('drip-toggle');
             const dripContainer = document.getElementById('drip-container');
-            dripToggle.className = 'toggle' + (dripEnabled ? ' active' : '');
-            dripContainer.className = 'drip-toggle' + (dripEnabled ? ' active' : '');
+            dripToggle.className = 'toggle-switch' + (dripEnabled ? ' active' : '');
+            dripContainer.className = 'drip-panel' + (dripEnabled ? ' active' : '');
 
             renderStocks();
             renderMilestones();
@@ -670,24 +1010,24 @@
 
                 card.innerHTML = `
                     <div class="stock-header">
-                        <div class="stock-info">
+                        <div>
                             <div class="stock-name">${stock.name}</div>
                             <div class="stock-symbol">${stock.symbol}</div>
                         </div>
                         <div class="stock-yield">${(stock.yield * 100).toFixed(1)}% APY</div>
                     </div>
-                    <div class="stock-details">
-                        <div class="stock-detail">
-                            <div class="stock-detail-label">Price</div>
-                            <div class="stock-detail-value">${formatMoney(stock.price)}</div>
+                    <div class="stock-stats">
+                        <div class="stock-stat">
+                            <div class="stock-stat-label">Price</div>
+                            <div class="stock-stat-value">${formatMoney(stock.price)}</div>
                         </div>
-                        <div class="stock-detail">
-                            <div class="stock-detail-label">Owned</div>
-                            <div class="stock-detail-value">${shares}</div>
+                        <div class="stock-stat">
+                            <div class="stock-stat-label">Owned</div>
+                            <div class="stock-stat-value">${shares}</div>
                         </div>
-                        <div class="stock-detail">
-                            <div class="stock-detail-label">Income</div>
-                            <div class="stock-detail-value">${formatRate(divPerSec)}/s</div>
+                        <div class="stock-stat">
+                            <div class="stock-stat-label">Income</div>
+                            <div class="stock-stat-value">${formatRate(divPerSec)}/s</div>
                         </div>
                     </div>
                     ${shares > 0 ? `
@@ -725,7 +1065,7 @@
                 div.className = 'milestone';
                 div.innerHTML = `
                     <div class="milestone-icon ${complete ? 'complete' : 'pending'}">
-                        ${complete ? '✓' : '○'}
+                        ${complete ? '&#10003;' : '&#9675;'}
                     </div>
                     <div class="milestone-info">
                         <div class="milestone-name">${milestone.name}</div>
@@ -767,15 +1107,16 @@
             const popup = document.createElement('div');
             popup.className = 'dividend-popup' + (isDrip ? ' drip' : '');
             if (isMilestone) {
-                popup.style.fontSize = '20px';
-                popup.style.color = '#ffd700';
+                popup.style.fontSize = '22px';
+                popup.style.color = '#d4af37';
+                popup.style.textShadow = '0 0 15px rgba(212, 175, 55, 0.6)';
             }
             popup.textContent = text;
             popup.style.left = (Math.random() * 200 + 100) + 'px';
             popup.style.top = (Math.random() * 100 + 150) + 'px';
             document.body.appendChild(popup);
 
-            setTimeout(() => popup.remove(), 1000);
+            setTimeout(() => popup.remove(), 1200);
         }
 
         function prestige() {
