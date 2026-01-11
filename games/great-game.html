@@ -6725,7 +6725,7 @@
             <button class="action-btn friendly" data-action="influence">
                 <span class="action-icon">📢</span>
                 <span class="action-name">Influence</span>
-                <span class="action-cost">-$0.3T GDP</span>
+                <span class="action-cost">-$0.8T GDP</span>
             </button>
         </div>
     </div>
@@ -10160,7 +10160,7 @@
             });
 
             // Start button
-            document.getElementById('start-btn').addEventListener('click', startGame);
+            document.getElementById('start-btn')?.addEventListener('click', startGame);
 
             // Continue button (load saved game)
             document.getElementById('continue-btn')?.addEventListener('click', () => {
@@ -10189,7 +10189,7 @@
             });
 
             // Play again
-            document.getElementById('play-again-btn').addEventListener('click', () => {
+            document.getElementById('play-again-btn')?.addEventListener('click', () => {
                 document.getElementById('game-over').classList.remove('active');
                 document.getElementById('start-screen').classList.remove('hidden');
                 resetState();
@@ -10207,7 +10207,7 @@
             setupMap();
 
             // Menu button
-            document.getElementById('menu-btn').addEventListener('click', () => {
+            document.getElementById('menu-btn')?.addEventListener('click', () => {
                 if (confirm('Return to main menu? Progress will be lost.')) {
                     document.getElementById('game-container').classList.remove('active');
                     document.getElementById('start-screen').classList.remove('hidden');
@@ -10281,8 +10281,21 @@
                 });
 
                 country.addEventListener('mousemove', (e) => {
-                    tooltip.style.left = (e.clientX + 15) + 'px';
-                    tooltip.style.top = (e.clientY + 15) + 'px';
+                    const tooltipRect = tooltip.getBoundingClientRect();
+                    const padding = 15;
+                    let left = e.clientX + padding;
+                    let top = e.clientY + padding;
+
+                    // Clamp to viewport bounds
+                    if (left + tooltipRect.width > window.innerWidth - padding) {
+                        left = e.clientX - tooltipRect.width - padding;
+                    }
+                    if (top + tooltipRect.height > window.innerHeight - padding) {
+                        top = e.clientY - tooltipRect.height - padding;
+                    }
+
+                    tooltip.style.left = Math.max(padding, left) + 'px';
+                    tooltip.style.top = Math.max(padding, top) + 'px';
                 });
 
                 country.addEventListener('mouseleave', () => {
@@ -10300,8 +10313,8 @@
             });
 
             // Close modal handlers
-            document.getElementById('close-modal').addEventListener('click', closeCountryModal);
-            document.getElementById('modal-overlay').addEventListener('click', closeCountryModal);
+            document.getElementById('close-modal')?.addEventListener('click', closeCountryModal);
+            document.getElementById('modal-overlay')?.addEventListener('click', closeCountryModal);
 
             // Action button handlers
             document.querySelectorAll('.action-btn').forEach(btn => {
@@ -10312,17 +10325,17 @@
             });
 
             // Zoom controls
-            document.getElementById('zoom-in').addEventListener('click', () => {
+            document.getElementById('zoom-in')?.addEventListener('click', () => {
                 mapZoom = Math.min(mapZoom * 1.3, 5);
                 updateMapTransform();
             });
 
-            document.getElementById('zoom-out').addEventListener('click', () => {
+            document.getElementById('zoom-out')?.addEventListener('click', () => {
                 mapZoom = Math.max(mapZoom / 1.3, 0.5);
                 updateMapTransform();
             });
 
-            document.getElementById('zoom-reset').addEventListener('click', () => {
+            document.getElementById('zoom-reset')?.addEventListener('click', () => {
                 mapZoom = 1;
                 mapPanX = 0;
                 mapPanY = 0;
@@ -10473,9 +10486,7 @@
                         { res: 'softpower', val: -5 },
                         { res: 'approval', val: 5 }
                     ];
-                    if (state.relations[selectedCountryId] !== undefined) {
-                        state.relations[selectedCountryId] -= 20;
-                    }
+                    state.relations[selectedCountryId] = (state.relations[selectedCountryId] || 0) - 20;
                     // Crash target's stock market
                     if (state.markets[selectedCountryId]) {
                         crashMarket(selectedCountryId, 0.15);
@@ -10495,9 +10506,7 @@
                         crashMarket(selectedCountryId, 0.08);
                         recordDecision(`Tariffs on ${countryName}`, selectedCountryId, 'hostile', -8, [selectedCountryId, 'us']);
                     }
-                    if (state.relations[selectedCountryId] !== undefined) {
-                        state.relations[selectedCountryId] -= 15;
-                    }
+                    state.relations[selectedCountryId] = (state.relations[selectedCountryId] || 0) - 15;
                     message = `Tariffs enacted on ${countryName} imports. Trade relations strained.`;
                     break;
 
@@ -10539,9 +10548,7 @@
                         { res: 'stability', val: -5 },
                         { res: 'tech', val: 2 }
                     ];
-                    if (state.relations[selectedCountryId] !== undefined) {
-                        state.relations[selectedCountryId] -= 10;
-                    }
+                    state.relations[selectedCountryId] = (state.relations[selectedCountryId] || 0) - 10;
                     // Cyber attack crashes their market
                     if (state.markets[selectedCountryId]) {
                         crashMarket(selectedCountryId, 0.12);
@@ -10565,7 +10572,7 @@
 
                 case 'influence':
                     effects = [
-                        { res: 'gdp', val: -0.3 },
+                        { res: 'gdp', val: -0.8 },
                         { res: 'softpower', val: 8 }
                     ];
                     if (state.relations[selectedCountryId] !== undefined) {
@@ -10594,7 +10601,7 @@
             else if (action === 'trade') influenceChange = 12;      // Slightly reduced
             else if (action === 'aid') influenceChange = 15;        // Reduced from 25 (was OP)
             else if (action === 'cyber') influenceChange = -12;     // Higher impact for the risk
-            else if (action === 'influence') influenceChange = 18;  // Slightly reduced
+            else if (action === 'influence') influenceChange = 12;  // Rebalanced for higher cost
 
             updateInfluence(selectedCountryId, influenceChange);
 
@@ -11418,7 +11425,57 @@
                     countriesInfluenced: 0
                 },
                 victoryAchieved: false,
-                victoryType: null
+                victoryType: null,
+                // Victory path system
+                victoryPath: {
+                    primary: null,
+                    secondary: null,
+                    revealed: false
+                },
+                victoryProgress: {
+                    architect: {
+                        turnsWithoutRegimeChange: 0,
+                        allianceLeadershipMaintained: true,
+                        peakTrust: 100,
+                        peakStability: 65
+                    },
+                    hegemon: {
+                        rivalCrashes: 0,
+                        peakMarketShare: 0,
+                        marketRank: 1
+                    },
+                    shadow: {
+                        regimesInfluenced: 0,
+                        intelOperations: 0,
+                        neverExposed: true
+                    },
+                    breaker: {
+                        allianceFractures: 0,
+                        cascadesTriggered: 0,
+                        peakChaos: 0
+                    }
+                },
+                campaignLength: 'standard',
+                // Hidden systems (Crisis Engine)
+                hiddenState: {
+                    terrorNetwork: {
+                        globalStrength: 10,
+                        regionalCells: {},
+                        lastActivation: null,
+                        recruitmentRate: 0
+                    },
+                    deepState: {
+                        influence: 5,
+                        lastAction: null,
+                        emergencyPowersActive: false,
+                        warTurns: 0
+                    },
+                    trust: 100,
+                    activeScandals: []
+                },
+                countryStability: {},
+                rollHistory: [],
+                crisisEvents: []
             };
             // Reset UI displays
             updateTurnDisplay();
@@ -12212,14 +12269,14 @@
             document.getElementById('tool-modal').classList.add('active');
         }
 
-        document.getElementById('tool-cancel-btn').addEventListener('click', () => {
+        document.getElementById('tool-cancel-btn')?.addEventListener('click', () => {
             playClick();
             document.getElementById('tool-modal').classList.remove('active');
             currentTool = null;
             selectedTarget = null;
         });
 
-        document.getElementById('tool-execute-btn').addEventListener('click', () => {
+        document.getElementById('tool-execute-btn')?.addEventListener('click', () => {
             if (!currentTool || !selectedTarget) {
                 playAlert();
                 return;
@@ -14199,12 +14256,12 @@
                 });
             });
 
-            document.getElementById('diplo-cancel').addEventListener('click', () => {
+            document.getElementById('diplo-cancel')?.addEventListener('click', () => {
                 playClick();
                 targetSelect.remove();
             });
 
-            document.getElementById('diplo-confirm').addEventListener('click', () => {
+            document.getElementById('diplo-confirm')?.addEventListener('click', () => {
                 if (!selectedCountry) {
                     playAlert();
                     return;
