@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Flappy Markets</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .back-link {
+            color: #7d8590;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: #58a6ff;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e6edf3;
+        }
+
+        .game-wrapper {
+            position: relative;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        #game-canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .score-display {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 48px;
+            font-weight: 800;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            pointer-events: none;
+            transition: transform 0.15s;
+        }
+        .score-display.bounce {
+            animation: scoreBounce 0.3s ease;
+        }
+        @keyframes scoreBounce {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.3); }
+        }
+
+        .combo-display {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            font-weight: 600;
+            color: #ffd700;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .combo-display.visible {
+            opacity: 1;
+        }
+
+        .milestone-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 36px;
+            font-weight: 800;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            z-index: 30;
+            pointer-events: none;
+            animation: milestoneAnim 1.5s ease forwards;
+        }
+        @keyframes milestoneAnim {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-15deg); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.3) rotate(5deg); opacity: 1; }
+            40% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) scale(1) translateY(-50px); opacity: 0; }
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(13, 17, 23, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+        }
+
+        .overlay.hidden {
+            display: none;
+        }
+
+        .overlay-title {
+            font-size: 36px;
+            font-weight: 800;
+            color: #e6edf3;
+            margin-bottom: 8px;
+        }
+
+        .overlay-title.crash {
+            color: #f85149;
+            text-shadow: 0 0 30px rgba(248, 81, 73, 0.5);
+            animation: crashShake 0.5s ease;
+        }
+        @keyframes crashShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+
+        .overlay-subtitle {
+            font-size: 16px;
+            color: #7d8590;
+            margin-bottom: 24px;
+        }
+
+        .overlay-score {
+            font-size: 24px;
+            color: #58a6ff;
+            margin-bottom: 8px;
+        }
+
+        .overlay-best {
+            font-size: 14px;
+            color: #7d8590;
+            margin-bottom: 24px;
+        }
+
+        .new-best {
+            color: #ffd700;
+            font-weight: 600;
+            animation: newBestPulse 0.5s ease infinite alternate;
+        }
+        @keyframes newBestPulse {
+            from { text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+            to { text-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
+        }
+
+        .play-btn {
+            background-color: #238636;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 48px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .play-btn:hover {
+            background-color: #2ea043;
+            transform: scale(1.05);
+        }
+
+        .instructions {
+            font-size: 12px;
+            color: #7d8590;
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .instructions kbd {
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-family: inherit;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 200;
+            animation: confettiFall 2s ease-out forwards;
+        }
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(400px) rotate(720deg); }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 12px;
+            color: #484f58;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="position:absolute;top:20px;left:20px;display:flex;align-items:center;gap:8px;font-size:14px;"><a href="/" style="color:#7d8590;text-decoration:none;">Abacus</a><span style="color:#7d8590;opacity:0.5;">/</span><a href="/" style="color:#7d8590;text-decoration:none;">Games</a><span style="color:#7d8590;opacity:0.5;">/</span><span style="color:#e6edf3;">Flappy Markets</span></div>
+            <h1>Flappy Markets</h1>
+        </header>
+
+        <div class="game-wrapper">
+            <canvas id="game-canvas" width="400" height="600"></canvas>
+            <div class="score-display" id="score-display">0</div>
+            <div class="combo-display" id="combo-display">x1 Combo</div>
+
+            <div class="overlay" id="start-overlay">
+                <div class="overlay-title">Flappy Markets</div>
+                <div class="overlay-subtitle">Dodge the red candles!</div>
+                <button class="play-btn" id="start-btn">Play</button>
+                <div class="overlay-best">Best: <span id="best-start">0</span></div>
+            </div>
+
+            <div class="overlay hidden" id="gameover-overlay">
+                <div class="overlay-title crash">MARKET CRASH</div>
+                <div class="overlay-score">Score: <span id="final-score">0</span></div>
+                <div class="overlay-best" id="best-container">Best: <span id="best-end">0</span></div>
+                <button class="play-btn" id="restart-btn">Try Again</button>
+            </div>
+        </div>
+
+        <p class="instructions">
+            <kbd>Space</kbd> / <kbd>Click</kbd> / <kbd>Tap</kbd> to fly
+        </p>
+
+        <footer>
+            Flappy Markets — Navigate through volatile markets
+        </footer>
+    </div>
+
+    <script>
+        // Audio System
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(freq, duration = 0.1, type = 'sine', volume = 0.3) {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain).connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function playFlap() {
+            playTone(400, 0.08, 'triangle', 0.2);
+            setTimeout(() => playTone(500, 0.06, 'triangle', 0.15), 40);
+        }
+
+        function playScore() {
+            playTone(600, 0.1, 'sine', 0.2);
+            setTimeout(() => playTone(800, 0.1, 'sine', 0.2), 80);
+        }
+
+        function playCoin() {
+            [800, 1000, 1200].forEach((f, i) => {
+                setTimeout(() => playTone(f, 0.08, 'sine', 0.2), i * 50);
+            });
+        }
+
+        function playMilestone() {
+            [523, 659, 784, 1047].forEach((f, i) => {
+                setTimeout(() => playTone(f, 0.15, 'sine', 0.25), i * 100);
+            });
+        }
+
+        function playDeath() {
+            playTone(400, 0.2, 'sawtooth', 0.2);
+            setTimeout(() => playTone(300, 0.2, 'sawtooth', 0.15), 100);
+            setTimeout(() => playTone(200, 0.3, 'sawtooth', 0.1), 200);
+        }
+
+        function playNewBest() {
+            [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => {
+                setTimeout(() => playTone(f, 0.15, 'sine', 0.25), i * 100);
+            });
+        }
+
+        function confetti(count = 50) {
+            const colors = ['#3fb950', '#58a6ff', '#d29922', '#f0883e', '#a371f7', '#ffd700'];
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'confetti';
+                particle.style.left = (Math.random() * window.innerWidth) + 'px';
+                particle.style.top = '-20px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDelay = (Math.random() * 0.5) + 's';
+                particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 2500);
+            }
+        }
+
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // High DPI canvas support
+        const dpr = window.devicePixelRatio || 1;
+        const baseWidth = 400;
+        const baseHeight = 600;
+
+        function setupCanvas() {
+            canvas.width = baseWidth * dpr;
+            canvas.height = baseHeight * dpr;
+            canvas.style.width = baseWidth + 'px';
+            canvas.style.height = baseHeight + 'px';
+            ctx.scale(dpr, dpr);
+        }
+        setupCanvas();
+
+        const scoreDisplay = document.getElementById('score-display');
+        const comboDisplay = document.getElementById('combo-display');
+        const startOverlay = document.getElementById('start-overlay');
+        const gameoverOverlay = document.getElementById('gameover-overlay');
+        const finalScoreEl = document.getElementById('final-score');
+        const bestStartEl = document.getElementById('best-start');
+        const bestEndEl = document.getElementById('best-end');
+        const bestContainer = document.getElementById('best-container');
+        const gameWrapper = document.querySelector('.game-wrapper');
+
+        let best = parseInt(localStorage.getItem('flappyMarketsBest')) || 0;
+        bestStartEl.textContent = best;
+        bestEndEl.textContent = best;
+
+        const GRAVITY = 0.4;
+        const FLAP_POWER = -7;
+        const BASE_PIPE_SPEED = 3;
+        const BASE_PIPE_GAP = 170;
+        const MIN_PIPE_GAP = 130; // More forgiving minimum gap
+        const PIPE_WIDTH = 60;
+        const PIPE_SPAWN_RATE = 100;
+
+        // Milestone thresholds
+        const MILESTONES = [10, 25, 50, 75, 100, 150, 200];
+        let achievedMilestones = [];
+
+        let pipeSpeed = BASE_PIPE_SPEED;
+        let pipeGap = BASE_PIPE_GAP;
+
+        let bird = {
+            x: 80,
+            y: 300,
+            width: 40,
+            height: 30,
+            velocity: 0,
+            rotation: 0
+        };
+
+        let pipes = [];
+        let score = 0;
+        let combo = 0;
+        let bestCombo = 0;
+        let frameCount = 0;
+        let gameRunning = false;
+        let gameOver = false;
+        let particles = [];
+        let coins = [];
+        let shakeIntensity = 0;
+
+        // Colors
+        const COLORS = {
+            bg: '#0d1117',
+            bgGrad1: '#161b22',
+            bgGrad2: '#0d1117',
+            pipeRed: '#da3633',
+            pipeRedDark: '#a82828',
+            pipeGreen: '#238636',
+            pipeGreenDark: '#1a6328',
+            dollar: '#3fb950',
+            dollarDark: '#2ea043',
+            text: '#e6edf3',
+            grid: '#21262d'
+        };
+
+        function showMilestone(points) {
+            const popup = document.createElement('div');
+            popup.className = 'milestone-popup';
+            popup.textContent = points + ' POINTS!';
+            gameWrapper.appendChild(popup);
+            playMilestone();
+            confetti(30);
+            setTimeout(() => popup.remove(), 1500);
+        }
+
+        function createTrailParticle() {
+            particles.push({
+                x: bird.x,
+                y: bird.y + bird.height / 2,
+                vx: -2 - Math.random() * 2,
+                vy: (Math.random() - 0.5) * 2,
+                size: 3 + Math.random() * 4,
+                life: 1,
+                color: Math.random() > 0.5 ? COLORS.dollar : COLORS.dollarDark
+            });
+        }
+
+        function createExplosion(x, y) {
+            for (let i = 0; i < 30; i++) {
+                const angle = (Math.PI * 2 * i) / 30;
+                const speed = 3 + Math.random() * 6;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    size: 4 + Math.random() * 8,
+                    life: 1,
+                    color: Math.random() > 0.3 ? '#f85149' : '#ffd700'
+                });
+            }
+        }
+
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.03;
+                p.size *= 0.95;
+                if (p.life <= 0 || p.size < 0.5) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        function drawParticles() {
+            particles.forEach(p => {
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        function spawnCoin() {
+            if (Math.random() < 0.02 && pipes.length > 0) {
+                const lastPipe = pipes[pipes.length - 1];
+                coins.push({
+                    x: lastPipe.x + PIPE_WIDTH / 2,
+                    y: lastPipe.topHeight + lastPipe.gap / 2,
+                    size: 15,
+                    collected: false,
+                    pulse: 0
+                });
+            }
+        }
+
+        function drawCoins() {
+            coins.forEach(coin => {
+                if (coin.collected) return;
+                coin.pulse = (coin.pulse + 0.1) % (Math.PI * 2);
+                const scale = 1 + Math.sin(coin.pulse) * 0.1;
+
+                ctx.save();
+                ctx.translate(coin.x, coin.y);
+                ctx.scale(scale, scale);
+
+                // Glow
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ffd700';
+
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(0, 0, coin.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = '#b8860b';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('$', 0, 0);
+
+                ctx.restore();
+            });
+        }
+
+        function drawBackground() {
+            // Gradient background
+            const grad = ctx.createLinearGradient(0, 0, 0, baseHeight);
+            grad.addColorStop(0, COLORS.bgGrad1);
+            grad.addColorStop(1, COLORS.bgGrad2);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, baseWidth, baseHeight);
+
+            // Grid lines
+            ctx.strokeStyle = COLORS.grid;
+            ctx.lineWidth = 1;
+            for (let x = (frameCount * 0.5) % 40; x < baseWidth; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, baseHeight);
+                ctx.stroke();
+            }
+            for (let y = 0; y < baseHeight; y += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(baseWidth, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawBird() {
+            ctx.save();
+            ctx.translate(bird.x + bird.width / 2, bird.y + bird.height / 2);
+            ctx.rotate(Math.min(Math.max(bird.velocity * 0.05, -0.5), 0.5));
+
+            // Glow when moving up
+            if (bird.velocity < 0) {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = COLORS.dollar;
+            }
+
+            // Dollar bill body
+            ctx.fillStyle = COLORS.dollar;
+            ctx.fillRect(-bird.width / 2, -bird.height / 2, bird.width, bird.height);
+
+            // Dollar sign
+            ctx.fillStyle = COLORS.dollarDark;
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('$', 0, 0);
+
+            // Border
+            ctx.strokeStyle = COLORS.dollarDark;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(-bird.width / 2, -bird.height / 2, bird.width, bird.height);
+
+            ctx.shadowBlur = 0;
+
+            // Wings (simple triangles)
+            if (frameCount % 10 < 5) {
+                ctx.fillStyle = COLORS.dollarDark;
+                ctx.beginPath();
+                ctx.moveTo(-bird.width / 2, 0);
+                ctx.lineTo(-bird.width / 2 - 10, -8);
+                ctx.lineTo(-bird.width / 2 - 10, 8);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        function drawPipe(pipe) {
+            // Top pipe (candlestick going down - red)
+            const topColor = COLORS.pipeRed;
+            const topColorDark = COLORS.pipeRedDark;
+
+            // Draw top candle body
+            ctx.fillStyle = topColor;
+            ctx.fillRect(pipe.x, 0, PIPE_WIDTH, pipe.topHeight);
+
+            // Candle wick
+            ctx.fillStyle = topColorDark;
+            ctx.fillRect(pipe.x + PIPE_WIDTH / 2 - 4, pipe.topHeight - 20, 8, 20);
+
+            // Border
+            ctx.strokeStyle = topColorDark;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(pipe.x, 0, PIPE_WIDTH, pipe.topHeight);
+
+            // Bottom pipe
+            const bottomY = pipe.topHeight + pipe.gap;
+            const bottomColor = COLORS.pipeRed;
+            const bottomColorDark = COLORS.pipeRedDark;
+
+            // Draw bottom candle body
+            ctx.fillStyle = bottomColor;
+            ctx.fillRect(pipe.x, bottomY, PIPE_WIDTH, baseHeight - bottomY);
+
+            // Candle wick on top
+            ctx.fillStyle = bottomColorDark;
+            ctx.fillRect(pipe.x + PIPE_WIDTH / 2 - 4, bottomY, 8, 20);
+
+            // Border
+            ctx.strokeStyle = bottomColorDark;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(pipe.x, bottomY, PIPE_WIDTH, baseHeight - bottomY);
+        }
+
+        function flap() {
+            if (gameOver) return;
+
+            initAudio();
+
+            if (!gameRunning) {
+                startGame();
+                return;
+            }
+
+            bird.velocity = FLAP_POWER;
+            playFlap();
+        }
+
+        function startGame() {
+            initAudio();
+
+            bird = {
+                x: 80,
+                y: 300,
+                width: 40,
+                height: 30,
+                velocity: 0,
+                rotation: 0
+            };
+            pipes = [];
+            coins = [];
+            particles = [];
+            score = 0;
+            combo = 0;
+            bestCombo = 0;
+            frameCount = 0;
+            gameRunning = true;
+            gameOver = false;
+            shakeIntensity = 0;
+            pipeSpeed = BASE_PIPE_SPEED;
+            pipeGap = BASE_PIPE_GAP;
+            achievedMilestones = [];
+
+            startOverlay.classList.add('hidden');
+            gameoverOverlay.classList.add('hidden');
+            comboDisplay.classList.remove('visible');
+            scoreDisplay.textContent = '0';
+            bestContainer.classList.remove('new-best');
+
+            gameLoop();
+        }
+
+        function endGame() {
+            gameRunning = false;
+            gameOver = true;
+
+            playDeath();
+
+            // Vibration feedback on mobile
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+
+            // Create explosion and screen shake
+            createExplosion(bird.x + bird.width / 2, bird.y + bird.height / 2);
+            shakeIntensity = 1;
+
+            // Continue drawing for explosion effect
+            let explosionFrames = 40;
+            function drawExplosion() {
+                if (explosionFrames-- > 0) {
+                    updateParticles();
+                    shakeIntensity *= 0.92;
+                    draw();
+                    requestAnimationFrame(drawExplosion);
+                }
+            }
+            drawExplosion();
+
+            const isNewBest = score > best;
+            if (isNewBest) {
+                best = score;
+                localStorage.setItem('flappyMarketsBest', best);
+                bestStartEl.textContent = best;
+                bestEndEl.textContent = best;
+                setTimeout(() => {
+                    playNewBest();
+                    confetti(60);
+                }, 500);
+            }
+
+            finalScoreEl.textContent = score;
+            bestEndEl.textContent = best;
+            comboDisplay.classList.remove('visible');
+
+            setTimeout(() => {
+                gameoverOverlay.classList.remove('hidden');
+                if (isNewBest) {
+                    bestContainer.classList.add('new-best');
+                    bestContainer.innerHTML = 'NEW BEST: <span id="best-end">' + best + '</span>!';
+                }
+            }, 600);
+        }
+
+        function checkCollision() {
+            // Floor and ceiling
+            if (bird.y < 0 || bird.y + bird.height > baseHeight) {
+                return true;
+            }
+
+            // Use a smaller hitbox for more forgiving collision (6px padding)
+            const hitboxPadding = 6;
+            const birdHitX = bird.x + hitboxPadding;
+            const birdHitY = bird.y + hitboxPadding;
+            const birdHitWidth = bird.width - hitboxPadding * 2;
+            const birdHitHeight = bird.height - hitboxPadding * 2;
+
+            // Pipes
+            for (const pipe of pipes) {
+                const birdRight = birdHitX + birdHitWidth;
+                const birdBottom = birdHitY + birdHitHeight;
+                const pipeRight = pipe.x + PIPE_WIDTH;
+                const bottomPipeTop = pipe.topHeight + pipe.gap;
+
+                // Check if bird overlaps with pipe horizontally
+                if (birdRight > pipe.x && birdHitX < pipeRight) {
+                    // Check top pipe
+                    if (birdHitY < pipe.topHeight) {
+                        return true;
+                    }
+                    // Check bottom pipe
+                    if (birdBottom > bottomPipeTop) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        function update() {
+            frameCount++;
+
+            // Create trail particles
+            if (frameCount % 3 === 0) {
+                createTrailParticle();
+            }
+
+            updateParticles();
+
+            // Update screen shake
+            if (shakeIntensity > 0) {
+                shakeIntensity *= 0.9;
+            }
+
+            // Bird physics
+            bird.velocity += GRAVITY;
+            bird.y += bird.velocity;
+
+            // FIXED: Much slower difficulty progression
+            // Gap shrinks 0.5px per point (was 2px), capped at MIN_PIPE_GAP
+            pipeGap = Math.max(MIN_PIPE_GAP, BASE_PIPE_GAP - score * 0.5);
+            // Speed increases very slowly, capped at +1.5
+            pipeSpeed = BASE_PIPE_SPEED + Math.min(score * 0.03, 1.5);
+
+            // Spawn pipes
+            if (frameCount % PIPE_SPAWN_RATE === 0) {
+                const minHeight = 80;
+                const maxHeight = baseHeight - pipeGap - 80;
+                const topHeight = minHeight + Math.random() * (maxHeight - minHeight);
+
+                pipes.push({
+                    x: baseWidth,
+                    topHeight: topHeight,
+                    gap: pipeGap,
+                    scored: false
+                });
+            }
+
+            // Move pipes
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                pipes[i].x -= pipeSpeed;
+
+                // Score and combo
+                if (!pipes[i].scored && pipes[i].x + PIPE_WIDTH < bird.x) {
+                    pipes[i].scored = true;
+                    combo++;
+                    if (combo > bestCombo) bestCombo = combo;
+
+                    // Combo bonus scoring
+                    const comboBonus = Math.min(combo, 10);
+                    score += comboBonus;
+                    scoreDisplay.textContent = score;
+
+                    // Bounce animation
+                    scoreDisplay.classList.remove('bounce');
+                    scoreDisplay.offsetHeight; // Force reflow
+                    scoreDisplay.classList.add('bounce');
+
+                    playScore();
+
+                    // Check milestones
+                    MILESTONES.forEach(m => {
+                        if (score >= m && !achievedMilestones.includes(m)) {
+                            achievedMilestones.push(m);
+                            showMilestone(m);
+                        }
+                    });
+
+                    // Update combo display
+                    if (combo > 1) {
+                        comboDisplay.textContent = `x${combo} Combo!`;
+                        comboDisplay.classList.add('visible');
+                    }
+                }
+
+                // Remove off-screen pipes
+                if (pipes[i].x + PIPE_WIDTH < 0) {
+                    pipes.splice(i, 1);
+                }
+            }
+
+            // Update coins
+            for (let i = coins.length - 1; i >= 0; i--) {
+                coins[i].x -= pipeSpeed;
+
+                // Check coin collision
+                if (!coins[i].collected) {
+                    const dx = bird.x + bird.width / 2 - coins[i].x;
+                    const dy = bird.y + bird.height / 2 - coins[i].y;
+                    if (Math.sqrt(dx * dx + dy * dy) < coins[i].size + 15) {
+                        coins[i].collected = true;
+                        score += 5;
+                        scoreDisplay.textContent = score;
+                        playCoin();
+
+                        // Sparkle effect
+                        for (let j = 0; j < 12; j++) {
+                            particles.push({
+                                x: coins[i].x,
+                                y: coins[i].y,
+                                vx: (Math.random() - 0.5) * 8,
+                                vy: (Math.random() - 0.5) * 8,
+                                size: 5,
+                                life: 1,
+                                color: '#ffd700'
+                            });
+                        }
+                    }
+                }
+
+                // Remove off-screen coins
+                if (coins[i].x < -20) {
+                    coins.splice(i, 1);
+                }
+            }
+
+            // Spawn bonus coins occasionally
+            spawnCoin();
+
+            // Check collision
+            if (checkCollision()) {
+                endGame();
+            }
+        }
+
+        function draw() {
+            ctx.save();
+
+            // Apply screen shake
+            if (shakeIntensity > 0.1) {
+                ctx.translate(
+                    (Math.random() - 0.5) * shakeIntensity * 15,
+                    (Math.random() - 0.5) * shakeIntensity * 15
+                );
+            }
+
+            drawBackground();
+            drawParticles();
+
+            for (const pipe of pipes) {
+                drawPipe(pipe);
+            }
+
+            drawCoins();
+            drawBird();
+
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initial draw
+        draw();
+
+        // Event listeners
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                flap();
+            }
+        });
+
+        canvas.addEventListener('click', flap);
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            flap();
+        });
+
+        document.getElementById('start-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            startGame();
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            startGame();
+        });
+    </script>
+</body>
+</html>

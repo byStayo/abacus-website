@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Stock Snake</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            user-select: none;
+            overflow-x: hidden;
+        }
+        .container { max-width: 500px; width: 100%; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .back-link { color: #7d8590; text-decoration: none; font-size: 14px; }
+        .back-link:hover { color: #58a6ff; }
+        h1 { font-size: 24px; font-weight: 600; color: #e6edf3; }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+        .stat { text-align: center; }
+        .stat-label { font-size: 11px; color: #7d8590; text-transform: uppercase; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #3fb950; transition: transform 0.2s; }
+        .stat-value.bounce { animation: bounce 0.3s ease; }
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+        .game-wrapper {
+            position: relative;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        #canvas { display: block; width: 100%; height: auto; }
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(13, 17, 23, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        .overlay.hidden { display: none; }
+        .overlay-title {
+            font-size: 36px;
+            font-weight: 800;
+            color: #e6edf3;
+            margin-bottom: 8px;
+        }
+        .overlay-title.crash { color: #f85149; animation: crashShake 0.5s ease; }
+        @keyframes crashShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+        .overlay-score { font-size: 20px; color: #58a6ff; margin-bottom: 24px; }
+        .new-best { color: #ffd700; }
+        .play-btn {
+            background-color: #238636;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 48px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .play-btn:hover { background-color: #2ea043; transform: scale(1.05); }
+        .instructions {
+            font-size: 12px;
+            color: #7d8590;
+            text-align: center;
+            margin-top: 16px;
+        }
+        .difficulty {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .diff-btn {
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .diff-btn:hover { background-color: #30363d; }
+        .diff-btn.active {
+            background-color: #238636;
+            border-color: #238636;
+            color: white;
+        }
+        .pause-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(13, 17, 23, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+        .pause-overlay.active { display: flex; }
+        .pause-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: #58a6ff;
+            margin-bottom: 8px;
+        }
+        .pause-hint {
+            font-size: 14px;
+            color: #7d8590;
+        }
+        .ticker-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            font-weight: 800;
+            color: #3fb950;
+            text-shadow: 0 0 20px rgba(63, 185, 80, 0.5);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .ticker-display.show { opacity: 1; animation: tickerPop 0.5s ease; }
+        .ticker-display.gold { color: #ffd700; text-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+        @keyframes tickerPop {
+            0% { transform: translate(-50%, -50%) scale(0.5); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        .level-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 48px;
+            font-weight: 800;
+            color: #58a6ff;
+            text-shadow: 0 0 30px rgba(88, 166, 255, 0.8);
+            pointer-events: none;
+            z-index: 20;
+        }
+        .level-display.show {
+            animation: levelUp 1.5s ease forwards;
+        }
+        @keyframes levelUp {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-15deg); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.3) rotate(5deg); opacity: 1; }
+            40% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) scale(1) translateY(-40px); opacity: 0; }
+        }
+        .level-bar {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            height: 6px;
+            background-color: #21262d;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .level-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #58a6ff, #79b8ff);
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 200;
+            animation: confettiFall 2s ease-out forwards;
+        }
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(400px) rotate(720deg); }
+        }
+        /* Screen shake */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
+        }
+        .shake { animation: shake 0.3s ease; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="position:absolute;top:20px;left:20px;display:flex;align-items:center;gap:8px;font-size:14px;"><a href="/" style="color:#7d8590;text-decoration:none;">Abacus</a><span style="color:#7d8590;opacity:0.5;">/</span><a href="/" style="color:#7d8590;text-decoration:none;">Games</a><span style="color:#7d8590;opacity:0.5;">/</span><span style="color:#e6edf3;">Snake</span></div>
+            <h1>Stock Snake</h1>
+        </header>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label">Score</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Level</div>
+                <div class="stat-value" id="level" style="color: #58a6ff;">1</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Best</div>
+                <div class="stat-value" id="best" style="color: #d29922;">0</div>
+            </div>
+        </div>
+        <div class="difficulty">
+            <button class="diff-btn" data-speed="180">Slow</button>
+            <button class="diff-btn active" data-speed="140">Normal</button>
+            <button class="diff-btn" data-speed="100">Fast</button>
+        </div>
+        <div class="game-wrapper">
+            <canvas id="canvas" width="400" height="400"></canvas>
+            <div class="ticker-display" id="ticker-popup"></div>
+            <div class="level-display" id="level-popup"></div>
+            <div class="level-bar">
+                <div class="level-fill" id="level-fill" style="width: 0%"></div>
+            </div>
+            <div class="overlay" id="start-overlay">
+                <div class="overlay-title">Stock Snake</div>
+                <div class="overlay-score">Collect ticker symbols!</div>
+                <button class="play-btn" id="start-btn">Play</button>
+            </div>
+            <div class="overlay hidden" id="gameover-overlay">
+                <div class="overlay-title crash">LIQUIDATED</div>
+                <div class="overlay-score" id="final-stats">Score: <span id="final-score">0</span></div>
+                <button class="play-btn" id="restart-btn">Try Again</button>
+            </div>
+            <div class="pause-overlay" id="pause-overlay">
+                <div class="pause-text">PAUSED</div>
+                <div class="pause-hint">Press P or tap to resume</div>
+            </div>
+        </div>
+        <p class="instructions">Arrow Keys / WASD to move | P to pause</p>
+    </div>
+    <script>
+        // Audio System
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(freq, duration = 0.1, type = 'sine', volume = 0.3) {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain).connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function playEat() {
+            playTone(500, 0.08, 'square', 0.15);
+            setTimeout(() => playTone(700, 0.1, 'square', 0.15), 60);
+        }
+
+        function playGold() {
+            [600, 800, 1000, 1200].forEach((f, i) => {
+                setTimeout(() => playTone(f, 0.1, 'sine', 0.25), i * 60);
+            });
+        }
+
+        function playLevelUp() {
+            [523, 659, 784, 1047].forEach((f, i) => {
+                setTimeout(() => playTone(f, 0.15, 'sine', 0.25), i * 100);
+            });
+        }
+
+        function playDeath() {
+            playTone(400, 0.2, 'sawtooth', 0.2);
+            setTimeout(() => playTone(300, 0.2, 'sawtooth', 0.15), 100);
+            setTimeout(() => playTone(200, 0.3, 'sawtooth', 0.1), 200);
+        }
+
+        function playNewBest() {
+            [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => {
+                setTimeout(() => playTone(f, 0.15, 'sine', 0.25), i * 100);
+            });
+        }
+
+        function playClick() {
+            playTone(600, 0.05, 'square', 0.1);
+        }
+
+        function confetti(count = 50) {
+            const colors = ['#3fb950', '#58a6ff', '#d29922', '#f0883e', '#a371f7', '#ffd700'];
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'confetti';
+                particle.style.left = (Math.random() * window.innerWidth) + 'px';
+                particle.style.top = '-20px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDelay = (Math.random() * 0.5) + 's';
+                particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 2500);
+            }
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const GRID = 20;
+        const CELL = canvas.width / GRID;
+        const TICKERS = ['AAPL','GOOGL','MSFT','AMZN','TSLA','NVDA','META','JPM','V','MA','DIS','NFLX','AMD','INTC','PYPL'];
+        const GOLD_TICKERS = ['BRK.A','GLD','GOLD'];
+        const FOOD_PER_LEVEL = 5;
+
+        let snake = [{x: 10, y: 10}];
+        let direction = {x: 1, y: 0};
+        let nextDirection = {x: 1, y: 0};
+        let food = {x: 15, y: 10, ticker: 'AAPL', isGold: false};
+        let score = 0;
+        let level = 1;
+        let foodEaten = 0;
+        let best = parseInt(localStorage.getItem('stockSnakeBest')) || 0;
+        let gameRunning = false;
+        let gamePaused = false;
+        let gameLoop;
+        let baseSpeed = 140;
+        let speed = 140;
+        let lastUpdateTime = 0;
+        let particles = [];
+
+        document.getElementById('best').textContent = best;
+
+        function spawnFood() {
+            let valid = false;
+            while (!valid) {
+                food.x = Math.floor(Math.random() * GRID);
+                food.y = Math.floor(Math.random() * GRID);
+                valid = !snake.some(s => s.x === food.x && s.y === food.y);
+            }
+
+            // 10% chance for gold ticker
+            food.isGold = Math.random() < 0.1;
+            if (food.isGold) {
+                food.ticker = GOLD_TICKERS[Math.floor(Math.random() * GOLD_TICKERS.length)];
+            } else {
+                food.ticker = TICKERS[Math.floor(Math.random() * TICKERS.length)];
+            }
+        }
+
+        function createParticles(x, y, color, count = 8) {
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 * i) / count;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * 3,
+                    vy: Math.sin(angle) * 3,
+                    size: 4 + Math.random() * 3,
+                    life: 1,
+                    color: color
+                });
+            }
+        }
+
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.05;
+                p.size *= 0.9;
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        function drawParticles() {
+            particles.forEach(p => {
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        function draw() {
+            // Background
+            ctx.fillStyle = '#0d1117';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Grid
+            ctx.strokeStyle = '#21262d';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= GRID; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * CELL, 0);
+                ctx.lineTo(i * CELL, canvas.height);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i * CELL);
+                ctx.lineTo(canvas.width, i * CELL);
+                ctx.stroke();
+            }
+
+            // Food (ticker symbol)
+            const foodColor = food.isGold ? '#ffd700' : '#238636';
+            const foodTextColor = food.isGold ? '#b8860b' : '#3fb950';
+
+            // Glow for gold
+            if (food.isGold) {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ffd700';
+            }
+
+            ctx.fillStyle = foodColor;
+            ctx.fillRect(food.x * CELL + 2, food.y * CELL + 2, CELL - 4, CELL - 4);
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = food.isGold ? '#8b6914' : '#0d1117';
+            ctx.font = 'bold 7px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(food.ticker, food.x * CELL + CELL/2, food.y * CELL + CELL/2);
+
+            // Snake
+            snake.forEach((segment, i) => {
+                const isHead = i === 0;
+
+                // Gradient based on position
+                const progress = i / snake.length;
+                const r = Math.floor(88 - progress * 50);
+                const g = Math.floor(166 - progress * 50);
+                const b = Math.floor(255 - progress * 50);
+
+                ctx.fillStyle = isHead ? '#58a6ff' : `rgb(${r}, ${g}, ${b})`;
+
+                // Slight glow on head
+                if (isHead) {
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#58a6ff';
+                }
+
+                ctx.fillRect(segment.x * CELL + 1, segment.y * CELL + 1, CELL - 2, CELL - 2);
+                ctx.shadowBlur = 0;
+
+                if (isHead) {
+                    ctx.fillStyle = '#0d1117';
+                    ctx.font = 'bold 10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('$', segment.x * CELL + CELL/2, segment.y * CELL + CELL/2);
+                }
+            });
+
+            // Particles
+            drawParticles();
+        }
+
+        function showTickerPopup(ticker, isGold) {
+            const popup = document.getElementById('ticker-popup');
+            popup.textContent = '+' + ticker;
+            popup.className = 'ticker-display show' + (isGold ? ' gold' : '');
+            setTimeout(() => popup.classList.remove('show'), 500);
+        }
+
+        function showLevelUp(newLevel) {
+            const popup = document.getElementById('level-popup');
+            popup.textContent = 'LEVEL ' + newLevel + '!';
+            popup.classList.add('show');
+            playLevelUp();
+            confetti(25);
+            setTimeout(() => popup.classList.remove('show'), 1500);
+        }
+
+        function updateLevelBar() {
+            const progress = (foodEaten % FOOD_PER_LEVEL) / FOOD_PER_LEVEL * 100;
+            document.getElementById('level-fill').style.width = progress + '%';
+        }
+
+        function update() {
+            direction = nextDirection;
+            const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
+
+            // Wall collision
+            if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID) {
+                endGame();
+                return;
+            }
+
+            // Self collision
+            if (snake.some(s => s.x === head.x && s.y === head.y)) {
+                endGame();
+                return;
+            }
+
+            snake.unshift(head);
+
+            // Food collision
+            if (head.x === food.x && head.y === food.y) {
+                const points = food.isGold ? 50 : 10;
+                score += points;
+                foodEaten++;
+
+                const scoreEl = document.getElementById('score');
+                scoreEl.textContent = score;
+                scoreEl.classList.remove('bounce');
+                scoreEl.offsetHeight;
+                scoreEl.classList.add('bounce');
+
+                // Particles
+                const foodCenterX = food.x * CELL + CELL / 2;
+                const foodCenterY = food.y * CELL + CELL / 2;
+                createParticles(foodCenterX, foodCenterY, food.isGold ? '#ffd700' : '#3fb950', food.isGold ? 16 : 8);
+
+                if (food.isGold) {
+                    playGold();
+                } else {
+                    playEat();
+                }
+
+                showTickerPopup(food.ticker, food.isGold);
+
+                // Level up every FOOD_PER_LEVEL food
+                if (foodEaten % FOOD_PER_LEVEL === 0) {
+                    level++;
+                    document.getElementById('level').textContent = level;
+                    showLevelUp(level);
+                    // Speed increases with level (in waves, not linear)
+                    speed = Math.max(50, baseSpeed - (level - 1) * 10);
+                }
+
+                updateLevelBar();
+                spawnFood();
+            } else {
+                snake.pop();
+            }
+
+            updateParticles();
+            draw();
+        }
+
+        function gameLoopFrame(timestamp) {
+            if (!gameRunning || gamePaused) return;
+
+            if (timestamp - lastUpdateTime >= speed) {
+                lastUpdateTime = timestamp;
+                update();
+            }
+
+            gameLoop = requestAnimationFrame(gameLoopFrame);
+        }
+
+        function startGame() {
+            initAudio();
+            playClick();
+
+            snake = [{x: 10, y: 10}];
+            direction = {x: 1, y: 0};
+            nextDirection = {x: 1, y: 0};
+            score = 0;
+            level = 1;
+            foodEaten = 0;
+            speed = baseSpeed;
+            gamePaused = false;
+            lastUpdateTime = 0;
+            particles = [];
+
+            document.getElementById('score').textContent = '0';
+            document.getElementById('level').textContent = '1';
+            document.getElementById('level-fill').style.width = '0%';
+            document.getElementById('final-stats').innerHTML = 'Score: <span id="final-score">0</span>';
+
+            spawnFood();
+            document.getElementById('start-overlay').classList.add('hidden');
+            document.getElementById('gameover-overlay').classList.add('hidden');
+            document.getElementById('pause-overlay').classList.remove('active');
+            gameRunning = true;
+            draw();
+            cancelAnimationFrame(gameLoop);
+            gameLoop = requestAnimationFrame(gameLoopFrame);
+        }
+
+        function togglePause() {
+            if (!gameRunning) return;
+            initAudio();
+            playClick();
+            gamePaused = !gamePaused;
+            const pauseOverlay = document.getElementById('pause-overlay');
+            if (gamePaused) {
+                pauseOverlay.classList.add('active');
+            } else {
+                pauseOverlay.classList.remove('active');
+                lastUpdateTime = performance.now();
+                gameLoop = requestAnimationFrame(gameLoopFrame);
+            }
+        }
+
+        function endGame() {
+            gameRunning = false;
+            cancelAnimationFrame(gameLoop);
+            initAudio();
+            playDeath();
+
+            // Screen shake
+            document.querySelector('.game-wrapper').classList.add('shake');
+            setTimeout(() => document.querySelector('.game-wrapper').classList.remove('shake'), 300);
+
+            const isNewBest = score > best;
+            if (isNewBest) {
+                best = score;
+                localStorage.setItem('stockSnakeBest', best);
+                document.getElementById('best').textContent = best;
+                setTimeout(() => {
+                    playNewBest();
+                    confetti(60);
+                }, 400);
+            }
+
+            document.getElementById('final-score').textContent = score;
+            if (isNewBest) {
+                document.getElementById('final-stats').innerHTML = `
+                    Score: <span id="final-score">${score}</span><br>
+                    <span class="new-best">NEW BEST!</span>
+                `;
+            }
+            document.getElementById('gameover-overlay').classList.remove('hidden');
+        }
+
+        function setDirection(x, y) {
+            if (!gameRunning) return;
+            if (direction.x === -x && direction.y === -y) return;
+            nextDirection = {x, y};
+        }
+
+        document.addEventListener('keydown', e => {
+            if (['ArrowUp','w','W'].includes(e.key)) { e.preventDefault(); setDirection(0, -1); }
+            if (['ArrowDown','s','S'].includes(e.key)) { e.preventDefault(); setDirection(0, 1); }
+            if (['ArrowLeft','a','A'].includes(e.key)) { e.preventDefault(); setDirection(-1, 0); }
+            if (['ArrowRight','d','D'].includes(e.key)) { e.preventDefault(); setDirection(1, 0); }
+            if (e.code === 'Space' && !gameRunning) startGame();
+            if (e.key === 'p' || e.key === 'P') togglePause();
+        });
+
+        let touchStartX, touchStartY;
+        canvas.addEventListener('touchstart', e => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        });
+        canvas.addEventListener('touchend', e => {
+            if (!gameRunning) { startGame(); return; }
+            if (gamePaused) { togglePause(); return; }
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = e.changedTouches[0].clientY - touchStartY;
+            if (Math.abs(dx) > Math.abs(dy)) {
+                setDirection(dx > 0 ? 1 : -1, 0);
+            } else {
+                setDirection(0, dy > 0 ? 1 : -1);
+            }
+        });
+
+        document.getElementById('start-btn').addEventListener('click', startGame);
+        document.getElementById('restart-btn').addEventListener('click', startGame);
+
+        // Difficulty selector
+        document.querySelectorAll('.diff-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (gameRunning) return;
+                initAudio();
+                playClick();
+                document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                baseSpeed = parseInt(btn.dataset.speed);
+                speed = baseSpeed;
+            });
+        });
+
+        // Resume on pause overlay click
+        document.getElementById('pause-overlay').addEventListener('click', togglePause);
+
+        draw();
+    </script>
+</body>
+</html>

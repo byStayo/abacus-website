@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>IPO Frenzy</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .container { max-width: 500px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .back-link { color: #7d8590; text-decoration: none; font-size: 14px; }
+        .back-link:hover { color: #58a6ff; }
+        h1 { font-size: 24px; font-weight: 600; color: #e6edf3; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .stat.flash-green {
+            animation: flashGreen 0.5s ease;
+        }
+        .stat.flash-red {
+            animation: flashRed 0.5s ease;
+        }
+        @keyframes flashGreen {
+            0%, 100% { background-color: #161b22; }
+            50% { background-color: rgba(63, 185, 80, 0.3); border-color: #3fb950; }
+        }
+        @keyframes flashRed {
+            0%, 100% { background-color: #161b22; }
+            50% { background-color: rgba(248, 81, 73, 0.3); border-color: #f85149; }
+        }
+        .stat-label { font-size: 11px; color: #7d8590; text-transform: uppercase; margin-bottom: 4px; }
+        .stat-value { font-size: 20px; font-weight: 700; }
+        .stat-value.green { color: #3fb950; }
+        .stat-value.blue { color: #58a6ff; }
+        .stat-value.orange { color: #d29922; }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .day-title { font-size: 14px; color: #7d8590; }
+        .day-progress {
+            font-size: 12px;
+            color: #58a6ff;
+            background-color: rgba(88, 166, 255, 0.1);
+            padding: 4px 12px;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        .day-progress.pulse {
+            animation: dayPulse 0.6s ease;
+        }
+        @keyframes dayPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); background-color: rgba(88, 166, 255, 0.3); }
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e6edf3;
+            margin-bottom: 12px;
+        }
+
+        .ipo-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .ipo-card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .ipo-card.hot { border-color: #f85149; }
+        .ipo-card.owned { border-color: #3fb950; background-color: rgba(63, 185, 80, 0.05); }
+        .ipo-card.profitable {
+            animation: profitGlow 2s ease-in-out infinite;
+        }
+        .ipo-card.losing {
+            animation: loseGlow 1.5s ease-in-out infinite;
+        }
+        @keyframes profitGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(63, 185, 80, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(63, 185, 80, 0.6), 0 0 40px rgba(63, 185, 80, 0.3); }
+        }
+        @keyframes loseGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(248, 81, 73, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(248, 81, 73, 0.5); }
+        }
+        .ipo-card.bounce {
+            animation: cardBounce 0.4s ease;
+        }
+        @keyframes cardBounce {
+            0%, 100% { transform: scale(1); }
+            30% { transform: scale(1.05); }
+            60% { transform: scale(0.98); }
+        }
+
+        .ipo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .ipo-info { flex: 1; }
+        .ipo-symbol {
+            font-size: 18px;
+            font-weight: 700;
+            color: #e6edf3;
+        }
+        .ipo-name {
+            font-size: 12px;
+            color: #7d8590;
+        }
+        .ipo-badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+        .ipo-badge.hot { background-color: rgba(248, 81, 73, 0.2); color: #f85149; animation: hotPulse 1s ease-in-out infinite; }
+        .ipo-badge.new { background-color: rgba(88, 166, 255, 0.2); color: #58a6ff; }
+        .ipo-badge.owned { background-color: rgba(63, 185, 80, 0.2); color: #3fb950; }
+        @keyframes hotPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .ipo-chart {
+            height: 60px;
+            margin-bottom: 12px;
+        }
+        .ipo-chart canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .ipo-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .ipo-stat {
+            text-align: center;
+        }
+        .ipo-stat-label { font-size: 10px; color: #7d8590; }
+        .ipo-stat-value { font-size: 14px; font-weight: 600; transition: all 0.3s; }
+        .ipo-stat-value.up { color: #3fb950; }
+        .ipo-stat-value.down { color: #f85149; }
+        .ipo-stat-value.price-up {
+            animation: priceUp 0.3s ease;
+        }
+        .ipo-stat-value.price-down {
+            animation: priceDown 0.3s ease;
+        }
+        @keyframes priceUp {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); color: #3fb950; }
+        }
+        @keyframes priceDown {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); color: #f85149; }
+        }
+
+        .ipo-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .ipo-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+            overflow: hidden;
+        }
+        .ipo-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .buy-btn { background-color: #238636; color: white; }
+        .buy-btn:hover:not(:disabled) { background-color: #2ea043; transform: scale(1.02); }
+        .buy-btn:active:not(:disabled) { transform: scale(0.98); }
+        .sell-btn { background-color: #da3633; color: white; }
+        .sell-btn:hover:not(:disabled) { background-color: #f85149; transform: scale(1.02); }
+        .sell-btn:active:not(:disabled) { transform: scale(0.98); }
+
+        .next-day-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: #58a6ff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: all 0.2s;
+        }
+        .next-day-btn:hover { background-color: #79b8ff; transform: scale(1.02); }
+        .next-day-btn:active { transform: scale(0.98); }
+
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(13, 17, 23, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .overlay.active { display: flex; }
+        .overlay-content { text-align: center; padding: 20px; max-width: 400px; }
+        .overlay-title { font-size: 32px; font-weight: 800; margin-bottom: 16px; }
+        .overlay-title.win { color: #3fb950; animation: winTitle 0.5s ease; }
+        .overlay-title.lose { color: #f85149; }
+        @keyframes winTitle {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .overlay-subtitle { font-size: 16px; color: #7d8590; margin-bottom: 24px; line-height: 1.5; }
+        .play-btn {
+            background-color: #238636;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 48px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .play-btn:hover { background-color: #2ea043; transform: scale(1.05); }
+
+        /* Day Summary Popup */
+        .day-summary {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background-color: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 16px;
+            padding: 24px 32px;
+            text-align: center;
+            z-index: 80;
+            transition: transform 0.3s ease;
+            min-width: 280px;
+        }
+        .day-summary.show { transform: translate(-50%, -50%) scale(1); }
+        .day-summary.profit { border-color: #3fb950; }
+        .day-summary.loss { border-color: #f85149; }
+        .day-summary h3 {
+            font-size: 18px;
+            color: #7d8590;
+            margin-bottom: 12px;
+        }
+        .day-summary .day-pnl {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .day-summary.profit .day-pnl { color: #3fb950; }
+        .day-summary.loss .day-pnl { color: #f85149; }
+        .day-summary .holdings-value {
+            font-size: 14px;
+            color: #7d8590;
+        }
+
+        /* Trade Popup */
+        .trade-popup {
+            position: fixed;
+            pointer-events: none;
+            font-size: 24px;
+            font-weight: 800;
+            z-index: 90;
+            animation: floatUp 1s ease-out forwards;
+        }
+        .trade-popup.profit { color: #3fb950; }
+        .trade-popup.loss { color: #f85149; }
+        .trade-popup.buy { color: #58a6ff; }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1.2); }
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 200;
+            animation: confettiFall 2s ease-out forwards;
+        }
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(400px) rotate(720deg); }
+        }
+
+        /* Screen shake */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+        .shake {
+            animation: shake 0.4s ease;
+        }
+
+        /* Screen flash */
+        .screen-flash {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 150;
+            animation: screenFlash 0.3s ease-out forwards;
+        }
+        @keyframes screenFlash {
+            0% { opacity: 0.4; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="position:absolute;top:20px;left:20px;display:flex;align-items:center;gap:8px;font-size:14px;"><a href="/" style="color:#7d8590;text-decoration:none;">Abacus</a><span style="color:#7d8590;opacity:0.5;">/</span><a href="/" style="color:#7d8590;text-decoration:none;">Games</a><span style="color:#7d8590;opacity:0.5;">/</span><span style="color:#e6edf3;">IPO Frenzy</span></div>
+            <h1>IPO Frenzy</h1>
+        </header>
+
+        <div class="stats">
+            <div class="stat" id="cash-stat">
+                <div class="stat-label">Cash</div>
+                <div class="stat-value green" id="cash">$50,000</div>
+            </div>
+            <div class="stat" id="holdings-stat">
+                <div class="stat-label">Holdings</div>
+                <div class="stat-value blue" id="holdings">$0</div>
+            </div>
+            <div class="stat" id="pnl-stat">
+                <div class="stat-label">Total P/L</div>
+                <div class="stat-value orange" id="pnl">$0</div>
+            </div>
+        </div>
+
+        <div class="day-header">
+            <span class="day-title">IPO Season</span>
+            <span class="day-progress" id="day">Day 1 of 10</span>
+        </div>
+
+        <div id="available-section">
+            <div class="section-title">Available IPOs</div>
+            <div class="ipo-grid" id="available-ipos"></div>
+        </div>
+
+        <div id="portfolio-section" style="display: none;">
+            <div class="section-title">Your Holdings</div>
+            <div class="ipo-grid" id="portfolio-ipos"></div>
+        </div>
+
+        <button class="next-day-btn" id="next-day-btn">Next Day →</button>
+    </div>
+
+    <div class="day-summary" id="day-summary">
+        <h3>Day <span id="summary-day">1</span> Complete</h3>
+        <div class="day-pnl" id="summary-pnl">+$0</div>
+        <div class="holdings-value" id="summary-holdings">Holdings: $0</div>
+    </div>
+
+    <div class="overlay active" id="start-overlay">
+        <div class="overlay-content">
+            <div class="overlay-title" style="color: #e6edf3;">IPO Frenzy</div>
+            <div class="overlay-subtitle">Buy hot IPOs and sell before they crash!<br>You have 10 days to maximize profits.</div>
+            <button class="play-btn" id="start-btn">Start Trading</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="gameover-overlay">
+        <div class="overlay-content">
+            <div class="overlay-title" id="gameover-title">Season Over</div>
+            <div class="overlay-subtitle" id="gameover-subtitle"></div>
+            <button class="play-btn" id="restart-btn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Audio System
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(freq, duration = 0.1, type = 'sine', volume = 0.3) {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain).connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function playBuy() {
+            // Coin collect sound - rising arpeggio
+            playTone(400, 0.08, 'square', 0.2);
+            setTimeout(() => playTone(500, 0.08, 'square', 0.2), 60);
+            setTimeout(() => playTone(600, 0.12, 'square', 0.25), 120);
+        }
+
+        function playSellProfit() {
+            // Success fanfare
+            playTone(523, 0.1, 'sine', 0.25);
+            setTimeout(() => playTone(659, 0.1, 'sine', 0.25), 80);
+            setTimeout(() => playTone(784, 0.15, 'sine', 0.3), 160);
+            setTimeout(() => playTone(1047, 0.2, 'sine', 0.25), 260);
+        }
+
+        function playSellLoss() {
+            // Sad descending
+            playTone(400, 0.15, 'sawtooth', 0.15);
+            setTimeout(() => playTone(300, 0.2, 'sawtooth', 0.12), 150);
+        }
+
+        function playDayEnd() {
+            // Bell chime
+            playTone(880, 0.3, 'sine', 0.2);
+            setTimeout(() => playTone(660, 0.3, 'sine', 0.15), 150);
+        }
+
+        function playNewIPO() {
+            // Alert ding
+            playTone(700, 0.1, 'triangle', 0.2);
+            setTimeout(() => playTone(900, 0.15, 'triangle', 0.25), 100);
+        }
+
+        function playClick() {
+            playTone(600, 0.05, 'square', 0.1);
+        }
+
+        function playBigWin() {
+            // Victory fanfare
+            [523, 659, 784, 1047, 784, 1047].forEach((f, i) => {
+                setTimeout(() => playTone(f, 0.15, 'sine', 0.25), i * 100);
+            });
+        }
+
+        // Visual Effects
+        function confetti(x, y, count = 40) {
+            const colors = ['#3fb950', '#58a6ff', '#d29922', '#f0883e', '#a371f7', '#f85149'];
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'confetti';
+                const startX = x || (Math.random() * window.innerWidth);
+                particle.style.left = startX + 'px';
+                particle.style.top = (y || -20) + 'px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDelay = (Math.random() * 0.3) + 's';
+                particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                particle.style.transform = `translateX(${(Math.random() - 0.5) * 200}px)`;
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 2500);
+            }
+        }
+
+        function screenFlash(color) {
+            const flash = document.createElement('div');
+            flash.className = 'screen-flash';
+            flash.style.backgroundColor = color;
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 300);
+        }
+
+        function screenShake() {
+            document.body.classList.add('shake');
+            setTimeout(() => document.body.classList.remove('shake'), 400);
+        }
+
+        function showTradePopup(x, y, text, type) {
+            const popup = document.createElement('div');
+            popup.className = 'trade-popup ' + type;
+            popup.textContent = text;
+            popup.style.left = x + 'px';
+            popup.style.top = y + 'px';
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 1000);
+        }
+
+        // Animated number counter
+        function animateNumber(element, target, prefix = '', suffix = '', duration = 400) {
+            const startText = element.textContent.replace(/[^0-9.-]/g, '');
+            const start = parseFloat(startText) || 0;
+            const startTime = performance.now();
+
+            function update(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = start + (target - start) * eased;
+                element.textContent = prefix + formatMoney(current).replace('$', '') + suffix;
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+
+        const COMPANY_NAMES = [
+            'TechVault', 'CloudNine', 'DataStream', 'ByteForge', 'NeuralHub',
+            'QuantumLeap', 'CyberCore', 'BlockChain+', 'AIVentures', 'RoboTech',
+            'SpaceLink', 'GreenEnergy', 'BioGen', 'FinanceAI', 'MetaWorld',
+            'CryptoBank', 'DroneX', 'SolarMax', 'EVMotors', 'GameVerse'
+        ];
+
+        const TOTAL_DAYS = 10;
+        const STARTING_CASH = 50000;
+
+        let cash = STARTING_CASH;
+        let day = 1;
+        let availableIPOs = [];
+        let portfolio = [];
+        let totalPnL = 0;
+        let dayStartPnL = 0;
+        let previousHoldingsValue = 0;
+        let best = parseInt(localStorage.getItem('ipoFrenzyBest')) || STARTING_CASH;
+        let usedNames = [];
+
+        function generateSymbol() {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let symbol = '';
+            for (let i = 0; i < 4; i++) {
+                symbol += letters[Math.floor(Math.random() * letters.length)];
+            }
+            return symbol;
+        }
+
+        function getUniqueName() {
+            const available = COMPANY_NAMES.filter(n => !usedNames.includes(n));
+            if (available.length === 0) {
+                usedNames = [];
+                return COMPANY_NAMES[Math.floor(Math.random() * COMPANY_NAMES.length)];
+            }
+            const name = available[Math.floor(Math.random() * available.length)];
+            usedNames.push(name);
+            return name;
+        }
+
+        function createIPO() {
+            const ipoPrice = 15 + Math.floor(Math.random() * 85);
+            const isHot = Math.random() > 0.6;
+
+            const behavior = Math.floor(Math.random() * 4);
+
+            return {
+                id: Date.now() + Math.random(),
+                symbol: generateSymbol(),
+                name: getUniqueName(),
+                ipoPrice: ipoPrice,
+                currentPrice: ipoPrice,
+                previousPrice: ipoPrice,
+                priceHistory: [ipoPrice],
+                isHot: isHot,
+                behavior: behavior,
+                daysSinceIPO: 0,
+                peakDay: 1 + Math.floor(Math.random() * 4),
+                owned: false,
+                shares: 0,
+                buyPrice: 0
+            };
+        }
+
+        function updateIPOPrice(ipo) {
+            ipo.daysSinceIPO++;
+            ipo.previousPrice = ipo.currentPrice;
+            let change = 0;
+
+            switch (ipo.behavior) {
+                case 0: // Moon then crash
+                    if (ipo.daysSinceIPO <= ipo.peakDay) {
+                        change = 0.1 + Math.random() * 0.3;
+                    } else {
+                        change = -0.15 - Math.random() * 0.35;
+                    }
+                    break;
+                case 1: // Steady rise
+                    change = 0.02 + Math.random() * 0.1;
+                    break;
+                case 2: // Quick dump
+                    if (ipo.daysSinceIPO <= 1) {
+                        change = Math.random() * 0.15;
+                    } else {
+                        change = -0.1 - Math.random() * 0.2;
+                    }
+                    break;
+                case 3: // Volatile
+                    change = (Math.random() - 0.45) * 0.4;
+                    break;
+            }
+
+            ipo.currentPrice = Math.max(1, ipo.currentPrice * (1 + change));
+            ipo.priceHistory.push(ipo.currentPrice);
+
+            if (ipo.priceHistory.length > 10) {
+                ipo.priceHistory.shift();
+            }
+        }
+
+        function drawMiniChart(canvas, priceHistory, isUp) {
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            if (priceHistory.length < 2) return;
+
+            const min = Math.min(...priceHistory) * 0.95;
+            const max = Math.max(...priceHistory) * 1.05;
+            const range = max - min || 1;
+
+            const getX = (i) => (i / (priceHistory.length - 1)) * w;
+            const getY = (price) => h - ((price - min) / range) * h;
+
+            // Area fill
+            const gradient = ctx.createLinearGradient(0, 0, 0, h);
+            if (isUp) {
+                gradient.addColorStop(0, 'rgba(63, 185, 80, 0.3)');
+                gradient.addColorStop(1, 'rgba(63, 185, 80, 0)');
+            } else {
+                gradient.addColorStop(0, 'rgba(248, 81, 73, 0.3)');
+                gradient.addColorStop(1, 'rgba(248, 81, 73, 0)');
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(getX(0), h);
+            for (let i = 0; i < priceHistory.length; i++) {
+                ctx.lineTo(getX(i), getY(priceHistory[i]));
+            }
+            ctx.lineTo(getX(priceHistory.length - 1), h);
+            ctx.closePath();
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Line
+            ctx.beginPath();
+            ctx.moveTo(getX(0), getY(priceHistory[0]));
+            for (let i = 1; i < priceHistory.length; i++) {
+                ctx.lineTo(getX(i), getY(priceHistory[i]));
+            }
+            ctx.strokeStyle = isUp ? '#3fb950' : '#f85149';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Dot at end
+            ctx.beginPath();
+            ctx.arc(getX(priceHistory.length - 1), getY(priceHistory[priceHistory.length - 1]), 4, 0, Math.PI * 2);
+            ctx.fillStyle = isUp ? '#3fb950' : '#f85149';
+            ctx.fill();
+        }
+
+        function formatMoney(value) {
+            const absValue = Math.abs(value);
+            if (absValue >= 1000000) return (value < 0 ? '-' : '') + '$' + (absValue / 1000000).toFixed(1) + 'M';
+            if (absValue >= 1000) return (value < 0 ? '-' : '') + '$' + Math.floor(absValue).toLocaleString();
+            return (value < 0 ? '-' : '') + '$' + absValue.toFixed(0);
+        }
+
+        function renderIPO(ipo, isPortfolio = false) {
+            const change = ((ipo.currentPrice - (isPortfolio ? ipo.buyPrice : ipo.ipoPrice)) / (isPortfolio ? ipo.buyPrice : ipo.ipoPrice)) * 100;
+            const isUp = change >= 0;
+            const priceChanged = ipo.previousPrice !== ipo.currentPrice;
+            const priceWentUp = ipo.currentPrice > ipo.previousPrice;
+
+            const card = document.createElement('div');
+            let cardClasses = 'ipo-card';
+            if (ipo.isHot && !isPortfolio) cardClasses += ' hot';
+            if (isPortfolio) {
+                cardClasses += ' owned';
+                if (isUp) cardClasses += ' profitable';
+                else cardClasses += ' losing';
+            }
+            card.className = cardClasses;
+            card.dataset.id = ipo.id;
+
+            const value = isPortfolio ? ipo.shares * ipo.currentPrice : 0;
+            const pnl = isPortfolio ? (ipo.currentPrice - ipo.buyPrice) * ipo.shares : 0;
+
+            card.innerHTML = `
+                <div class="ipo-header">
+                    <div class="ipo-info">
+                        <div class="ipo-symbol">${ipo.symbol}</div>
+                        <div class="ipo-name">${ipo.name}</div>
+                    </div>
+                    <span class="ipo-badge ${ipo.isHot && !isPortfolio ? 'hot' : isPortfolio ? 'owned' : 'new'}">
+                        ${ipo.isHot && !isPortfolio ? '🔥 Hot' : isPortfolio ? '✓ Owned' : 'New'}
+                    </span>
+                </div>
+                <div class="ipo-chart">
+                    <canvas width="300" height="60"></canvas>
+                </div>
+                <div class="ipo-stats">
+                    <div class="ipo-stat">
+                        <div class="ipo-stat-label">${isPortfolio ? 'Avg Cost' : 'IPO Price'}</div>
+                        <div class="ipo-stat-value">$${(isPortfolio ? ipo.buyPrice : ipo.ipoPrice).toFixed(2)}</div>
+                    </div>
+                    <div class="ipo-stat">
+                        <div class="ipo-stat-label">Current</div>
+                        <div class="ipo-stat-value ${isUp ? 'up' : 'down'} ${priceChanged ? (priceWentUp ? 'price-up' : 'price-down') : ''}">$${ipo.currentPrice.toFixed(2)}</div>
+                    </div>
+                    <div class="ipo-stat">
+                        <div class="ipo-stat-label">${isPortfolio ? 'P/L' : 'Change'}</div>
+                        <div class="ipo-stat-value ${isUp ? 'up' : 'down'}">${isUp ? '+' : ''}${change.toFixed(1)}%</div>
+                    </div>
+                </div>
+                <div class="ipo-actions">
+                    ${isPortfolio ? `
+                        <button class="ipo-btn sell-btn" data-id="${ipo.id}">Sell All (${formatMoney(value)})</button>
+                    ` : `
+                        <button class="ipo-btn buy-btn" data-id="${ipo.id}" ${cash < ipo.currentPrice * 10 ? 'disabled' : ''}>
+                            Buy 10 Shares ($${(ipo.currentPrice * 10).toFixed(0)})
+                        </button>
+                    `}
+                </div>
+            `;
+
+            // Draw chart
+            setTimeout(() => {
+                const canvas = card.querySelector('canvas');
+                if (canvas) {
+                    drawMiniChart(canvas, ipo.priceHistory, isUp);
+                }
+            }, 0);
+
+            return card;
+        }
+
+        function renderUI(animate = false) {
+            // Stats with animation
+            const cashEl = document.getElementById('cash');
+            const holdingsEl = document.getElementById('holdings');
+            const pnlEl = document.getElementById('pnl');
+
+            if (animate) {
+                animateNumber(cashEl, cash, '$');
+            } else {
+                cashEl.textContent = formatMoney(cash);
+            }
+
+            const holdingsValue = portfolio.reduce((sum, ipo) => sum + ipo.shares * ipo.currentPrice, 0);
+            if (animate) {
+                animateNumber(holdingsEl, holdingsValue, '$');
+            } else {
+                holdingsEl.textContent = formatMoney(holdingsValue);
+            }
+
+            if (animate) {
+                const pnlTarget = totalPnL;
+                animateNumber(pnlEl, pnlTarget, totalPnL >= 0 ? '+$' : '-$');
+            } else {
+                pnlEl.textContent = (totalPnL >= 0 ? '+' : '') + formatMoney(totalPnL);
+            }
+            pnlEl.style.color = totalPnL >= 0 ? '#3fb950' : '#f85149';
+
+            document.getElementById('day').textContent = `Day ${day} of ${TOTAL_DAYS}`;
+
+            // Available IPOs
+            const availableContainer = document.getElementById('available-ipos');
+            availableContainer.innerHTML = '';
+            availableIPOs.forEach(ipo => {
+                availableContainer.appendChild(renderIPO(ipo, false));
+            });
+
+            // Portfolio
+            const portfolioContainer = document.getElementById('portfolio-ipos');
+            portfolioContainer.innerHTML = '';
+
+            if (portfolio.length > 0) {
+                document.getElementById('portfolio-section').style.display = 'block';
+                portfolio.forEach(ipo => {
+                    portfolioContainer.appendChild(renderIPO(ipo, true));
+                });
+            } else {
+                document.getElementById('portfolio-section').style.display = 'none';
+            }
+
+            // Attach event listeners
+            document.querySelectorAll('.buy-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => buyIPO(btn.dataset.id, e));
+            });
+            document.querySelectorAll('.sell-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => sellIPO(btn.dataset.id, e));
+            });
+        }
+
+        function buyIPO(id, event) {
+            const ipo = availableIPOs.find(i => i.id == id);
+            if (!ipo) return;
+
+            initAudio();
+            const shares = 10;
+            const cost = ipo.currentPrice * shares;
+
+            if (cash < cost) return;
+
+            cash -= cost;
+
+            // Check if already own this stock
+            const existing = portfolio.find(p => p.id === ipo.id);
+            if (existing) {
+                const totalShares = existing.shares + shares;
+                existing.buyPrice = (existing.buyPrice * existing.shares + ipo.currentPrice * shares) / totalShares;
+                existing.shares = totalShares;
+            } else {
+                portfolio.push({
+                    ...ipo,
+                    owned: true,
+                    shares: shares,
+                    buyPrice: ipo.currentPrice
+                });
+            }
+
+            // Effects
+            playBuy();
+            const card = document.querySelector(`.ipo-card[data-id="${id}"]`);
+            if (card) {
+                card.classList.add('bounce');
+                setTimeout(() => card.classList.remove('bounce'), 400);
+            }
+
+            // Show popup
+            const rect = event.target.getBoundingClientRect();
+            showTradePopup(rect.left + rect.width / 2, rect.top, '+10 shares', 'buy');
+
+            document.getElementById('cash-stat').classList.add('flash-red');
+            setTimeout(() => document.getElementById('cash-stat').classList.remove('flash-red'), 500);
+
+            renderUI(true);
+        }
+
+        function sellIPO(id, event) {
+            const index = portfolio.findIndex(p => p.id == id);
+            if (index === -1) return;
+
+            initAudio();
+            const ipo = portfolio[index];
+            const proceeds = ipo.shares * ipo.currentPrice;
+            const pnl = proceeds - (ipo.shares * ipo.buyPrice);
+            const pnlPercent = ((ipo.currentPrice - ipo.buyPrice) / ipo.buyPrice) * 100;
+
+            cash += proceeds;
+            totalPnL += pnl;
+
+            // Effects based on profit/loss
+            const rect = event.target.getBoundingClientRect();
+            const isProfit = pnl >= 0;
+
+            if (isProfit) {
+                playSellProfit();
+                screenFlash('rgba(63, 185, 80, 0.3)');
+                showTradePopup(rect.left + rect.width / 2, rect.top, '+' + formatMoney(pnl), 'profit');
+
+                document.getElementById('cash-stat').classList.add('flash-green');
+                document.getElementById('pnl-stat').classList.add('flash-green');
+
+                // Big confetti for >20% gain
+                if (pnlPercent >= 20) {
+                    playBigWin();
+                    confetti(window.innerWidth / 2, 100, 60);
+                }
+            } else {
+                playSellLoss();
+                screenFlash('rgba(248, 81, 73, 0.3)');
+                screenShake();
+                showTradePopup(rect.left + rect.width / 2, rect.top, formatMoney(pnl), 'loss');
+
+                document.getElementById('cash-stat').classList.add('flash-red');
+                document.getElementById('pnl-stat').classList.add('flash-red');
+            }
+
+            setTimeout(() => {
+                document.getElementById('cash-stat').classList.remove('flash-green', 'flash-red');
+                document.getElementById('pnl-stat').classList.remove('flash-green', 'flash-red');
+            }, 500);
+
+            portfolio.splice(index, 1);
+            renderUI(true);
+        }
+
+        function showDaySummary(dayPnL) {
+            const summary = document.getElementById('day-summary');
+            document.getElementById('summary-day').textContent = day - 1;
+            document.getElementById('summary-pnl').textContent = (dayPnL >= 0 ? '+' : '') + formatMoney(dayPnL);
+
+            const holdingsValue = portfolio.reduce((sum, ipo) => sum + ipo.shares * ipo.currentPrice, 0);
+            document.getElementById('summary-holdings').textContent = 'Holdings: ' + formatMoney(holdingsValue);
+
+            summary.className = 'day-summary show ' + (dayPnL >= 0 ? 'profit' : 'loss');
+
+            if (dayPnL > 0) {
+                confetti(window.innerWidth / 2, window.innerHeight / 2, 30);
+            }
+
+            setTimeout(() => {
+                summary.classList.remove('show');
+            }, 1800);
+        }
+
+        function nextDay() {
+            if (day >= TOTAL_DAYS) {
+                endGame();
+                return;
+            }
+
+            initAudio();
+            playDayEnd();
+
+            // Calculate holdings value before price changes
+            const holdingsValueBefore = portfolio.reduce((sum, ipo) => sum + ipo.shares * ipo.currentPrice, 0);
+
+            day++;
+
+            // Update all IPO prices
+            [...availableIPOs, ...portfolio].forEach(ipo => {
+                updateIPOPrice(ipo);
+            });
+
+            // Calculate unrealized P/L change
+            const holdingsValueAfter = portfolio.reduce((sum, ipo) => sum + ipo.shares * ipo.currentPrice, 0);
+            const unrealizedChange = holdingsValueAfter - holdingsValueBefore;
+
+            // Remove old IPOs (after 5 days)
+            availableIPOs = availableIPOs.filter(ipo => ipo.daysSinceIPO < 5);
+
+            // Add new IPOs (1-2 per day)
+            const newIPOs = 1 + Math.floor(Math.random() * 2);
+            for (let i = 0; i < newIPOs; i++) {
+                if (availableIPOs.length < 4) {
+                    const newIPO = createIPO();
+                    availableIPOs.push(newIPO);
+                    setTimeout(() => playNewIPO(), 300);
+                }
+            }
+
+            // Day pulse animation
+            const dayEl = document.getElementById('day');
+            dayEl.classList.add('pulse');
+            setTimeout(() => dayEl.classList.remove('pulse'), 600);
+
+            // Show day summary if holdings changed
+            if (portfolio.length > 0) {
+                showDaySummary(unrealizedChange);
+            }
+
+            renderUI(true);
+        }
+
+        function endGame() {
+            initAudio();
+
+            // Force sell all holdings
+            portfolio.forEach(ipo => {
+                const proceeds = ipo.shares * ipo.currentPrice;
+                const pnl = proceeds - (ipo.shares * ipo.buyPrice);
+                cash += proceeds;
+                totalPnL += pnl;
+            });
+            portfolio = [];
+
+            const finalValue = cash;
+
+            if (finalValue > best) {
+                best = finalValue;
+                localStorage.setItem('ipoFrenzyBest', finalValue);
+                playBigWin();
+                confetti(window.innerWidth / 2, 100, 80);
+            }
+
+            const title = document.getElementById('gameover-title');
+            const subtitle = document.getElementById('gameover-subtitle');
+
+            if (totalPnL >= 25000) {
+                title.textContent = '🏆 IPO Legend!';
+                title.className = 'overlay-title win';
+                confetti(window.innerWidth / 2, 100, 100);
+                playBigWin();
+            } else if (totalPnL >= 10000) {
+                title.textContent = '📈 Great Season!';
+                title.className = 'overlay-title win';
+                confetti(window.innerWidth / 2, 100, 50);
+                playSellProfit();
+            } else if (totalPnL >= 0) {
+                title.textContent = '✓ Profitable!';
+                title.className = 'overlay-title win';
+                playSellProfit();
+            } else {
+                title.textContent = '📉 Tough Season';
+                title.className = 'overlay-title lose';
+                playSellLoss();
+                screenShake();
+            }
+
+            subtitle.innerHTML = `
+                Final Value: <strong>${formatMoney(finalValue)}</strong><br>
+                Total P/L: <strong style="color: ${totalPnL >= 0 ? '#3fb950' : '#f85149'}">${totalPnL >= 0 ? '+' : ''}${formatMoney(totalPnL)}</strong><br>
+                Best: ${formatMoney(best)}
+            `;
+
+            document.getElementById('gameover-overlay').classList.add('active');
+        }
+
+        function startGame() {
+            initAudio();
+            playClick();
+
+            cash = STARTING_CASH;
+            day = 1;
+            totalPnL = 0;
+            portfolio = [];
+            usedNames = [];
+
+            // Generate initial IPOs
+            availableIPOs = [];
+            for (let i = 0; i < 3; i++) {
+                availableIPOs.push(createIPO());
+            }
+
+            document.getElementById('start-overlay').classList.remove('active');
+            document.getElementById('gameover-overlay').classList.remove('active');
+
+            renderUI();
+        }
+
+        // Event Listeners
+        document.getElementById('start-btn').addEventListener('click', startGame);
+        document.getElementById('restart-btn').addEventListener('click', startGame);
+        document.getElementById('next-day-btn').addEventListener('click', nextDay);
+    </script>
+</body>
+</html>

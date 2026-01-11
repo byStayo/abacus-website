@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Options Trader</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .container { max-width: 500px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .back-link { color: #7d8590; text-decoration: none; font-size: 14px; }
+        .back-link:hover { color: #58a6ff; }
+        h1 { font-size: 24px; font-weight: 600; color: #e6edf3; }
+
+        /* Animations */
+        @keyframes bounce { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes glow { 0%,100% { box-shadow: 0 0 5px currentColor; } 50% { box-shadow: 0 0 25px currentColor, 0 0 50px currentColor; } }
+        @keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-8px); } 80% { transform: translateX(8px); } }
+        @keyframes countUp { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
+        }
+        @keyframes streakPop { 0% { transform: scale(1); } 30% { transform: scale(1.5); } 100% { transform: scale(1); } }
+        @keyframes flash { 0% { opacity: 0.6; } 100% { opacity: 0; } }
+
+        .confetti {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 1000;
+            animation: confettiFall 1.5s ease-out forwards;
+        }
+
+        .screen-flash {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 999;
+            animation: flash 0.4s ease-out forwards;
+        }
+        .screen-flash.win { background-color: rgba(63, 185, 80, 0.4); }
+        .screen-flash.lose { background-color: rgba(248, 81, 73, 0.4); }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .stat.highlight { animation: bounce 0.4s ease; }
+        .stat-label { font-size: 11px; color: #7d8590; text-transform: uppercase; margin-bottom: 4px; }
+        .stat-value { font-size: 20px; font-weight: 700; transition: all 0.3s; }
+        .stat-value.green { color: #3fb950; }
+        .stat-value.blue { color: #58a6ff; }
+        .stat-value.orange { color: #d29922; }
+        .stat-value.animated { animation: countUp 0.3s ease; }
+
+        .chart-container {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .stock-info { display: flex; align-items: center; gap: 12px; }
+        .stock-symbol { font-size: 18px; font-weight: 700; color: #e6edf3; }
+        .stock-price { font-size: 24px; font-weight: 800; transition: all 0.2s; }
+        .stock-change { font-size: 14px; font-weight: 600; padding: 4px 8px; border-radius: 4px; }
+        .stock-change.up { background-color: rgba(63, 185, 80, 0.2); color: #3fb950; }
+        .stock-change.down { background-color: rgba(248, 81, 73, 0.2); color: #f85149; }
+
+        #chart { width: 100%; height: 180px; display: block; border-radius: 8px; }
+
+        .timer-bar {
+            height: 10px;
+            background-color: #21262d;
+            border-radius: 5px;
+            margin: 16px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3fb950, #58a6ff);
+            border-radius: 5px;
+            transition: width 0.1s linear, background 0.3s;
+        }
+        .timer-fill.warning { background: linear-gradient(90deg, #d29922, #f0883e); }
+        .timer-fill.danger { background: linear-gradient(90deg, #f85149, #da3633); animation: pulse 0.3s infinite; }
+
+        .stake-section { margin-bottom: 16px; }
+        .stake-label { font-size: 12px; color: #7d8590; text-transform: uppercase; margin-bottom: 8px; }
+        .stake-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .stake-btn {
+            background-color: #21262d;
+            border: 2px solid #30363d;
+            color: #c9d1d9;
+            padding: 12px 8px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .stake-btn:hover { background-color: #30363d; transform: translateY(-2px); }
+        .stake-btn.active { background-color: #58a6ff; border-color: #58a6ff; color: #ffffff; transform: scale(1.05); }
+        .stake-btn .amount { display: block; font-size: 11px; color: #7d8590; margin-top: 4px; }
+        .stake-btn.active .amount { color: rgba(255,255,255,0.8); }
+
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .action-btn {
+            padding: 24px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 22px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .action-btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
+            pointer-events: none;
+        }
+        .action-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+        .action-btn .payout { font-size: 12px; font-weight: 500; opacity: 0.9; }
+
+        .call-btn { background: linear-gradient(135deg, #238636 0%, #2ea043 100%); color: #ffffff; }
+        .call-btn:hover:not(:disabled) { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(35, 134, 54, 0.5); }
+        .call-btn.selected { animation: glow 1s infinite; box-shadow: 0 0 30px rgba(63, 185, 80, 0.6); }
+
+        .put-btn { background: linear-gradient(135deg, #da3633 0%, #f85149 100%); color: #ffffff; }
+        .put-btn:hover:not(:disabled) { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(218, 54, 51, 0.5); }
+        .put-btn.selected { animation: glow 1s infinite; box-shadow: 0 0 30px rgba(248, 81, 73, 0.6); }
+
+        .result-display {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .result-display.show { opacity: 1; transform: scale(1); }
+        .result-display.win { background: linear-gradient(135deg, rgba(63, 185, 80, 0.2), rgba(63, 185, 80, 0.1)); border: 2px solid #3fb950; }
+        .result-display.lose { background: linear-gradient(135deg, rgba(248, 81, 73, 0.2), rgba(248, 81, 73, 0.1)); border: 2px solid #f85149; }
+        .result-title { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+        .result-display.win .result-title { color: #3fb950; }
+        .result-display.lose .result-title { color: #f85149; }
+        .result-amount { font-size: 18px; color: #e6edf3; }
+
+        .streak-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #d29922, #f0883e);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 16px;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+        }
+        .streak-display.show { opacity: 1; transform: scale(1); }
+        .streak-display.pop { animation: streakPop 0.4s ease; }
+
+        .history {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .history-title { font-size: 14px; font-weight: 600; color: #e6edf3; margin-bottom: 12px; }
+        .history-trades { display: flex; gap: 6px; flex-wrap: wrap; }
+        .trade-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            animation: slideUp 0.3s ease;
+        }
+        .trade-dot.win { background: linear-gradient(135deg, #238636, #2ea043); color: #fff; }
+        .trade-dot.lose { background: linear-gradient(135deg, #da3633, #f85149); color: #fff; }
+
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(13, 17, 23, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .overlay.active { display: flex; }
+        .overlay-content { text-align: center; padding: 20px; animation: slideUp 0.4s ease; }
+        .overlay-title { font-size: 36px; font-weight: 800; margin-bottom: 8px; color: #e6edf3; }
+        .overlay-subtitle { font-size: 16px; color: #7d8590; margin-bottom: 24px; }
+        .play-btn {
+            background: linear-gradient(135deg, #238636, #2ea043);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 16px 48px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .play-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(35, 134, 54, 0.4); }
+
+        .gameover-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+        .gameover-stat { text-align: center; }
+        .gameover-stat-label { font-size: 12px; color: #7d8590; }
+        .gameover-stat-value { font-size: 24px; font-weight: 700; color: #e6edf3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="position:absolute;top:20px;left:20px;display:flex;align-items:center;gap:8px;font-size:14px;"><a href="/" style="color:#7d8590;text-decoration:none;">Abacus</a><span style="color:#7d8590;opacity:0.5;">/</span><a href="/" style="color:#7d8590;text-decoration:none;">Games</a><span style="color:#7d8590;opacity:0.5;">/</span><span style="color:#e6edf3;">Options Trader</span></div>
+            <h1>Options Trader</h1>
+        </header>
+
+        <div class="stats">
+            <div class="stat" id="portfolio-stat">
+                <div class="stat-label">Portfolio</div>
+                <div class="stat-value green" id="portfolio">$10,000</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Win Rate</div>
+                <div class="stat-value blue" id="winrate">0%</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Trades</div>
+                <div class="stat-value orange" id="trades">0</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <div class="stock-info">
+                    <span class="stock-symbol" id="symbol">AAPL</span>
+                    <span class="stock-price" id="price">$150.00</span>
+                    <span class="stock-change up" id="change">+0.00%</span>
+                </div>
+            </div>
+            <canvas id="chart"></canvas>
+        </div>
+
+        <div class="timer-bar">
+            <div class="timer-fill" id="timer" style="width: 100%;"></div>
+        </div>
+
+        <div class="stake-section">
+            <div class="stake-label">Stake Amount</div>
+            <div class="stake-buttons">
+                <button class="stake-btn" data-percent="10">10%<span class="amount" id="stake10">$1,000</span></button>
+                <button class="stake-btn active" data-percent="25">25%<span class="amount" id="stake25">$2,500</span></button>
+                <button class="stake-btn" data-percent="50">50%<span class="amount" id="stake50">$5,000</span></button>
+                <button class="stake-btn" data-percent="100">ALL IN<span class="amount" id="stake100">$10,000</span></button>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn call-btn" id="call-btn">
+                CALL ↑
+                <span class="payout">Win 1.8x</span>
+            </button>
+            <button class="action-btn put-btn" id="put-btn">
+                PUT ↓
+                <span class="payout">Win 1.8x</span>
+            </button>
+        </div>
+
+        <div class="result-display" id="result">
+            <div class="result-title" id="result-title">WIN!</div>
+            <div class="result-amount" id="result-amount">+$1,800</div>
+        </div>
+
+        <div class="history">
+            <div class="history-title">Trade History</div>
+            <div class="history-trades" id="history"></div>
+        </div>
+    </div>
+
+    <div class="streak-display" id="streak-display">🔥 3 Streak!</div>
+
+    <div class="overlay active" id="start-overlay">
+        <div class="overlay-content">
+            <div class="overlay-title">Options Trader</div>
+            <div class="overlay-subtitle">Predict if the stock goes UP or DOWN<br>Win 1.8x your stake!</div>
+            <button class="play-btn" id="start-btn">Start Trading</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="gameover-overlay">
+        <div class="overlay-content">
+            <div class="overlay-title" id="gameover-title">Game Over</div>
+            <div class="gameover-stats">
+                <div class="gameover-stat">
+                    <div class="gameover-stat-label">Final Portfolio</div>
+                    <div class="gameover-stat-value" id="final-portfolio">$0</div>
+                </div>
+                <div class="gameover-stat">
+                    <div class="gameover-stat-label">Win Rate</div>
+                    <div class="gameover-stat-value" id="final-winrate">0%</div>
+                </div>
+                <div class="gameover-stat">
+                    <div class="gameover-stat-label">Total Trades</div>
+                    <div class="gameover-stat-value" id="final-trades">0</div>
+                </div>
+                <div class="gameover-stat">
+                    <div class="gameover-stat-label">Best Streak</div>
+                    <div class="gameover-stat-value" id="final-streak">0</div>
+                </div>
+            </div>
+            <button class="play-btn" id="restart-btn">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Audio System
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioCtx();
+        }
+
+        function playTone(freq, duration = 0.1, type = 'sine', volume = 0.3) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain).connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playSuccess() {
+            playTone(523, 0.1); // C
+            setTimeout(() => playTone(659, 0.1), 80); // E
+            setTimeout(() => playTone(784, 0.15), 160); // G
+        }
+
+        function playError() {
+            playTone(200, 0.15, 'sawtooth', 0.2);
+            setTimeout(() => playTone(150, 0.2, 'sawtooth', 0.15), 100);
+        }
+
+        function playCoin() {
+            playTone(987, 0.08);
+            setTimeout(() => playTone(1318, 0.12), 60);
+        }
+
+        function playClick() {
+            playTone(600, 0.05, 'sine', 0.2);
+        }
+
+        // Visual Effects
+        function confetti(count = 40) {
+            const colors = ['#3fb950', '#58a6ff', '#d29922', '#f0883e', '#a371f7', '#f85149'];
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'confetti';
+                particle.style.left = (Math.random() * window.innerWidth) + 'px';
+                particle.style.top = '-20px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDelay = (Math.random() * 0.5) + 's';
+                particle.style.animationDuration = (1 + Math.random()) + 's';
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 2000);
+            }
+        }
+
+        function screenFlash(type) {
+            const flash = document.createElement('div');
+            flash.className = 'screen-flash ' + type;
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 400);
+        }
+
+        function screenShake() {
+            document.body.style.animation = 'shake 0.4s ease';
+            setTimeout(() => document.body.style.animation = '', 400);
+        }
+
+        // Game State
+        const canvas = document.getElementById('chart');
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+
+        const STOCKS = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'META', 'NVDA', 'AMD'];
+        const ROUND_TIME = 6000;
+        const PAYOUT = 1.8;
+
+        let portfolio = 10000;
+        let displayedPortfolio = 10000;
+        let stakePercent = 25;
+        let wins = 0;
+        let losses = 0;
+        let streak = 0;
+        let bestStreak = 0;
+        let tradeHistory = [];
+        let priceHistory = [];
+        let currentPrice = 100;
+        let startPrice = 100;
+        let currentStock = 'AAPL';
+        let roundActive = false;
+        let prediction = null;
+        let timerStart = null;
+        let animationId = null;
+        let priceAnimationId = null;
+        let best = parseInt(localStorage.getItem('optionsTraderBest')) || 10000;
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const width = rect.width - 32;
+            canvas.width = width * dpr;
+            canvas.height = 180 * dpr;
+            canvas.style.width = width + 'px';
+            canvas.style.height = '180px';
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function formatMoney(value) {
+            if (value >= 1000000) return '$' + (value / 1000000).toFixed(2) + 'M';
+            if (value >= 1000) return '$' + Math.floor(value).toLocaleString();
+            return '$' + value.toFixed(0);
+        }
+
+        function animateValue(el, start, end, duration = 500, prefix = '$') {
+            const startTime = performance.now();
+            el.classList.add('animated');
+
+            function update(now) {
+                const progress = Math.min((now - startTime) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = start + (end - start) * eased;
+                el.textContent = prefix + Math.floor(current).toLocaleString();
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    el.classList.remove('animated');
+                }
+            }
+            requestAnimationFrame(update);
+        }
+
+        function generatePriceHistory() {
+            priceHistory = [];
+            currentPrice = 80 + Math.random() * 120;
+            startPrice = currentPrice;
+
+            let price = currentPrice;
+            const volatility = 0.015 + Math.random() * 0.02;
+
+            for (let i = 0; i < 25; i++) {
+                const change = (Math.random() - 0.5) * 2 * volatility * price;
+                price = Math.max(10, price + change);
+                priceHistory.unshift(price);
+            }
+            priceHistory.push(currentPrice);
+        }
+
+        function updatePrice() {
+            const volatility = 0.006 + Math.random() * 0.008;
+            const trend = (Math.random() - 0.48) * 2;
+            const change = trend * volatility * currentPrice;
+            currentPrice = Math.max(10, currentPrice + change);
+
+            if (priceHistory.length > 50) priceHistory.shift();
+            priceHistory.push(currentPrice);
+
+            updatePriceDisplay();
+            drawChart();
+        }
+
+        function updatePriceDisplay() {
+            document.getElementById('price').textContent = '$' + currentPrice.toFixed(2);
+            const changePercent = ((currentPrice - startPrice) / startPrice) * 100;
+            const changeEl = document.getElementById('change');
+            changeEl.textContent = (changePercent >= 0 ? '+' : '') + changePercent.toFixed(2) + '%';
+            changeEl.className = 'stock-change ' + (changePercent >= 0 ? 'up' : 'down');
+        }
+
+        function drawChart() {
+            const w = canvas.width / dpr;
+            const h = canvas.height / dpr;
+
+            ctx.clearRect(0, 0, w, h);
+
+            if (priceHistory.length < 2) return;
+
+            const minPrice = Math.min(...priceHistory) * 0.995;
+            const maxPrice = Math.max(...priceHistory) * 1.005;
+            const priceRange = maxPrice - minPrice || 1;
+
+            const getX = (i) => (i / (priceHistory.length - 1)) * w;
+            const getY = (price) => h - ((price - minPrice) / priceRange) * h;
+
+            // Grid
+            ctx.strokeStyle = '#21262d';
+            ctx.lineWidth = 1;
+            for (let i = 1; i < 4; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, h * i / 4);
+                ctx.lineTo(w, h * i / 4);
+                ctx.stroke();
+            }
+
+            // Entry line
+            if (prediction !== null) {
+                const entryY = getY(startPrice);
+                ctx.strokeStyle = '#58a6ff';
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(0, entryY);
+                ctx.lineTo(w, entryY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = '#58a6ff';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.fillText('ENTRY $' + startPrice.toFixed(2), 5, entryY - 6);
+            }
+
+            // Gradient fill
+            const isUp = currentPrice >= startPrice;
+            const gradient = ctx.createLinearGradient(0, 0, 0, h);
+            if (isUp) {
+                gradient.addColorStop(0, 'rgba(63, 185, 80, 0.4)');
+                gradient.addColorStop(1, 'rgba(63, 185, 80, 0)');
+            } else {
+                gradient.addColorStop(0, 'rgba(248, 81, 73, 0.4)');
+                gradient.addColorStop(1, 'rgba(248, 81, 73, 0)');
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(getX(0), h);
+            for (let i = 0; i < priceHistory.length; i++) {
+                ctx.lineTo(getX(i), getY(priceHistory[i]));
+            }
+            ctx.lineTo(getX(priceHistory.length - 1), h);
+            ctx.closePath();
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Line
+            ctx.beginPath();
+            ctx.moveTo(getX(0), getY(priceHistory[0]));
+            for (let i = 1; i < priceHistory.length; i++) {
+                ctx.lineTo(getX(i), getY(priceHistory[i]));
+            }
+            ctx.strokeStyle = isUp ? '#3fb950' : '#f85149';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+
+            // Current price dot with glow
+            const lastX = getX(priceHistory.length - 1);
+            const lastY = getY(currentPrice);
+
+            ctx.shadowColor = isUp ? '#3fb950' : '#f85149';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(lastX, lastY, 8, 0, Math.PI * 2);
+            ctx.fillStyle = isUp ? '#3fb950' : '#f85149';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function updateStakeAmounts() {
+            const amounts = [10, 25, 50, 100];
+            amounts.forEach(percent => {
+                const amount = Math.floor(portfolio * percent / 100);
+                document.getElementById('stake' + percent).textContent = formatMoney(amount);
+            });
+        }
+
+        function updateStats() {
+            const portfolioEl = document.getElementById('portfolio');
+            if (displayedPortfolio !== portfolio) {
+                animateValue(portfolioEl, displayedPortfolio, portfolio, 400);
+                displayedPortfolio = portfolio;
+                document.getElementById('portfolio-stat').classList.add('highlight');
+                setTimeout(() => document.getElementById('portfolio-stat').classList.remove('highlight'), 400);
+            }
+
+            const totalTrades = wins + losses;
+            const winRate = totalTrades > 0 ? Math.round((wins / totalTrades) * 100) : 0;
+            document.getElementById('winrate').textContent = winRate + '%';
+            document.getElementById('trades').textContent = totalTrades;
+            updateStakeAmounts();
+        }
+
+        function updateHistory() {
+            const historyEl = document.getElementById('history');
+            historyEl.innerHTML = '';
+            tradeHistory.slice(-20).forEach((trade, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'trade-dot ' + (trade.won ? 'win' : 'lose');
+                dot.textContent = trade.won ? '✓' : '✗';
+                dot.style.animationDelay = (i * 0.05) + 's';
+                historyEl.appendChild(dot);
+            });
+        }
+
+        function updateStreak() {
+            const streakEl = document.getElementById('streak-display');
+            if (streak >= 2) {
+                streakEl.textContent = '🔥 ' + streak + ' Streak!';
+                streakEl.classList.add('show');
+                streakEl.classList.remove('pop');
+                void streakEl.offsetWidth;
+                streakEl.classList.add('pop');
+            } else {
+                streakEl.classList.remove('show');
+            }
+        }
+
+        function startRound() {
+            currentStock = STOCKS[Math.floor(Math.random() * STOCKS.length)];
+            document.getElementById('symbol').textContent = currentStock;
+
+            generatePriceHistory();
+            updatePriceDisplay();
+            drawChart();
+
+            document.getElementById('result').classList.remove('show', 'win', 'lose');
+            document.getElementById('call-btn').disabled = false;
+            document.getElementById('put-btn').disabled = false;
+            document.getElementById('call-btn').classList.remove('selected');
+            document.getElementById('put-btn').classList.remove('selected');
+
+            roundActive = true;
+            prediction = null;
+
+            // Animate prices while waiting
+            if (priceAnimationId) clearInterval(priceAnimationId);
+            priceAnimationId = setInterval(updatePrice, 300);
+        }
+
+        function makePrediction(type) {
+            if (!roundActive || prediction !== null) return;
+
+            initAudio();
+            playClick();
+
+            prediction = type;
+            startPrice = currentPrice;
+            timerStart = Date.now();
+
+            document.getElementById('call-btn').disabled = true;
+            document.getElementById('put-btn').disabled = true;
+
+            if (type === 'call') {
+                document.getElementById('call-btn').classList.add('selected');
+            } else {
+                document.getElementById('put-btn').classList.add('selected');
+            }
+
+            runTimer();
+        }
+
+        function runTimer() {
+            const elapsed = Date.now() - timerStart;
+            const remaining = Math.max(0, 1 - elapsed / ROUND_TIME);
+
+            const timerEl = document.getElementById('timer');
+            timerEl.style.width = (remaining * 100) + '%';
+
+            if (remaining < 0.2) {
+                timerEl.classList.add('danger');
+                timerEl.classList.remove('warning');
+            } else if (remaining < 0.4) {
+                timerEl.classList.add('warning');
+                timerEl.classList.remove('danger');
+            } else {
+                timerEl.classList.remove('warning', 'danger');
+            }
+
+            if (elapsed % 250 < 50) {
+                updatePrice();
+            }
+
+            if (remaining > 0) {
+                animationId = requestAnimationFrame(runTimer);
+            } else {
+                endRound();
+            }
+        }
+
+        function endRound() {
+            roundActive = false;
+            cancelAnimationFrame(animationId);
+            clearInterval(priceAnimationId);
+
+            document.getElementById('call-btn').classList.remove('selected');
+            document.getElementById('put-btn').classList.remove('selected');
+            document.getElementById('timer').classList.remove('warning', 'danger');
+
+            const stake = Math.floor(portfolio * stakePercent / 100);
+            const priceWentUp = currentPrice > startPrice;
+            const won = (prediction === 'call' && priceWentUp) || (prediction === 'put' && !priceWentUp);
+
+            const resultEl = document.getElementById('result');
+            const resultTitle = document.getElementById('result-title');
+            const resultAmount = document.getElementById('result-amount');
+
+            // Delay for dramatic effect
+            setTimeout(() => {
+                if (won) {
+                    const winnings = Math.floor(stake * PAYOUT);
+                    portfolio += winnings - stake;
+                    wins++;
+                    streak++;
+                    if (streak > bestStreak) bestStreak = streak;
+
+                    resultEl.classList.remove('lose');
+                    resultEl.classList.add('win', 'show');
+                    resultTitle.textContent = streak >= 3 ? '🔥 ON FIRE!' : '💰 PROFIT!';
+                    resultAmount.textContent = '+' + formatMoney(winnings - stake);
+
+                    playSuccess();
+                    playCoin();
+                    screenFlash('win');
+                    if (streak >= 3) confetti(50);
+                    else confetti(25);
+                } else {
+                    portfolio -= stake;
+                    losses++;
+                    streak = 0;
+
+                    resultEl.classList.remove('win');
+                    resultEl.classList.add('lose', 'show');
+                    resultTitle.textContent = '📉 LOSS';
+                    resultAmount.textContent = '-' + formatMoney(stake);
+
+                    playError();
+                    screenFlash('lose');
+                    screenShake();
+                }
+
+                tradeHistory.push({ won, amount: stake });
+                updateStats();
+                updateHistory();
+                updateStreak();
+
+                if (portfolio > best) {
+                    best = portfolio;
+                    localStorage.setItem('optionsTraderBest', portfolio);
+                }
+
+                if (portfolio < 100) {
+                    setTimeout(gameOver, 1500);
+                } else {
+                    setTimeout(startRound, 2000);
+                }
+            }, 500);
+        }
+
+        function gameOver() {
+            document.getElementById('final-portfolio').textContent = formatMoney(portfolio);
+            const totalTrades = wins + losses;
+            document.getElementById('final-winrate').textContent = totalTrades > 0 ? Math.round((wins / totalTrades) * 100) + '%' : '0%';
+            document.getElementById('final-trades').textContent = totalTrades;
+            document.getElementById('final-streak').textContent = bestStreak;
+
+            const title = document.getElementById('gameover-title');
+            if (portfolio >= 10000) {
+                title.textContent = '📈 Profitable!';
+                title.style.color = '#3fb950';
+                confetti(60);
+            } else {
+                title.textContent = '📉 Margin Call';
+                title.style.color = '#f85149';
+            }
+
+            document.getElementById('gameover-overlay').classList.add('active');
+        }
+
+        function startGame() {
+            initAudio();
+            portfolio = 10000;
+            displayedPortfolio = 10000;
+            wins = 0;
+            losses = 0;
+            streak = 0;
+            bestStreak = 0;
+            tradeHistory = [];
+
+            updateStats();
+            updateHistory();
+            updateStreak();
+
+            document.getElementById('start-overlay').classList.remove('active');
+            document.getElementById('gameover-overlay').classList.remove('active');
+            document.getElementById('timer').style.width = '100%';
+
+            startRound();
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.stake-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                playClick();
+                document.querySelectorAll('.stake-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                stakePercent = parseInt(btn.dataset.percent);
+            });
+        });
+
+        document.getElementById('call-btn').addEventListener('click', () => makePrediction('call'));
+        document.getElementById('put-btn').addEventListener('click', () => makePrediction('put'));
+        document.getElementById('start-btn').addEventListener('click', startGame);
+        document.getElementById('restart-btn').addEventListener('click', startGame);
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            drawChart();
+        });
+
+        resizeCanvas();
+        generatePriceHistory();
+        drawChart();
+        updateStats();
+    </script>
+</body>
+</html>

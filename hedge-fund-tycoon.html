@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Hedge Fund Tycoon</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .back-link {
+            color: #7d8590;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: #58a6ff;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #e6edf3;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-box {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #7d8590;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #58a6ff;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-value.money {
+            color: #3fb950;
+        }
+
+        .stat-sub {
+            font-size: 12px;
+            color: #7d8590;
+            margin-top: 4px;
+        }
+
+        .main-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 700px) {
+            .main-area {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .click-area {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+        }
+
+        .click-btn {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
+            border: 4px solid #3fb950;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.1s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 8px 32px rgba(35, 134, 54, 0.3);
+        }
+
+        .click-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(35, 134, 54, 0.4);
+        }
+
+        .click-btn:active {
+            transform: scale(0.95);
+        }
+
+        .click-btn .amount {
+            font-size: 24px;
+        }
+
+        .click-multiplier {
+            font-size: 13px;
+            color: #7d8590;
+            margin-top: 16px;
+        }
+
+        .shop {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .shop-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e6edf3;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background-color: #21262d;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.15s;
+        }
+
+        .shop-item:hover {
+            background-color: #30363d;
+        }
+
+        .shop-item.locked {
+            opacity: 0.5;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e6edf3;
+            margin-bottom: 4px;
+        }
+
+        .item-desc {
+            font-size: 12px;
+            color: #7d8590;
+        }
+
+        .item-owned {
+            font-size: 11px;
+            color: #58a6ff;
+            margin-top: 2px;
+        }
+
+        .buy-btn {
+            background-color: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .buy-btn:hover:not(:disabled) {
+            background-color: #2ea043;
+        }
+
+        .buy-btn:disabled {
+            background-color: #30363d;
+            color: #7d8590;
+            cursor: not-allowed;
+        }
+
+        .milestones {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .milestones-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e6edf3;
+            margin-bottom: 16px;
+        }
+
+        .milestone-track {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .milestone {
+            padding: 8px 16px;
+            background-color: #21262d;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #7d8590;
+            border: 1px solid #30363d;
+        }
+
+        .milestone.achieved {
+            background-color: #238636;
+            color: white;
+            border-color: #3fb950;
+        }
+
+        .milestone.current {
+            border-color: #58a6ff;
+            color: #58a6ff;
+        }
+
+        .prestige-area {
+            margin-top: 24px;
+            padding: 20px;
+            background: linear-gradient(135deg, #2d2050 0%, #161b22 100%);
+            border: 1px solid #6e40c9;
+            border-radius: 12px;
+            text-align: center;
+            display: none;
+        }
+
+        .prestige-area.visible {
+            display: block;
+        }
+
+        .prestige-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #b388ff;
+            margin-bottom: 8px;
+        }
+
+        .prestige-desc {
+            font-size: 14px;
+            color: #7d8590;
+            margin-bottom: 16px;
+        }
+
+        .prestige-btn {
+            background: linear-gradient(135deg, #6e40c9 0%, #8957e5 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .prestige-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 32px rgba(110, 64, 201, 0.4);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid #21262d;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: #484f58;
+        }
+
+        .click-popup {
+            position: fixed;
+            pointer-events: none;
+            font-size: 20px;
+            font-weight: 700;
+            color: #3fb950;
+            text-shadow: 0 2px 10px rgba(63, 185, 80, 0.5);
+            animation: floatUp 1s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-60px); }
+        }
+
+        .auto-buy-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background-color: #21262d;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .auto-buy-toggle label {
+            font-size: 13px;
+            color: #c9d1d9;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background-color: #30363d;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .toggle-switch.active {
+            background-color: #238636;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background-color: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.2s;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(20px);
+        }
+
+        .milestone-progress {
+            margin-top: 16px;
+            padding: 12px;
+            background-color: #21262d;
+            border-radius: 8px;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: #7d8590;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #30363d;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #238636, #3fb950);
+            transition: width 0.3s ease;
+        }
+
+        .milestone-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #238636, #3fb950);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 8px 32px rgba(35, 134, 54, 0.4);
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 1000;
+            animation: confetti-fall 2.5s ease-out forwards;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg) scale(0.5); opacity: 0; }
+        }
+
+        /* Button pulse on afford */
+        .shop-item:not(.locked) .buy-btn {
+            animation: affordPulse 2s ease-in-out infinite;
+        }
+        @keyframes affordPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(35, 134, 54, 0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(35, 134, 54, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="position:absolute;top:20px;left:20px;display:flex;align-items:center;gap:8px;font-size:14px;"><a href="/" style="color:#7d8590;text-decoration:none;">Abacus</a><span style="color:#7d8590;opacity:0.5;">/</span><a href="/" style="color:#7d8590;text-decoration:none;">Games</a><span style="color:#7d8590;opacity:0.5;">/</span><span style="color:#e6edf3;">Hedge Fund Tycoon</span></div>
+            <h1>Hedge Fund Tycoon</h1>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-box">
+                <div class="stat-label">Assets Under Management</div>
+                <div class="stat-value money" id="money">$10,000</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Income</div>
+                <div class="stat-value" id="income">$0/s</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Employees</div>
+                <div class="stat-value" id="employees">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Prestige</div>
+                <div class="stat-value" id="prestige" style="color: #b388ff;">x1.0</div>
+            </div>
+        </div>
+
+        <div class="main-area">
+            <div class="click-area">
+                <button class="click-btn" id="click-btn">
+                    <span>TRADE</span>
+                    <span class="amount" id="click-amount">+$100</span>
+                </button>
+                <div class="click-multiplier">Click power: <span id="click-power">$100</span></div>
+            </div>
+
+            <div class="shop">
+                <div class="shop-title">Hire & Upgrade</div>
+                <div class="auto-buy-toggle">
+                    <label for="auto-buy">Auto-buy cheapest upgrade</label>
+                    <div class="toggle-switch" id="auto-buy-toggle"></div>
+                </div>
+                <div id="shop-items"></div>
+            </div>
+        </div>
+
+        <div class="milestones">
+            <div class="milestones-title">Milestones</div>
+            <div class="milestone-track" id="milestones"></div>
+            <div class="milestone-progress" id="milestone-progress">
+                <div class="progress-label">
+                    <span>Next: <span id="next-milestone">$100K</span></span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="prestige-area" id="prestige-area">
+            <div class="prestige-title">Ready to IPO?</div>
+            <div class="prestige-desc">Reset your fund but gain a permanent <span id="prestige-bonus">+10%</span> bonus to all earnings!</div>
+            <button class="prestige-btn" id="prestige-btn">Go Public (IPO)</button>
+        </div>
+
+        <footer>
+            <p class="footer-text">Hedge Fund Tycoon — Build your empire from $10K to $1B+</p>
+        </footer>
+    </div>
+
+    <script>
+        // Audio system
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(freq, duration = 0.1, type = 'sine', volume = 0.3) {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain).connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function playClick() {
+            playTone(400, 0.05, 'square', 0.15);
+            setTimeout(() => playTone(500, 0.04, 'square', 0.1), 30);
+        }
+
+        function playBuy() {
+            playTone(600, 0.08, 'sine', 0.2);
+            setTimeout(() => playTone(800, 0.06, 'sine', 0.15), 50);
+        }
+
+        function playMilestone() {
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((freq, i) => {
+                setTimeout(() => playTone(freq, 0.15, 'sine', 0.25), i * 80);
+            });
+        }
+
+        function playPrestige() {
+            const notes = [523, 659, 784, 880, 1047, 1319, 1568];
+            notes.forEach((freq, i) => {
+                setTimeout(() => playTone(freq, 0.2, 'sine', 0.3), i * 100);
+            });
+        }
+
+        // Confetti
+        function confetti(count = 50) {
+            const colors = ['#3fb950', '#58a6ff', '#b388ff', '#ffd700', '#f0883e'];
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'confetti';
+                particle.style.left = (Math.random() * window.innerWidth) + 'px';
+                particle.style.top = '-20px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDelay = (Math.random() * 0.5) + 's';
+                particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 2500);
+            }
+        }
+
+        const SHOP_ITEMS = [
+            { id: 'analyst', name: 'Junior Analyst', desc: '+$50/sec', baseCost: 500, baseIncome: 50, owned: 0 },
+            { id: 'trader', name: 'Trader', desc: '+$200/sec', baseCost: 2500, baseIncome: 200, owned: 0 },
+            { id: 'quant', name: 'Quant Developer', desc: '+$1,000/sec', baseCost: 15000, baseIncome: 1000, owned: 0 },
+            { id: 'pm', name: 'Portfolio Manager', desc: '+$5,000/sec', baseCost: 100000, baseIncome: 5000, owned: 0 },
+            { id: 'office', name: 'Office Upgrade', desc: '+50% click power', baseCost: 50000, clickMult: 1.5, owned: 0, maxOwned: 10 },
+            { id: 'algo', name: 'Trading Algorithm', desc: '+100% income', baseCost: 500000, incomeMult: 2, owned: 0, maxOwned: 5 },
+            { id: 'fund', name: 'New Fund Launch', desc: '+$50,000/sec', baseCost: 5000000, baseIncome: 50000, owned: 0 },
+            { id: 'hq', name: 'Global HQ', desc: '+$500,000/sec', baseCost: 100000000, baseIncome: 500000, owned: 0 },
+        ];
+
+        const MILESTONES = [
+            { amount: 100000, label: '$100K' },
+            { amount: 1000000, label: '$1M' },
+            { amount: 10000000, label: '$10M' },
+            { amount: 100000000, label: '$100M' },
+            { amount: 1000000000, label: '$1B' },
+            { amount: 10000000000, label: '$10B' },
+        ];
+
+        let gameState = {
+            money: 10000,
+            totalEarned: 10000,
+            clickPower: 100,
+            clickMultiplier: 1,
+            incomeMultiplier: 1,
+            prestigeLevel: 0,
+            prestigeMultiplier: 1,
+            items: {},
+            lastUpdate: Date.now(),
+            autoBuy: false,
+            achievedMilestones: []
+        };
+
+        let cachedIncome = 0; // Cache income to avoid recalculating every frame
+        let incomeDirty = true; // Flag to recalculate when items change
+
+        const moneyEl = document.getElementById('money');
+        const incomeEl = document.getElementById('income');
+        const employeesEl = document.getElementById('employees');
+        const prestigeEl = document.getElementById('prestige');
+        const clickBtn = document.getElementById('click-btn');
+        const clickAmountEl = document.getElementById('click-amount');
+        const clickPowerEl = document.getElementById('click-power');
+        const shopItemsEl = document.getElementById('shop-items');
+        const milestonesEl = document.getElementById('milestones');
+        const prestigeArea = document.getElementById('prestige-area');
+        const prestigeBonus = document.getElementById('prestige-bonus');
+        const prestigeBtn = document.getElementById('prestige-btn');
+        const autoBuyToggle = document.getElementById('auto-buy-toggle');
+        const nextMilestoneEl = document.getElementById('next-milestone');
+        const progressPercentEl = document.getElementById('progress-percent');
+        const progressFillEl = document.getElementById('progress-fill');
+        const milestoneProgressEl = document.getElementById('milestone-progress');
+
+        function formatMoney(value) {
+            if (value >= 1e12) return '$' + (value / 1e12).toFixed(2) + 'T';
+            if (value >= 1e9) return '$' + (value / 1e9).toFixed(2) + 'B';
+            if (value >= 1e6) return '$' + (value / 1e6).toFixed(2) + 'M';
+            if (value >= 1e3) return '$' + (value / 1e3).toFixed(1) + 'K';
+            return '$' + Math.floor(value).toLocaleString();
+        }
+
+        function getItemCost(item) {
+            const owned = gameState.items[item.id] || 0;
+            return Math.floor(item.baseCost * Math.pow(1.12, owned)); // Reduced from 1.15 for better balance
+        }
+
+        function getIncome() {
+            // Use cached value if not dirty
+            if (!incomeDirty) return cachedIncome;
+
+            let income = 0;
+            SHOP_ITEMS.forEach(item => {
+                if (item.baseIncome) {
+                    const owned = gameState.items[item.id] || 0;
+                    income += item.baseIncome * owned;
+                }
+            });
+            cachedIncome = income * gameState.incomeMultiplier * gameState.prestigeMultiplier;
+            incomeDirty = false;
+            return cachedIncome;
+        }
+
+        function showMilestoneNotification(milestone) {
+            const notification = document.createElement('div');
+            notification.className = 'milestone-notification';
+            notification.textContent = `🎉 Milestone reached: ${milestone}!`;
+            document.body.appendChild(notification);
+            playMilestone();
+            confetti(40);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function checkMilestones() {
+            MILESTONES.forEach(m => {
+                if (gameState.totalEarned >= m.amount && !gameState.achievedMilestones.includes(m.label)) {
+                    gameState.achievedMilestones.push(m.label);
+                    showMilestoneNotification(m.label);
+                }
+            });
+        }
+
+        function updateMilestoneProgress() {
+            // Find next unachieved milestone
+            let prevAmount = 0;
+            for (const m of MILESTONES) {
+                if (gameState.totalEarned < m.amount) {
+                    const progress = ((gameState.totalEarned - prevAmount) / (m.amount - prevAmount)) * 100;
+                    nextMilestoneEl.textContent = m.label;
+                    progressPercentEl.textContent = Math.floor(progress) + '%';
+                    progressFillEl.style.width = Math.min(100, progress) + '%';
+                    milestoneProgressEl.style.display = 'block';
+                    return;
+                }
+                prevAmount = m.amount;
+            }
+            // All milestones achieved
+            milestoneProgressEl.style.display = 'none';
+        }
+
+        function getEmployees() {
+            let count = 0;
+            ['analyst', 'trader', 'quant', 'pm'].forEach(id => {
+                count += gameState.items[id] || 0;
+            });
+            return count;
+        }
+
+        function getClickPower() {
+            return gameState.clickPower * gameState.clickMultiplier * gameState.prestigeMultiplier;
+        }
+
+        function updateUI() {
+            moneyEl.textContent = formatMoney(gameState.money);
+            incomeEl.textContent = formatMoney(getIncome()) + '/s';
+            employeesEl.textContent = getEmployees();
+            prestigeEl.textContent = 'x' + gameState.prestigeMultiplier.toFixed(1);
+            clickAmountEl.textContent = '+' + formatMoney(getClickPower());
+            clickPowerEl.textContent = formatMoney(getClickPower());
+
+            renderShop();
+            renderMilestones();
+            updateMilestoneProgress();
+
+            // Update auto-buy toggle state
+            if (gameState.autoBuy) {
+                autoBuyToggle.classList.add('active');
+            } else {
+                autoBuyToggle.classList.remove('active');
+            }
+
+            if (gameState.totalEarned >= 1000000000) {
+                prestigeArea.classList.add('visible');
+                const bonus = (gameState.prestigeLevel + 1) * 10;
+                prestigeBonus.textContent = '+' + bonus + '%';
+            }
+        }
+
+        function renderShop() {
+            shopItemsEl.innerHTML = '';
+            SHOP_ITEMS.forEach(item => {
+                const owned = gameState.items[item.id] || 0;
+                const cost = getItemCost(item);
+                const canBuy = gameState.money >= cost && (!item.maxOwned || owned < item.maxOwned);
+                const maxed = item.maxOwned && owned >= item.maxOwned;
+
+                const div = document.createElement('div');
+                div.className = 'shop-item' + (canBuy ? '' : ' locked');
+                div.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-desc">${item.desc}</div>
+                        <div class="item-owned">Owned: ${owned}${item.maxOwned ? '/' + item.maxOwned : ''}</div>
+                    </div>
+                    <button class="buy-btn" ${canBuy ? '' : 'disabled'}>
+                        ${maxed ? 'MAXED' : formatMoney(cost)}
+                    </button>
+                `;
+
+                if (canBuy) {
+                    div.querySelector('.buy-btn').addEventListener('click', () => buyItem(item));
+                }
+
+                shopItemsEl.appendChild(div);
+            });
+        }
+
+        function renderMilestones() {
+            milestonesEl.innerHTML = '';
+            let nextFound = false;
+            MILESTONES.forEach(m => {
+                const achieved = gameState.totalEarned >= m.amount;
+                const isCurrent = !achieved && !nextFound;
+                if (isCurrent) nextFound = true;
+
+                const div = document.createElement('div');
+                div.className = 'milestone' + (achieved ? ' achieved' : '') + (isCurrent ? ' current' : '');
+                div.textContent = m.label;
+                milestonesEl.appendChild(div);
+            });
+        }
+
+        function buyItem(item) {
+            const cost = getItemCost(item);
+            if (gameState.money < cost) return;
+            if (item.maxOwned && (gameState.items[item.id] || 0) >= item.maxOwned) return;
+
+            playBuy();
+            gameState.money -= cost;
+            gameState.items[item.id] = (gameState.items[item.id] || 0) + 1;
+
+            if (item.clickMult) {
+                gameState.clickMultiplier *= item.clickMult;
+            }
+            if (item.incomeMult) {
+                gameState.incomeMultiplier *= item.incomeMult;
+            }
+
+            incomeDirty = true; // Recalculate income on next call
+            updateUI();
+            saveGame();
+        }
+
+        function autoBuyUpgrade() {
+            if (!gameState.autoBuy) return;
+
+            // Find cheapest affordable item
+            let cheapest = null;
+            let cheapestCost = Infinity;
+
+            SHOP_ITEMS.forEach(item => {
+                const owned = gameState.items[item.id] || 0;
+                const cost = getItemCost(item);
+                const canBuy = gameState.money >= cost && (!item.maxOwned || owned < item.maxOwned);
+
+                if (canBuy && cost < cheapestCost) {
+                    cheapest = item;
+                    cheapestCost = cost;
+                }
+            });
+
+            if (cheapest) {
+                buyItem(cheapest);
+            }
+        }
+
+        function doClick(e) {
+            initAudio();
+            playClick();
+
+            const amount = getClickPower();
+            gameState.money += amount;
+            gameState.totalEarned += amount;
+
+            // Show popup
+            const popup = document.createElement('div');
+            popup.className = 'click-popup';
+            popup.textContent = '+' + formatMoney(amount);
+            popup.style.left = (e.clientX - 30) + 'px';
+            popup.style.top = (e.clientY - 20) + 'px';
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 1000);
+
+            updateUI();
+        }
+
+        function doPrestige() {
+            if (gameState.totalEarned < 1000000000) return;
+
+            playPrestige();
+            confetti(80);
+
+            gameState.prestigeLevel++;
+            gameState.prestigeMultiplier = 1 + (gameState.prestigeLevel * 0.1);
+            gameState.money = 10000;
+            gameState.totalEarned = 10000;
+            gameState.clickMultiplier = 1;
+            gameState.incomeMultiplier = 1;
+            gameState.items = {};
+            gameState.achievedMilestones = [];
+            incomeDirty = true;
+
+            prestigeArea.classList.remove('visible');
+            updateUI();
+            saveGame();
+        }
+
+        function gameLoop() {
+            const now = Date.now();
+            const delta = (now - gameState.lastUpdate) / 1000;
+            gameState.lastUpdate = now;
+
+            const income = getIncome() * delta;
+            gameState.money += income;
+            gameState.totalEarned += income;
+
+            checkMilestones();
+            autoBuyUpgrade();
+            updateUI();
+        }
+
+        function saveGame() {
+            localStorage.setItem('hedgeFundTycoon', JSON.stringify(gameState));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('hedgeFundTycoon');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    gameState = { ...gameState, ...data };
+
+                    // Calculate offline earnings
+                    const now = Date.now();
+                    const offlineTime = (now - gameState.lastUpdate) / 1000;
+                    if (offlineTime > 0 && offlineTime < 86400) { // Max 24 hours
+                        const offlineEarnings = getIncome() * offlineTime * 0.5; // 50% offline efficiency
+                        gameState.money += offlineEarnings;
+                        gameState.totalEarned += offlineEarnings;
+                    }
+                    gameState.lastUpdate = now;
+                } catch(e) {
+                    console.error('Failed to load save');
+                }
+            }
+        }
+
+        clickBtn.addEventListener('click', doClick);
+        prestigeBtn.addEventListener('click', doPrestige);
+
+        autoBuyToggle.addEventListener('click', () => {
+            gameState.autoBuy = !gameState.autoBuy;
+            updateUI();
+            saveGame();
+        });
+
+        loadGame();
+        updateUI();
+
+        setInterval(gameLoop, 100);
+        setInterval(saveGame, 5000);
+    </script>
+</body>
+</html>

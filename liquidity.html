@@ -1,0 +1,4628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIQUIDITY - The Money Supply Simulator</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta name="description" content="Educational Federal Reserve simulator. Learn monetary policy, money supply, and the Divisia aggregates through interactive gameplay.">
+    <meta name="theme-color" content="#0d1117">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Enhanced dark theme colors */
+            --bg-primary: #0a0e14;
+            --bg-secondary: #12181f;
+            --bg-tertiary: #1a2230;
+            --bg-card: rgba(26, 34, 48, 0.7);
+            --bg-card-hover: rgba(30, 40, 56, 0.8);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.12);
+            --text-primary: #f0f4f8;
+            --text-secondary: #8b9cb3;
+            --text-muted: #5a6a7e;
+
+            /* Vibrant accent colors */
+            --accent-green: #00d68f;
+            --accent-green-glow: rgba(0, 214, 143, 0.3);
+            --accent-red: #ff6b6b;
+            --accent-red-glow: rgba(255, 107, 107, 0.3);
+            --accent-yellow: #ffc857;
+            --accent-yellow-glow: rgba(255, 200, 87, 0.3);
+            --accent-blue: #4dabf7;
+            --accent-blue-glow: rgba(77, 171, 247, 0.3);
+            --accent-purple: #b197fc;
+            --accent-purple-glow: rgba(177, 151, 252, 0.3);
+            --accent-cyan: #22d3ee;
+            --accent-cyan-glow: rgba(34, 211, 238, 0.3);
+            --accent-orange: #ff922b;
+
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #22d3ee, #4dabf7, #b197fc);
+            --gradient-success: linear-gradient(135deg, #00d68f, #22d3ee);
+            --gradient-danger: linear-gradient(135deg, #ff6b6b, #ff922b);
+            --gradient-card: linear-gradient(145deg, rgba(26, 34, 48, 0.9), rgba(18, 24, 31, 0.9));
+
+            /* Shadows */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 20px rgba(34, 211, 238, 0.15);
+
+            /* Spacing */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            background-image:
+                radial-gradient(ellipse at top, rgba(34, 211, 238, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(177, 151, 252, 0.03) 0%, transparent 50%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-light);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* ============ TOOLTIPS & INFO ICONS ============ */
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            font-size: 10px;
+            color: var(--text-muted);
+            cursor: help;
+            margin-left: 6px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .info-icon:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            border-color: var(--accent-cyan);
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            white-space: normal;
+            width: 220px;
+            max-width: 280px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-lg);
+            pointer-events: none;
+            text-align: left;
+            font-weight: 400;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--border-light);
+        }
+
+        .info-icon:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tooltip-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Position tooltips to left/right on edges */
+        .info-icon.tooltip-left .tooltip {
+            left: auto;
+            right: 0;
+            transform: none;
+        }
+
+        .info-icon.tooltip-left .tooltip::after {
+            left: auto;
+            right: 12px;
+        }
+
+        .info-icon.tooltip-right .tooltip {
+            left: 0;
+            transform: none;
+        }
+
+        .info-icon.tooltip-right .tooltip::after {
+            left: 12px;
+        }
+
+        /* ============ START SCREEN ============ */
+        .start-screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .start-screen.hidden {
+            display: none;
+        }
+
+        .nav-breadcrumb {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .breadcrumb-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .breadcrumb-link:hover {
+            color: var(--accent-blue);
+        }
+
+        .breadcrumb-sep {
+            color: var(--text-muted);
+        }
+
+        .breadcrumb-current {
+            color: var(--text-primary);
+        }
+
+        .game-logo {
+            font-size: 72px;
+            font-weight: 800;
+            letter-spacing: -3px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .game-tagline {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .game-description {
+            max-width: 600px;
+            margin-bottom: 32px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .game-description p {
+            margin-bottom: 16px;
+        }
+
+        .concept-box {
+            background: var(--gradient-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 32px;
+            max-width: 500px;
+            text-align: left;
+            box-shadow: var(--shadow-md);
+        }
+
+        .concept-box h3 {
+            color: var(--accent-cyan);
+            margin-bottom: 12px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .concept-box p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .money-preview {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .money-tier {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            text-align: center;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .money-tier:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-light);
+        }
+
+        .money-tier-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .money-tier-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .m1 { color: var(--accent-green); }
+        .m2 { color: var(--accent-blue); }
+        .m3 { color: var(--accent-purple); }
+        .m4 { color: var(--accent-cyan); }
+
+        /* Game Settings */
+        .game-settings {
+            background: var(--gradient-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 32px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: var(--shadow-md);
+        }
+
+        .settings-title {
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .setting-label {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .setting-select {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .setting-select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .start-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            color: var(--bg-primary);
+            border: none;
+            padding: 16px 48px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px var(--accent-cyan-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 40px var(--accent-cyan-glow);
+        }
+
+        .start-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .tutorial-btn {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--accent-purple);
+            color: var(--accent-purple);
+            padding: 16px 32px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .tutorial-btn:hover {
+            background: rgba(177, 151, 252, 0.15);
+            box-shadow: 0 0 16px var(--accent-purple-glow);
+            transform: translateY(-2px);
+        }
+
+        /* ============ GAME CONTAINER ============ */
+        .game-container {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .game-container .panel {
+            animation: fadeInUp 0.5s ease backwards;
+        }
+
+        .game-container .panel:nth-child(1) { animation-delay: 0.1s; }
+        .game-container .panel:nth-child(2) { animation-delay: 0.2s; }
+        .game-container .panel:nth-child(3) { animation-delay: 0.3s; }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: var(--gradient-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .help-btn {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .help-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 12px var(--accent-cyan-glow);
+        }
+
+        .turn-info {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .turn-badge {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            border: 1px solid var(--border);
+        }
+
+        .turn-badge span {
+            color: var(--accent-blue);
+            font-weight: 700;
+        }
+
+        .rating-badge {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .rating-a { color: var(--accent-green); }
+        .rating-b { color: var(--accent-blue); }
+        .rating-c { color: var(--accent-yellow); }
+        .rating-d { color: var(--accent-orange); }
+        .rating-f { color: var(--accent-red); }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+        }
+
+        /* Panels - Glass Morphism */
+        .panel {
+            background: var(--gradient-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .panel:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .panel-toggle {
+            display: flex;
+            gap: 4px;
+        }
+
+        .toggle-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-btn:first-child {
+            border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+        }
+
+        .toggle-btn:last-child {
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        .toggle-btn:hover:not(.active) {
+            background: var(--bg-card-hover);
+            border-color: var(--border-light);
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            border-color: var(--accent-blue);
+            color: var(--bg-primary);
+            font-weight: 600;
+            box-shadow: 0 0 12px var(--accent-blue-glow);
+        }
+
+        /* Dashboard */
+        .dashboard {
+            margin-bottom: 20px;
+        }
+
+        .aggregate-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .aggregate-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            contain: content;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .aggregate-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-light);
+        }
+
+        .aggregate-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .aggregate-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .aggregate-card.m1::before { background: var(--accent-green); }
+        .aggregate-card.m2::before { background: var(--accent-blue); }
+        .aggregate-card.m3::before { background: var(--accent-purple); }
+        .aggregate-card.m4::before { background: var(--accent-cyan); }
+
+        .aggregate-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .aggregate-value {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .aggregate-change {
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .sparkline-container {
+            height: 30px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .sparkline-container canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .change-up { color: var(--accent-green); }
+        .change-down { color: var(--accent-red); }
+        .change-neutral { color: var(--text-muted); }
+
+        /* Stock Market Card */
+        .market-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .market-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .market-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-light);
+        }
+
+        .market-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .market-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .market-change {
+            font-size: 12px;
+        }
+
+        .market-sparkline {
+            height: 30px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        /* Chart Panel */
+        .chart-panel {
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 200px;
+            display: block;
+            overflow: hidden;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 10;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .legend-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .legend-item.disabled {
+            opacity: 0.4;
+            text-decoration: line-through;
+        }
+
+        .legend-item:active {
+            transform: scale(0.95);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* Comparison View */
+        .comparison-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .comparison-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            overflow: hidden;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .comparison-panel:hover {
+            border-color: var(--border-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .comparison-title {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comparison-title .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .simple-sum .dot { background: var(--accent-yellow); }
+        .divisia .dot { background: var(--accent-cyan); }
+
+        .comparison-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .comparison-growth {
+            font-size: 14px;
+        }
+
+        .divergence-alert {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid var(--accent-red);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .divergence-alert.warning {
+            background: rgba(210, 153, 34, 0.1);
+            border-color: var(--accent-yellow);
+        }
+
+        .divergence-alert.hidden {
+            display: none;
+        }
+
+        .divergence-icon {
+            font-size: 20px;
+        }
+
+        /* Dual Mandate Panel */
+        .dual-mandate-panel {
+            background: var(--gradient-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-md);
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+        }
+
+        .dual-mandate-panel.sweet-spot {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 30px var(--accent-green-glow), var(--shadow-md);
+        }
+
+        .dual-mandate-panel.warning {
+            border-color: var(--accent-yellow);
+            box-shadow: 0 0 20px var(--accent-yellow-glow), var(--shadow-md);
+        }
+
+        .dual-mandate-panel.danger {
+            border-color: var(--accent-red);
+            box-shadow: 0 0 20px var(--accent-red-glow), var(--shadow-md);
+        }
+
+        .mandate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mandate-title {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .sweet-spot-badge {
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+        }
+
+        .sweet-spot-badge.achieved {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+        }
+
+        /* Main Balance Display */
+        .mandate-balance {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .mandate-metric {
+            text-align: center;
+        }
+
+        .mandate-metric .metric-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .mandate-metric .metric-value {
+            font-size: 36px;
+            font-weight: 800;
+            margin: 8px 0;
+        }
+
+        .inflation-side .metric-value { color: var(--accent-red); }
+        .unemployment-side .metric-value { color: var(--accent-blue); }
+
+        .mandate-metric .metric-bar-container {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            position: relative;
+            overflow: visible;
+            margin: 8px 0;
+        }
+
+        .mandate-metric .metric-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s, background 0.3s;
+        }
+
+        .inflation-side .metric-bar {
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-yellow), var(--accent-red));
+        }
+
+        .unemployment-side .metric-bar {
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-yellow), var(--accent-red));
+        }
+
+        .target-marker {
+            position: absolute;
+            top: -4px;
+            width: 2px;
+            height: 16px;
+            background: var(--text-primary);
+            transform: translateX(-50%);
+        }
+
+        .target-marker::after {
+            content: '▼';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8px;
+            color: var(--text-muted);
+        }
+
+        .mandate-metric .metric-target {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* Balance Scale - Animated Beam */
+        .balance-scale {
+            text-align: center;
+            padding: 20px 16px;
+            position: relative;
+        }
+
+        .scale-beam-container {
+            position: relative;
+            width: 120px;
+            height: 80px;
+            margin: 0 auto;
+        }
+
+        /* Center pivot/fulcrum */
+        .scale-pivot {
+            position: absolute;
+            left: 50%;
+            top: 30px;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 12px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            z-index: 3;
+        }
+
+        .scale-pivot::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 20px;
+            background: var(--text-secondary);
+            border-radius: 2px;
+        }
+
+        /* The tilting beam */
+        .scale-beam {
+            position: absolute;
+            left: 50%;
+            top: 34px;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-red), var(--text-secondary), var(--accent-blue));
+            transform-origin: center center;
+            transform: translateX(-50%) rotate(0deg);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 2px;
+            z-index: 2;
+        }
+
+        /* Weight pans */
+        .scale-pan {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+
+        .scale-pan.left {
+            left: 0;
+            top: 28px;
+            background: var(--accent-red);
+            color: white;
+            box-shadow: 0 4px 12px var(--accent-red-glow);
+        }
+
+        .scale-pan.right {
+            right: 0;
+            top: 28px;
+            background: var(--accent-blue);
+            color: white;
+            box-shadow: 0 4px 12px var(--accent-blue-glow);
+        }
+
+        /* Strings connecting beam to pans */
+        .scale-string {
+            position: absolute;
+            width: 2px;
+            background: var(--text-muted);
+            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
+        }
+
+        .scale-string.left {
+            left: 13px;
+            top: 38px;
+            height: 4px;
+        }
+
+        .scale-string.right {
+            right: 13px;
+            top: 38px;
+            height: 4px;
+        }
+
+        .scale-tilt {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        /* Success state when balanced */
+        .balance-scale.balanced .scale-beam {
+            background: var(--accent-green);
+            box-shadow: 0 0 12px var(--accent-green-glow);
+        }
+
+        .balance-scale.balanced .scale-pivot {
+            background: var(--accent-green);
+        }
+
+        .balance-scale.balanced .scale-pan {
+            background: var(--accent-green);
+            box-shadow: 0 4px 12px var(--accent-green-glow);
+        }
+
+        /* Policy Stance Meter */
+        .policy-stance-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .stance-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            width: 50px;
+        }
+
+        .stance-label.left { text-align: right; }
+        .stance-label.right { text-align: left; }
+
+        .stance-meter {
+            flex: 1;
+            height: 24px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stance-zone {
+            flex: 1;
+        }
+
+        .stance-zone.tight { background: rgba(88, 166, 255, 0.3); }
+        .stance-zone.neutral { background: rgba(63, 185, 80, 0.3); }
+        .stance-zone.loose { background: rgba(248, 81, 73, 0.3); }
+
+        .stance-indicator {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: left 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Trade-off Hint */
+        .tradeoff-hint {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(88, 166, 255, 0.1);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .tradeoff-hint.raising {
+            background: rgba(88, 166, 255, 0.15);
+        }
+
+        .tradeoff-hint.lowering {
+            background: rgba(248, 81, 73, 0.15);
+        }
+
+        /* Secondary Indicators */
+        .secondary-indicators {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .secondary-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .secondary-card:hover {
+            border-color: var(--border-light);
+        }
+
+        .secondary-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .secondary-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .secondary-target {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* Policy Controls */
+        .policy-section {
+            margin-bottom: 20px;
+        }
+
+        .policy-tool {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .policy-tool:hover {
+            border-color: var(--border-light);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .policy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .policy-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .policy-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .policy-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 8px;
+            background: linear-gradient(90deg, var(--bg-tertiary), var(--bg-secondary));
+            border-radius: 4px;
+            outline: none;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .policy-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 8px var(--accent-blue-glow);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .policy-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 16px var(--accent-blue-glow);
+        }
+
+        .policy-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 2px 8px var(--accent-blue-glow);
+        }
+
+        .policy-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* QE/QT Program Status */
+        .program-status {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--accent-purple);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 0 12px var(--accent-purple-glow);
+            transition: all 0.3s ease;
+        }
+
+        .program-status.inactive {
+            border-color: var(--border);
+            opacity: 0.6;
+            box-shadow: none;
+        }
+
+        .program-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .program-name {
+            font-size: 12px;
+            color: var(--accent-purple);
+            font-weight: 600;
+        }
+
+        .program-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--accent-purple);
+            color: var(--bg-primary);
+        }
+
+        .program-badge.inactive {
+            background: var(--text-muted);
+        }
+
+        .program-details {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .program-bar {
+            height: 4px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .program-fill {
+            height: 100%;
+            background: var(--accent-purple);
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .action-btn {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            border-color: var(--accent-blue);
+            background: rgba(77, 171, 247, 0.15);
+            transform: translateY(-1px);
+            box-shadow: 0 0 12px var(--accent-blue-glow);
+        }
+
+        .action-btn.qe {
+            border-color: var(--accent-purple);
+        }
+
+        .action-btn.qe:hover {
+            background: rgba(177, 151, 252, 0.15);
+            box-shadow: 0 0 12px var(--accent-purple-glow);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .end-turn-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            border: none;
+            color: var(--bg-primary);
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px var(--accent-cyan-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .end-turn-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .end-turn-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px var(--accent-cyan-glow);
+        }
+
+        .end-turn-btn:hover::before {
+            left: 100%;
+        }
+
+        .end-turn-btn:active {
+            transform: translateY(0);
+        }
+
+        /* News Ticker */
+        .news-panel {
+            margin-top: 20px;
+        }
+
+        .news-feed {
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .news-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-quarter {
+            color: var(--text-muted);
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .news-text {
+            color: var(--text-secondary);
+        }
+
+        .news-text.crisis {
+            color: var(--accent-red);
+        }
+
+        .news-text.positive {
+            color: var(--accent-green);
+        }
+
+        .news-text.warning {
+            color: var(--accent-yellow);
+        }
+
+        /* Money Components Detail */
+        .components-panel {
+            margin-top: 20px;
+        }
+
+        .component-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+        }
+
+        .component-row:last-child {
+            border-bottom: none;
+        }
+
+        .component-name {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .component-weight {
+            font-size: 10px;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        .component-value {
+            font-weight: 600;
+        }
+
+        /* Fed Balance Sheet */
+        .balance-sheet {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            margin-top: 12px;
+            transition: border-color 0.2s ease;
+        }
+
+        .balance-sheet:hover {
+            border-color: var(--border-light);
+        }
+
+        .balance-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .balance-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .balance-change {
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--gradient-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .modal-title.crisis {
+            color: var(--accent-red);
+        }
+
+        .modal-title.success {
+            color: var(--accent-green);
+        }
+
+        .modal-text {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            border: none;
+            color: var(--bg-primary);
+            padding: 12px 32px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px var(--accent-blue-glow);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--accent-blue-glow);
+        }
+
+        /* QE/QT Config Modal */
+        .config-modal {
+            text-align: left;
+        }
+
+        .config-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--accent-purple);
+        }
+
+        .config-row {
+            margin-bottom: 16px;
+        }
+
+        .config-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .config-input {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 16px;
+        }
+
+        .config-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .config-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .config-preview {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .config-preview-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .config-preview-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-purple);
+        }
+
+        .config-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .config-buttons button {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .config-cancel {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .config-confirm {
+            background: var(--accent-purple);
+            border: none;
+            color: white;
+        }
+
+        /* Tutorial Overlay */
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 900;
+            display: none;
+        }
+
+        .tutorial-overlay.active {
+            display: block;
+        }
+
+        .tutorial-highlight {
+            position: absolute;
+            border: 3px solid var(--accent-purple);
+            border-radius: 12px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+            pointer-events: none;
+            transition: all 0.3s;
+        }
+
+        .tutorial-tooltip {
+            position: absolute;
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent-purple);
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 350px;
+            z-index: 901;
+        }
+
+        .tutorial-step {
+            font-size: 11px;
+            color: var(--accent-purple);
+            margin-bottom: 8px;
+        }
+
+        .tutorial-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .tutorial-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .tutorial-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .tutorial-skip {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            padding: 8px 12px;
+        }
+
+        .tutorial-next {
+            background: var(--accent-purple);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Game Over Screen */
+        .game-over {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s;
+            padding: 20px;
+        }
+
+        .game-over.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .final-rating {
+            font-size: 100px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .final-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .final-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+            max-width: 600px;
+        }
+
+        .final-stat {
+            text-align: center;
+        }
+
+        .final-stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .final-stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .final-chart {
+            background: var(--gradient-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 24px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: var(--shadow-md);
+        }
+
+        .final-chart-title {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .final-chart canvas {
+            width: 100%;
+            height: 150px;
+        }
+
+        .play-again-btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            border: none;
+            color: var(--bg-primary);
+            padding: 16px 48px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px var(--accent-cyan-glow);
+        }
+
+        .play-again-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px var(--accent-cyan-glow);
+        }
+
+        /* ============ RESPONSIVE DESIGN ============ */
+
+        /* Tablet - 1024px */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .aggregate-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .market-row {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .game-container {
+                padding: 16px;
+            }
+        }
+
+        /* Small Tablet - 768px */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 12px;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px 16px;
+            }
+
+            .top-bar-left {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .turn-info {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .panel {
+                padding: 16px;
+                border-radius: 10px;
+            }
+
+            .panel-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .panel-toggle {
+                width: 100%;
+            }
+
+            .toggle-btn {
+                flex: 1;
+                padding: 8px 12px;
+            }
+
+            .market-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            /* Dual Mandate Mobile */
+            .dual-mandate-panel {
+                padding: 16px;
+            }
+
+            .mandate-balance {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .balance-scale {
+                order: -1;
+                padding: 12px 0;
+                border-bottom: 1px solid var(--border);
+                margin-bottom: 8px;
+            }
+
+            .scale-icon {
+                font-size: 40px;
+            }
+
+            .mandate-metric {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                text-align: left;
+                padding: 12px;
+                background: var(--bg-tertiary);
+                border-radius: 8px;
+            }
+
+            .mandate-metric .metric-label {
+                grid-column: 1;
+                align-self: center;
+            }
+
+            .mandate-metric .metric-value {
+                grid-column: 2;
+                text-align: right;
+                font-size: 28px;
+                margin: 0;
+            }
+
+            .mandate-metric .metric-bar-container {
+                grid-column: 1 / -1;
+                margin: 8px 0 4px;
+            }
+
+            .mandate-metric .metric-target {
+                grid-column: 1 / -1;
+                text-align: center;
+            }
+
+            .policy-stance-container {
+                padding: 12px;
+            }
+
+            .stance-label {
+                width: 40px;
+                font-size: 9px;
+            }
+
+            .comparison-view {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-value {
+                font-size: 26px;
+            }
+
+            /* Chart adjustments */
+            .chart-canvas {
+                height: 160px;
+            }
+
+            .chart-legend {
+                justify-content: center;
+            }
+        }
+
+        /* Mobile - 600px */
+        @media (max-width: 600px) {
+            body {
+                font-size: 14px;
+            }
+
+            .game-container {
+                padding: 10px;
+            }
+
+            .game-logo {
+                font-size: 42px;
+                letter-spacing: -2px;
+            }
+
+            .game-tagline {
+                font-size: 12px;
+                letter-spacing: 2px;
+            }
+
+            .game-description {
+                font-size: 13px;
+            }
+
+            .concept-box {
+                padding: 16px;
+            }
+
+            .game-settings {
+                padding: 16px;
+            }
+
+            .setting-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .setting-select {
+                width: 100%;
+            }
+
+            .start-buttons {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .start-btn, .tutorial-btn {
+                width: 100%;
+            }
+
+            /* Top bar mobile */
+            .top-bar {
+                padding: 10px 12px;
+                border-radius: 10px;
+            }
+
+            .game-title {
+                font-size: 20px;
+            }
+
+            .turn-badge {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+
+            .rating-badge {
+                font-size: 20px;
+            }
+
+            /* Aggregate cards */
+            .aggregate-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .aggregate-card {
+                padding: 12px;
+            }
+
+            .aggregate-label {
+                font-size: 10px;
+            }
+
+            .aggregate-value {
+                font-size: 18px;
+            }
+
+            .aggregate-change {
+                font-size: 10px;
+            }
+
+            .sparkline-container {
+                height: 24px;
+            }
+
+            /* Market cards */
+            .market-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .market-card {
+                padding: 12px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            .market-value {
+                font-size: 20px;
+            }
+
+            .market-sparkline {
+                width: 100%;
+                height: 24px;
+                margin-top: 8px;
+            }
+
+            /* Dual Mandate Mobile Small */
+            .mandate-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .mandate-title {
+                font-size: 12px;
+            }
+
+            .mandate-metric .metric-value {
+                font-size: 24px;
+            }
+
+            .policy-stance-container {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .stance-label {
+                width: auto;
+            }
+
+            .stance-meter {
+                order: 3;
+                width: 100%;
+                height: 20px;
+            }
+
+            .tradeoff-hint {
+                padding: 10px;
+                font-size: 11px;
+            }
+
+            .secondary-indicators {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .secondary-card {
+                padding: 10px;
+            }
+
+            .secondary-value {
+                font-size: 18px;
+            }
+
+            /* Chart */
+            .chart-container {
+                padding: 12px;
+            }
+
+            .chart-canvas {
+                height: 140px;
+            }
+
+            .legend-item {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+
+            /* Comparison view */
+            .comparison-panel {
+                padding: 12px;
+            }
+
+            .comparison-value {
+                font-size: 22px;
+            }
+
+            .comparison-growth {
+                font-size: 12px;
+            }
+
+            /* Policy controls */
+            .policy-tool {
+                padding: 12px;
+            }
+
+            .policy-name {
+                font-size: 12px;
+            }
+
+            .policy-value {
+                font-size: 16px;
+            }
+
+            .policy-slider {
+                height: 8px;
+            }
+
+            .policy-slider::-webkit-slider-thumb {
+                width: 22px;
+                height: 22px;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .action-btn {
+                padding: 10px 8px;
+                font-size: 11px;
+            }
+
+            .end-turn-btn {
+                padding: 14px;
+                font-size: 14px;
+            }
+
+            /* News feed */
+            .news-feed {
+                max-height: 120px;
+            }
+
+            .news-item {
+                padding: 8px;
+                font-size: 11px;
+            }
+
+            /* Components panel */
+            .component-row {
+                padding: 6px 0;
+                font-size: 11px;
+            }
+
+            /* Final stats */
+            .final-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .final-stat-value {
+                font-size: 18px;
+            }
+
+            .final-stat-label {
+                font-size: 10px;
+            }
+
+            /* Modals */
+            .modal {
+                padding: 20px;
+                max-width: 90%;
+            }
+
+            .modal-icon {
+                font-size: 40px;
+            }
+
+            .modal-title {
+                font-size: 20px;
+            }
+
+            .modal-text {
+                font-size: 13px;
+            }
+
+            /* Help modal */
+            .help-content h3 {
+                font-size: 14px;
+            }
+
+            .help-content p, .help-content li {
+                font-size: 12px;
+            }
+
+            /* QE/QT Modal */
+            .qe-config {
+                padding: 16px;
+            }
+
+            .config-slider {
+                height: 8px;
+            }
+
+            .config-slider::-webkit-slider-thumb {
+                width: 22px;
+                height: 22px;
+            }
+        }
+
+        /* Extra Small Mobile - 400px */
+        @media (max-width: 400px) {
+            .game-logo {
+                font-size: 36px;
+            }
+
+            .aggregate-value {
+                font-size: 16px;
+            }
+
+            .mandate-metric .metric-value {
+                font-size: 20px;
+            }
+
+            .market-value {
+                font-size: 18px;
+            }
+
+            .comparison-value {
+                font-size: 18px;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .secondary-indicators {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Touch-friendly adjustments */
+        @media (hover: none) and (pointer: coarse) {
+            .policy-slider::-webkit-slider-thumb {
+                width: 28px;
+                height: 28px;
+            }
+
+            .action-btn {
+                min-height: 48px;
+            }
+
+            .toggle-btn {
+                min-height: 44px;
+            }
+
+            .legend-item {
+                min-height: 40px;
+                padding: 10px 14px;
+            }
+
+            .start-btn, .tutorial-btn {
+                min-height: 52px;
+            }
+
+            .end-turn-btn {
+                min-height: 52px;
+                font-size: 15px;
+            }
+
+            .help-btn {
+                width: 44px;
+                height: 44px;
+            }
+
+            .modal-btn {
+                min-height: 48px;
+                padding: 14px 36px;
+            }
+
+            /* Remove hover effects on touch */
+            .aggregate-card:hover,
+            .market-card:hover,
+            .comparison-panel:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+            /* Add active states for touch feedback */
+            .action-btn:active,
+            .toggle-btn:active,
+            .end-turn-btn:active {
+                transform: scale(0.98);
+                opacity: 0.9;
+            }
+        }
+
+        /* Landscape mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .start-screen {
+                padding: 20px;
+            }
+
+            .game-logo {
+                font-size: 36px;
+                margin-bottom: 4px;
+            }
+
+            .game-tagline {
+                margin-bottom: 16px;
+            }
+
+            .game-description {
+                display: none;
+            }
+
+            .concept-box {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Start Screen -->
+    <div class="start-screen" id="start-screen">
+        <div class="nav-breadcrumb">
+            <a href="/" class="breadcrumb-link">Abacus</a>
+            <span class="breadcrumb-sep">/</span>
+            <a href="/" class="breadcrumb-link">Games</a>
+            <span class="breadcrumb-sep">/</span>
+            <span class="breadcrumb-current">Liquidity</span>
+        </div>
+
+        <h1 class="game-logo">LIQUIDITY</h1>
+        <p class="game-tagline">The Money Supply Simulator</p>
+
+        <div class="game-description">
+            <p>You are the newly appointed Chair of the Federal Reserve. Your mission: manage the nation's money supply to maintain economic stability.</p>
+            <p>But here's the secret the textbooks don't teach — <strong>not all money is created equal</strong>.</p>
+        </div>
+
+        <div class="concept-box">
+            <h3>The Divisia Difference</h3>
+            <p>A dollar in your pocket isn't the same as a dollar locked in a 5-year CD. The old Fed just added them up equally. You'll use <strong>Divisia-weighted aggregates</strong> to see the TRUE liquidity in the system.</p>
+            <div class="money-preview">
+                <div class="money-tier">
+                    <div class="money-tier-label">M1</div>
+                    <div class="money-tier-value m1">Cash</div>
+                </div>
+                <div class="money-tier">
+                    <div class="money-tier-label">M2</div>
+                    <div class="money-tier-value m2">+ Savings</div>
+                </div>
+                <div class="money-tier">
+                    <div class="money-tier-label">M3</div>
+                    <div class="money-tier-value m3">+ Large CDs</div>
+                </div>
+                <div class="money-tier">
+                    <div class="money-tier-label">M4</div>
+                    <div class="money-tier-value m4">+ T-Bills</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-settings">
+            <div class="settings-title">Game Settings</div>
+            <div class="setting-row">
+                <span class="setting-label">Game Length</span>
+                <select class="setting-select" id="setting-length">
+                    <option value="12">Short (3 years)</option>
+                    <option value="20" selected>Standard (5 years)</option>
+                    <option value="40">Extended (10 years)</option>
+                    <option value="80">Marathon (20 years)</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <span class="setting-label">Difficulty</span>
+                <select class="setting-select" id="setting-difficulty">
+                    <option value="easy">Easy (forgiving)</option>
+                    <option value="normal" selected>Normal</option>
+                    <option value="hard">Hard (volatile)</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <span class="setting-label">Starting Scenario</span>
+                <select class="setting-select" id="setting-scenario">
+                    <option value="normal" selected>Goldilocks (2024)</option>
+                    <option value="inflation">Inflation Crisis (6%)</option>
+                    <option value="recession">Recession (8% unemployment)</option>
+                    <option value="zerobound">Zero Bound (0% rates)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="start-buttons">
+            <button class="tutorial-btn" onclick="startTutorial()">Tutorial</button>
+            <button class="start-btn" onclick="startGame()">Begin Your Term</button>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div class="game-container" id="game-container">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <div class="game-title">LIQUIDITY</div>
+                <button class="help-btn" onclick="showHelp()" title="Help">?</button>
+            </div>
+            <div class="turn-info">
+                <div class="turn-badge">
+                    <span id="current-quarter">Q1</span> <span id="current-year">2024</span>
+                </div>
+                <div class="turn-badge">
+                    Turn <span id="current-turn">1</span> / <span id="max-turns">20</span>
+                </div>
+                <div class="rating-badge rating-a" id="current-rating">A</div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Column - Dashboard -->
+            <div class="left-column">
+                <!-- Money Supply Dashboard -->
+                <div class="panel dashboard">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            Money Supply Aggregates
+                            <span class="info-icon">?
+                                <div class="tooltip">
+                                    <div class="tooltip-title">Money Supply</div>
+                                    M1-M4 measure different types of money. M1 is most liquid (cash you can spend immediately). Higher numbers include less liquid assets like savings and CDs.
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="aggregate-grid">
+                        <div class="aggregate-card m1">
+                            <div class="aggregate-label">
+                                M1 (Currency + Checking)
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">M1 - Most Liquid</div>
+                                        Physical cash plus checking accounts. This is money people can spend immediately, making it the most responsive to Fed policy.
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="aggregate-value" id="m1-value">$4.2T</div>
+                            <div class="aggregate-change change-up" id="m1-change">+2.1%</div>
+                            <div class="sparkline-container">
+                                <canvas id="sparkline-m1"></canvas>
+                            </div>
+                        </div>
+                        <div class="aggregate-card m2">
+                            <div class="aggregate-label">
+                                M2 (+ Savings)
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">M2 - Near Money</div>
+                                        M1 plus savings accounts and small CDs. These can be converted to cash quickly but aren't instantly spendable.
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="aggregate-value" id="m2-value">$18.7T</div>
+                            <div class="aggregate-change change-up" id="m2-change">+1.8%</div>
+                            <div class="sparkline-container">
+                                <canvas id="sparkline-m2"></canvas>
+                            </div>
+                        </div>
+                        <div class="aggregate-card m3">
+                            <div class="aggregate-label">
+                                M3 (+ Large CDs)
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">M3 - Broad Money</div>
+                                        M2 plus large time deposits and institutional money funds. This shows money held by businesses and institutions.
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="aggregate-value" id="m3-value">$22.1T</div>
+                            <div class="aggregate-change change-neutral" id="m3-change">+0.5%</div>
+                            <div class="sparkline-container">
+                                <canvas id="sparkline-m3"></canvas>
+                            </div>
+                        </div>
+                        <div class="aggregate-card m4">
+                            <div class="aggregate-label">
+                                M4 (+ T-Bills)
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">M4 - Broadest</div>
+                                        M3 plus Treasury bills and commercial paper. The broadest measure of liquidity in the economy.
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="aggregate-value" id="m4-value">$28.4T</div>
+                            <div class="aggregate-change change-down" id="m4-change">-0.3%</div>
+                            <div class="sparkline-container">
+                                <canvas id="sparkline-m4"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Market Row: Stock Market + Key Metrics -->
+                    <div class="market-row">
+                        <div class="market-card">
+                            <div class="market-label">S&P 500 Index</div>
+                            <div class="market-value" id="stock-value">4,500</div>
+                            <div class="market-change change-up" id="stock-change">+1.2%</div>
+                            <div class="market-sparkline">
+                                <canvas id="sparkline-stock"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card">
+                            <div class="market-label">
+                                Fed Balance Sheet
+                                <span class="info-icon">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Balance Sheet</div>
+                                        Total assets held by the Fed. QE increases this (buying bonds), QT decreases it (selling bonds). Affects liquidity in the system.
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="market-value" id="balance-value">$8.9T</div>
+                            <div class="market-change" id="balance-change">Base</div>
+                        </div>
+                        <div class="market-card">
+                            <div class="market-label">
+                                VIX (Volatility)
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Fear Index</div>
+                                        Measures market fear/uncertainty. &lt;15 = Calm, 15-25 = Normal, 25-35 = Elevated, &gt;35 = High fear. Spikes during crises.
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="market-value" id="vix-value">15</div>
+                            <div class="market-change change-neutral" id="vix-label">Normal</div>
+                        </div>
+                    </div>
+
+                    <!-- Main Chart -->
+                    <div class="chart-container">
+                        <canvas id="main-chart" class="chart-canvas"></canvas>
+                        <div class="chart-legend" id="chart-legend">
+                            <div class="legend-item" data-series="simpleSum" onclick="toggleSeries('simpleSum')">
+                                <span class="legend-dot" style="background: var(--accent-yellow)"></span>
+                                Simple Sum
+                            </div>
+                            <div class="legend-item" data-series="divisia" onclick="toggleSeries('divisia')">
+                                <span class="legend-dot" style="background: var(--accent-cyan)"></span>
+                                Divisia M4
+                            </div>
+                            <div class="legend-item" data-series="stock" onclick="toggleSeries('stock')">
+                                <span class="legend-dot" style="background: var(--accent-green)"></span>
+                                S&P 500
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comparison View -->
+                    <div class="comparison-view" style="margin-top: 20px;">
+                        <div class="comparison-panel simple-sum">
+                            <div class="comparison-title">
+                                <span class="dot"></span>
+                                Simple Sum M4
+                                <span class="info-icon">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Simple Sum</div>
+                                        Traditional measure that adds all money equally. A dollar in savings counts the same as a dollar in your pocket. Can be misleading!
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="comparison-value" id="simple-sum-value">$28.4T</div>
+                            <div class="comparison-growth" id="simple-sum-growth">
+                                YoY Growth: <span class="change-up">+5.2%</span>
+                            </div>
+                        </div>
+                        <div class="comparison-panel divisia">
+                            <div class="comparison-title">
+                                <span class="dot"></span>
+                                Divisia M4 (Weighted)
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Divisia Index</div>
+                                        Weights money by how easily it can be spent. Cash gets full weight, locked CDs get less. Shows TRUE liquidity available to the economy.
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="comparison-value" id="divisia-value">$19.8T</div>
+                            <div class="comparison-growth" id="divisia-growth">
+                                YoY Growth: <span class="change-down">-1.3%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divergence-alert hidden" id="divergence-alert">
+                        <span class="divergence-icon">⚠️</span>
+                        <span><strong>Divergence Alert:</strong> Simple sum shows growth but Divisia shows contraction.</span>
+                    </div>
+                </div>
+
+                <!-- Dual Mandate Panel -->
+                <div class="dual-mandate-panel" id="dual-mandate-panel">
+                    <div class="mandate-header">
+                        <span class="mandate-title">
+                            Dual Mandate
+                            <span class="info-icon">?
+                                <div class="tooltip">
+                                    <div class="tooltip-title">Fed's Dual Mandate</div>
+                                    The Fed must balance TWO conflicting goals: low inflation (~2%) AND low unemployment (~4%). Tightening policy fights inflation but raises unemployment. Loosening helps jobs but risks inflation.
+                                </div>
+                            </span>
+                        </span>
+                        <span class="sweet-spot-badge" id="sweet-spot-badge">Sweet Spot: &#10007;</span>
+                    </div>
+
+                    <!-- Main Balance Display -->
+                    <div class="mandate-balance">
+                        <!-- Inflation Side -->
+                        <div class="mandate-metric inflation-side">
+                            <div class="metric-label">
+                                Inflation
+                                <span class="info-icon tooltip-right">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Inflation Rate</div>
+                                        Target: 2%. Rising prices erode purchasing power. Raise rates to fight high inflation (but this slows the economy).
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="metric-value" id="inflation-value">2.4%</div>
+                            <div class="metric-bar-container">
+                                <div class="metric-bar" id="inflation-bar" style="width: 24%;"></div>
+                                <div class="target-marker" style="left: 20%;"></div>
+                            </div>
+                            <div class="metric-target">Target: 2%</div>
+                        </div>
+
+                        <!-- Balance Scale - Animated Beam -->
+                        <div class="balance-scale" id="balance-scale">
+                            <div class="scale-beam-container">
+                                <div class="scale-pivot"></div>
+                                <div class="scale-beam" id="scale-beam"></div>
+                                <div class="scale-string left" id="string-left"></div>
+                                <div class="scale-string right" id="string-right"></div>
+                                <div class="scale-pan left" id="pan-left">INF</div>
+                                <div class="scale-pan right" id="pan-right">UNE</div>
+                            </div>
+                            <div class="scale-tilt" id="scale-tilt">Balanced</div>
+                        </div>
+
+                        <!-- Unemployment Side -->
+                        <div class="mandate-metric unemployment-side">
+                            <div class="metric-label">
+                                Unemployment
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Unemployment Rate</div>
+                                        Target: ~4% (natural rate). Lower rates to stimulate job growth (but this risks inflation). Too low can overheat the economy.
+                                    </div>
+                                </span>
+                            </div>
+                            <div class="metric-value" id="unemployment-value">3.8%</div>
+                            <div class="metric-bar-container">
+                                <div class="metric-bar" id="unemployment-bar" style="width: 25%;"></div>
+                                <div class="target-marker" style="left: 27%;"></div>
+                            </div>
+                            <div class="metric-target">Target: 4%</div>
+                        </div>
+                    </div>
+
+                    <!-- Policy Stance Meter -->
+                    <div class="policy-stance-container">
+                        <div class="stance-label left">Tight</div>
+                        <div class="stance-meter">
+                            <div class="stance-zone tight"></div>
+                            <div class="stance-zone neutral"></div>
+                            <div class="stance-zone loose"></div>
+                            <div class="stance-indicator" id="stance-indicator" style="left: 52.5%;"></div>
+                        </div>
+                        <div class="stance-label right">Loose</div>
+                    </div>
+
+                    <!-- Trade-off Explanation -->
+                    <div class="tradeoff-hint" id="tradeoff-hint">
+                        <span class="hint-icon">&#128161;</span>
+                        <span class="hint-text">Adjust Fed Funds Rate to balance inflation vs. unemployment</span>
+                    </div>
+
+                    <!-- Secondary Indicators -->
+                    <div class="secondary-indicators">
+                        <div class="secondary-card">
+                            <span class="secondary-label">GDP Growth</span>
+                            <span class="secondary-value" id="gdp-value">2.5%</span>
+                            <span class="secondary-target">Target: 2-3%</span>
+                        </div>
+                        <div class="secondary-card">
+                            <span class="secondary-label">Financial Stability</span>
+                            <span class="secondary-value" id="stability-value">85</span>
+                            <span class="secondary-target">Target: 80+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- News Feed -->
+                <div class="panel news-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Economic News</div>
+                    </div>
+                    <div class="news-feed" id="news-feed">
+                        <div class="news-item">
+                            <span class="news-quarter">Q1 2024</span>
+                            <span class="news-text">You have been appointed as the new Federal Reserve Chair. Markets await your first policy decisions.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Controls -->
+            <div class="right-column">
+                <!-- Policy Tools -->
+                <div class="panel policy-section">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            Policy Tools
+                            <span class="info-icon tooltip-left">?
+                                <div class="tooltip">
+                                    <div class="tooltip-title">Your Controls</div>
+                                    These are the main tools you use to control the economy. Adjust rates, set reserve requirements, and run QE/QT programs.
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="policy-tool">
+                        <div class="policy-header">
+                            <span class="policy-name">
+                                Federal Funds Rate
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Interest Rates</div>
+                                        The rate banks charge each other. Higher = tighter money (fights inflation). Lower = easier money (stimulates growth). Your primary tool!
+                                    </div>
+                                </span>
+                            </span>
+                            <span class="policy-value" id="rate-value">5.25%</span>
+                        </div>
+                        <input type="range" class="policy-slider" id="rate-slider" min="0" max="20" step="0.25" value="5.25" oninput="updateRateDisplay()">
+                        <div class="policy-labels">
+                            <span>0%</span>
+                            <span>10%</span>
+                            <span>20%</span>
+                        </div>
+                    </div>
+
+                    <div class="policy-tool">
+                        <div class="policy-header">
+                            <span class="policy-name">
+                                Reserve Requirement
+                                <span class="info-icon tooltip-left">?
+                                    <div class="tooltip">
+                                        <div class="tooltip-title">Bank Reserves</div>
+                                        % of deposits banks must keep (can't lend). Higher = less lending = tighter money. Lower = more lending = more money creation.
+                                    </div>
+                                </span>
+                            </span>
+                            <span class="policy-value" id="reserve-value">10%</span>
+                        </div>
+                        <input type="range" class="policy-slider" id="reserve-slider" min="0" max="20" step="1" value="10" oninput="updateReserveDisplay()">
+                        <div class="policy-labels">
+                            <span>0%</span>
+                            <span>10%</span>
+                            <span>20%</span>
+                        </div>
+                    </div>
+
+                    <!-- QE/QT Program Status -->
+                    <div class="program-status inactive" id="qe-status">
+                        <div class="program-header">
+                            <span class="program-name">QE PROGRAM</span>
+                            <span class="program-badge inactive" id="qe-badge">Inactive</span>
+                        </div>
+                        <div class="program-details" id="qe-details">No active program</div>
+                        <div class="program-bar">
+                            <div class="program-fill" id="qe-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="action-btn" id="btn-buy" onclick="openMarketOperation('buy')">
+                            Buy Securities<br><span style="font-size:11px;color:var(--text-muted)">Inject $300B</span>
+                        </button>
+                        <button class="action-btn" id="btn-sell" onclick="openMarketOperation('sell')">
+                            Sell Securities<br><span style="font-size:11px;color:var(--text-muted)">Drain $300B</span>
+                        </button>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="action-btn qe" id="btn-qe" onclick="showQEConfig()" title="Quantitative Easing: Fed buys bonds to inject money into the economy. Stimulates growth but risks inflation.">
+                            Start QE Program<br><span style="font-size:11px;color:var(--text-muted)">Customize</span>
+                        </button>
+                        <button class="action-btn qe" id="btn-qt" onclick="showQTConfig()" title="Quantitative Tightening: Fed sells bonds to drain money from the economy. Fights inflation but can slow growth.">
+                            Start QT Program<br><span style="font-size:11px;color:var(--text-muted)">Customize</span>
+                        </button>
+                    </div>
+
+                    <button class="end-turn-btn" onclick="endTurn()">
+                        End Quarter →
+                    </button>
+                </div>
+
+                <!-- Money Components -->
+                <div class="panel components-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            Money Components
+                            <span class="info-icon tooltip-left">?
+                                <div class="tooltip">
+                                    <div class="tooltip-title">Divisia Weights</div>
+                                    The number next to each component (0.00-1.00) is its Divisia weight. Cash = 1.0 (full liquidity), while locked CDs have lower weights. This is how Divisia captures TRUE liquidity!
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            Currency
+                            <span class="component-weight" title="Divisia weight: fully liquid">1.00</span>
+                        </span>
+                        <span class="component-value" id="comp-currency">$2.3T</span>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            Demand Deposits
+                            <span class="component-weight">0.95</span>
+                        </span>
+                        <span class="component-value" id="comp-demand">$1.9T</span>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            Savings Deposits
+                            <span class="component-weight">0.70</span>
+                        </span>
+                        <span class="component-value" id="comp-savings">$12.4T</span>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            Small Time Deposits
+                            <span class="component-weight">0.40</span>
+                        </span>
+                        <span class="component-value" id="comp-smallcd">$2.1T</span>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            Large Time Deposits
+                            <span class="component-weight">0.25</span>
+                        </span>
+                        <span class="component-value" id="comp-largecd">$1.8T</span>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            Money Market Funds
+                            <span class="component-weight">0.20</span>
+                        </span>
+                        <span class="component-value" id="comp-mmf">$1.6T</span>
+                    </div>
+                    <div class="component-row">
+                        <span class="component-name">
+                            T-Bills & CP
+                            <span class="component-weight">0.10</span>
+                        </span>
+                        <span class="component-value" id="comp-tbills">$6.3T</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crisis Modal -->
+    <div class="modal-overlay" id="crisis-modal">
+        <div class="modal">
+            <div class="modal-icon" id="modal-icon">⚠️</div>
+            <h2 class="modal-title crisis" id="modal-title">Crisis Alert</h2>
+            <p class="modal-text" id="modal-text">A financial crisis is unfolding...</p>
+            <button class="modal-btn" onclick="closeModal()">Understood</button>
+        </div>
+    </div>
+
+    <!-- QE Config Modal -->
+    <div class="modal-overlay" id="qe-config-modal">
+        <div class="modal config-modal">
+            <h2 class="config-title" id="config-title">Configure QE Program</h2>
+            <div class="config-row">
+                <div class="config-label">Monthly Purchase Pace</div>
+                <input type="range" class="config-slider" id="config-pace" min="25" max="150" step="25" value="75" oninput="updateConfigPreview()">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:4px;">
+                    <span>$25B</span>
+                    <span id="config-pace-value">$75B/mo</span>
+                    <span>$150B</span>
+                </div>
+            </div>
+            <div class="config-row">
+                <div class="config-label">Program Duration (Quarters)</div>
+                <input type="range" class="config-slider" id="config-duration" min="2" max="12" step="1" value="4" oninput="updateConfigPreview()">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:4px;">
+                    <span>2Q</span>
+                    <span id="config-duration-value">4 quarters</span>
+                    <span>12Q</span>
+                </div>
+            </div>
+            <div class="config-preview">
+                <div class="config-preview-label">Total Program Size</div>
+                <div class="config-preview-value" id="config-total">$900B</div>
+            </div>
+            <div class="config-buttons">
+                <button class="config-cancel" onclick="closeConfigModal()">Cancel</button>
+                <button class="config-confirm" id="config-confirm" onclick="confirmProgram()">Start Program</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal-overlay" id="help-modal">
+        <div class="modal" style="max-width:600px;text-align:left;">
+            <h2 class="modal-title" style="text-align:center;color:var(--accent-cyan);">How to Play</h2>
+            <div class="modal-text" style="font-size:13px;">
+                <p><strong>Your Goal:</strong> Maintain economic stability as Fed Chair for your term.</p>
+                <br>
+                <p><strong>Key Metrics:</strong></p>
+                <ul style="margin-left:20px;margin-top:8px;">
+                    <li><strong>Inflation</strong> - Target 2%. Too high = instability, too low = deflation risk</li>
+                    <li><strong>Unemployment</strong> - Target 4%. Trade-off with inflation</li>
+                    <li><strong>GDP Growth</strong> - Target 2-3%. Shows economic health</li>
+                    <li><strong>Financial Stability</strong> - Keep above 50 to avoid collapse</li>
+                </ul>
+                <br>
+                <p><strong>Your Tools:</strong></p>
+                <ul style="margin-left:20px;margin-top:8px;">
+                    <li><strong>Fed Funds Rate</strong> - Raise to fight inflation, lower to stimulate</li>
+                    <li><strong>Open Market Operations</strong> - Buy/sell $300B in securities</li>
+                    <li><strong>QE/QT Programs</strong> - Large-scale asset purchases or reductions</li>
+                </ul>
+                <br>
+                <p><strong>The Divisia Insight:</strong> Watch for divergence between Simple Sum and Divisia. When they diverge, the simple sum is misleading you about true liquidity!</p>
+            </div>
+            <button class="modal-btn" style="display:block;margin:20px auto 0;" onclick="closeHelp()">Got It</button>
+        </div>
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div class="tutorial-overlay" id="tutorial-overlay">
+        <div class="tutorial-tooltip" id="tutorial-tooltip">
+            <div class="tutorial-step" id="tutorial-step-num">Step 1 of 7</div>
+            <div class="tutorial-title" id="tutorial-title">Welcome, Chair!</div>
+            <div class="tutorial-text" id="tutorial-text">You've just been appointed Federal Reserve Chair. Your job: keep the economy stable.</div>
+            <div class="tutorial-buttons">
+                <button class="tutorial-skip" onclick="skipTutorial()">Skip Tutorial</button>
+                <button class="tutorial-next" onclick="nextTutorialStep()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div class="game-over" id="game-over">
+        <div class="final-rating rating-a" id="final-rating">A</div>
+        <h2 class="final-title" id="final-title">Excellent Stewardship</h2>
+        <div class="final-stats">
+            <div class="final-stat">
+                <div class="final-stat-value" id="final-inflation">2.1%</div>
+                <div class="final-stat-label">Avg. Inflation</div>
+            </div>
+            <div class="final-stat">
+                <div class="final-stat-value" id="final-unemployment">4.2%</div>
+                <div class="final-stat-label">Avg. Unemployment</div>
+            </div>
+            <div class="final-stat">
+                <div class="final-stat-value" id="final-gdp">2.4%</div>
+                <div class="final-stat-label">Avg. GDP Growth</div>
+            </div>
+            <div class="final-stat">
+                <div class="final-stat-value" id="final-crises">0</div>
+                <div class="final-stat-label">Crises Faced</div>
+            </div>
+        </div>
+        <div class="final-chart">
+            <div class="final-chart-title">Your Economic Record</div>
+            <canvas id="final-chart"></canvas>
+        </div>
+        <button class="play-again-btn" onclick="restartGame()">Serve Another Term</button>
+    </div>
+
+    <script>
+        // ============ GAME STATE ============
+        const state = {
+            turn: 1,
+            maxTurns: 20,
+            year: 2024,
+            quarter: 1,
+            view: 'divisia',
+            difficulty: 'normal',
+
+            // Policy settings
+            fedFundsRate: 5.25,
+            reserveRequirement: 10,
+
+            // Money supply components (in trillions)
+            components: {
+                currency: 2.3,
+                demandDeposits: 1.9,
+                savingsDeposits: 12.4,
+                smallTimeDeposits: 2.1,
+                largeTimeDeposits: 1.8,
+                moneyMarketFunds: 1.6,
+                tbillsCommercialPaper: 6.3
+            },
+
+            // Divisia weights
+            weights: {
+                currency: 1.00,
+                demandDeposits: 0.95,
+                savingsDeposits: 0.70,
+                smallTimeDeposits: 0.40,
+                largeTimeDeposits: 0.25,
+                moneyMarketFunds: 0.20,
+                tbillsCommercialPaper: 0.10
+            },
+
+            // Economic indicators
+            inflation: 2.4,
+            unemployment: 3.8,
+            gdpGrowth: 2.5,
+            financialStability: 85,
+
+            // Stock market
+            stockMarket: {
+                index: 4500,
+                volatility: 15,
+                sentiment: 50
+            },
+
+            // Fed balance sheet
+            balanceSheet: 8.9, // Trillions
+
+            // History tracking
+            history: {
+                m1: [],
+                m2: [],
+                m3: [],
+                m4: [],
+                simpleSum: [],
+                divisia: [],
+                inflation: [],
+                unemployment: [],
+                gdp: [],
+                stability: [],
+                fedFunds: [],
+                stock: [],
+                balanceSheet: []
+            },
+
+            // QE/QT Programs
+            programs: {
+                qe: { active: false, monthlyPace: 0, quartersRemaining: 0, totalDeployed: 0, totalPlanned: 0 },
+                qt: { active: false, monthlyPace: 0, quartersRemaining: 0, totalReduced: 0, totalPlanned: 0 }
+            },
+
+            // Chart visibility
+            chartSeries: {
+                simpleSum: true,
+                divisia: true,
+                stock: true
+            },
+
+            // Turn flags
+            omoUsed: false,
+
+            // Crisis tracking
+            crisesAvoided: 0,
+
+            // Previous values
+            prevDivisia: 0,
+            prevSimpleSum: 0,
+
+            // Tutorial
+            tutorial: { active: false, step: 0 }
+        };
+
+        // Config modal state
+        let configType = 'qe';
+
+        // ============ CALCULATIONS ============
+        function calculateM1() {
+            return state.components.currency + state.components.demandDeposits;
+        }
+
+        function calculateM2() {
+            return calculateM1() + state.components.savingsDeposits + state.components.smallTimeDeposits;
+        }
+
+        function calculateM3() {
+            return calculateM2() + state.components.largeTimeDeposits + state.components.moneyMarketFunds;
+        }
+
+        function calculateM4() {
+            return calculateM3() + state.components.tbillsCommercialPaper;
+        }
+
+        function calculateSimpleSum() {
+            return calculateM4();
+        }
+
+        function calculateDivisia() {
+            let total = 0;
+            for (const [key, value] of Object.entries(state.components)) {
+                total += value * state.weights[key];
+            }
+            return total;
+        }
+
+        function formatTrillion(value) {
+            return '$' + value.toFixed(1) + 'T';
+        }
+
+        function formatPercent(value) {
+            return value.toFixed(1) + '%';
+        }
+
+        function formatNumber(value) {
+            return value.toLocaleString();
+        }
+
+        // ============ CHART RENDERING ============
+        function renderSparkline(canvasId, data, color) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas || data.length < 2) return;
+
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+
+            // Skip if canvas is not visible yet
+            if (rect.width === 0 || rect.height === 0) return;
+
+            canvas.width = rect.width * 2;
+            canvas.height = rect.height * 2;
+            ctx.scale(2, 2);
+
+            const width = rect.width;
+            const height = rect.height;
+            const padding = 2;
+
+            const displayData = data.slice(-12);
+            const min = Math.min(...displayData) * 0.98;
+            const max = Math.max(...displayData) * 1.02;
+            const range = max - min || 1;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+
+            displayData.forEach((value, i) => {
+                const x = padding + (i / (displayData.length - 1)) * (width - 2 * padding);
+                const y = height - padding - ((value - min) / range) * (height - 2 * padding);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+
+            ctx.stroke();
+        }
+
+        function renderMainChart() {
+            const canvas = document.getElementById('main-chart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+
+            // Skip if canvas is not visible yet
+            if (rect.width === 0 || rect.height === 0) return;
+
+            canvas.width = rect.width * 2;
+            canvas.height = rect.height * 2;
+            ctx.scale(2, 2);
+
+            const width = rect.width;
+            const height = rect.height;
+            const padding = { top: 20, right: 20, bottom: 30, left: 50 };
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Get data
+            const datasets = [];
+            if (state.chartSeries.simpleSum && state.history.simpleSum.length > 0) {
+                datasets.push({ data: state.history.simpleSum, color: '#d29922', label: 'Simple Sum' });
+            }
+            if (state.chartSeries.divisia && state.history.divisia.length > 0) {
+                datasets.push({ data: state.history.divisia, color: '#39c5cf', label: 'Divisia' });
+            }
+            if (state.chartSeries.stock && state.history.stock.length > 0) {
+                // Normalize stock to similar scale
+                const stockNorm = state.history.stock.map(v => v / 200);
+                datasets.push({ data: stockNorm, color: '#3fb950', label: 'S&P 500' });
+            }
+
+            if (datasets.length === 0) return;
+
+            // Find min/max across all datasets
+            let allValues = [];
+            datasets.forEach(d => allValues = allValues.concat(d.data));
+            const min = Math.min(...allValues) * 0.95;
+            const max = Math.max(...allValues) * 1.05;
+            const range = max - min || 1;
+
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+
+            // Draw grid
+            ctx.strokeStyle = '#30363d';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= 4; i++) {
+                const y = padding.top + (i / 4) * chartHeight;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+
+                // Y-axis labels
+                const value = max - (i / 4) * range;
+                ctx.fillStyle = '#7d8590';
+                ctx.font = '10px SF Mono, monospace';
+                ctx.textAlign = 'right';
+                ctx.fillText(value.toFixed(1), padding.left - 5, y + 4);
+            }
+
+            // X-axis labels
+            const dataLength = datasets[0].data.length;
+            ctx.textAlign = 'center';
+            for (let i = 0; i < dataLength; i += Math.ceil(dataLength / 6)) {
+                const x = padding.left + (i / (dataLength - 1 || 1)) * chartWidth;
+                ctx.fillText('Q' + ((i % 4) + 1), x, height - 10);
+            }
+
+            // Draw lines
+            datasets.forEach(dataset => {
+                ctx.beginPath();
+                ctx.strokeStyle = dataset.color;
+                ctx.lineWidth = 2;
+
+                dataset.data.forEach((value, i) => {
+                    const x = padding.left + (i / (dataset.data.length - 1 || 1)) * chartWidth;
+                    const y = padding.top + ((max - value) / range) * chartHeight;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+
+                ctx.stroke();
+            });
+        }
+
+        function toggleSeries(series) {
+            state.chartSeries[series] = !state.chartSeries[series];
+            const item = document.querySelector(`[data-series="${series}"]`);
+            if (item) item.classList.toggle('disabled', !state.chartSeries[series]);
+            renderMainChart();
+        }
+
+        // ============ DUAL MANDATE VISUALIZATION ============
+        function updateDualMandate() {
+            const inflationDist = Math.abs(state.inflation - 2);
+            const unemploymentDist = Math.abs(state.unemployment - 4);
+            const inflationAboveTarget = state.inflation > 2;
+            const unemploymentAboveTarget = state.unemployment > 4;
+
+            // Update values with color based on target
+            const inflationValue = document.getElementById('inflation-value');
+            const unemploymentValue = document.getElementById('unemployment-value');
+
+            inflationValue.textContent = formatPercent(state.inflation);
+            unemploymentValue.textContent = formatPercent(state.unemployment);
+
+            // Color values based on how far from target
+            if (inflationDist <= 0.5) {
+                inflationValue.style.color = 'var(--accent-green)';
+            } else if (inflationDist <= 1.5) {
+                inflationValue.style.color = 'var(--accent-yellow)';
+            } else {
+                inflationValue.style.color = 'var(--accent-red)';
+            }
+
+            if (unemploymentDist <= 0.5) {
+                unemploymentValue.style.color = 'var(--accent-green)';
+            } else if (unemploymentDist <= 1.5) {
+                unemploymentValue.style.color = 'var(--accent-yellow)';
+            } else {
+                unemploymentValue.style.color = 'var(--accent-blue)';
+            }
+
+            // Update bars (0-10% scale for inflation, 0-15% for unemployment)
+            const inflationWidth = Math.min(100, (state.inflation / 10) * 100);
+            const unemploymentWidth = Math.min(100, (state.unemployment / 15) * 100);
+            document.getElementById('inflation-bar').style.width = inflationWidth + '%';
+            document.getElementById('unemployment-bar').style.width = unemploymentWidth + '%';
+
+            // Color the bars based on distance from target
+            const inflationBar = document.getElementById('inflation-bar');
+            const unemploymentBar = document.getElementById('unemployment-bar');
+
+            if (inflationDist <= 0.5) {
+                inflationBar.style.background = 'var(--accent-green)';
+            } else if (inflationDist <= 1.5) {
+                inflationBar.style.background = 'var(--accent-yellow)';
+            } else {
+                inflationBar.style.background = 'var(--accent-red)';
+            }
+
+            if (unemploymentDist <= 0.5) {
+                unemploymentBar.style.background = 'var(--accent-green)';
+            } else if (unemploymentDist <= 1.5) {
+                unemploymentBar.style.background = 'var(--accent-yellow)';
+            } else {
+                unemploymentBar.style.background = 'var(--accent-blue)';
+            }
+
+            // Update balance beam visualization
+            const scaleBeam = document.getElementById('scale-beam');
+            const scaleTilt = document.getElementById('scale-tilt');
+            const balanceScale = document.getElementById('balance-scale');
+            const panLeft = document.getElementById('pan-left');
+            const panRight = document.getElementById('pan-right');
+            const stringLeft = document.getElementById('string-left');
+            const stringRight = document.getElementById('string-right');
+
+            // Calculate tilt based on which is further from target
+            const diffFromBalance = inflationDist - unemploymentDist;
+            const tiltDeg = Math.max(-15, Math.min(15, diffFromBalance * 6)); // Scale to degrees
+
+            // Tilt the beam
+            scaleBeam.style.transform = `translateX(-50%) rotate(${tiltDeg}deg)`;
+
+            // Move pans up/down based on tilt (one goes up, other goes down)
+            const panOffset = Math.abs(tiltDeg) * 1.2; // Vertical movement
+            if (tiltDeg > 0) {
+                // Inflation side heavier - left pan goes down
+                panLeft.style.top = (28 + panOffset) + 'px';
+                panRight.style.top = (28 - panOffset) + 'px';
+                stringLeft.style.height = (4 + panOffset) + 'px';
+                stringRight.style.height = Math.max(1, 4 - panOffset) + 'px';
+            } else if (tiltDeg < 0) {
+                // Unemployment side heavier - right pan goes down
+                panLeft.style.top = (28 - Math.abs(panOffset)) + 'px';
+                panRight.style.top = (28 + Math.abs(panOffset)) + 'px';
+                stringLeft.style.height = Math.max(1, 4 - Math.abs(panOffset)) + 'px';
+                stringRight.style.height = (4 + Math.abs(panOffset)) + 'px';
+            } else {
+                // Balanced
+                panLeft.style.top = '28px';
+                panRight.style.top = '28px';
+                stringLeft.style.height = '4px';
+                stringRight.style.height = '4px';
+            }
+
+            // Check if balanced (both within target range)
+            const isBalanced = inflationDist <= 0.5 && unemploymentDist <= 0.5;
+            balanceScale.className = 'balance-scale' + (isBalanced ? ' balanced' : '');
+
+            // Update status text
+            if (isBalanced) {
+                scaleTilt.textContent = '✓ BALANCED';
+                scaleTilt.style.color = 'var(--accent-green)';
+            } else if (inflationDist > 2 && inflationDist > unemploymentDist + 0.5) {
+                scaleTilt.textContent = 'INFLATION HIGH';
+                scaleTilt.style.color = 'var(--accent-red)';
+            } else if (unemploymentDist > 2 && unemploymentDist > inflationDist + 0.5) {
+                scaleTilt.textContent = 'JOBS CRISIS';
+                scaleTilt.style.color = 'var(--accent-blue)';
+            } else if (inflationDist > unemploymentDist + 0.3) {
+                scaleTilt.textContent = inflationAboveTarget ? 'INFLATION ↑' : 'DEFLATION ↓';
+                scaleTilt.style.color = 'var(--accent-yellow)';
+            } else if (unemploymentDist > inflationDist + 0.3) {
+                scaleTilt.textContent = unemploymentAboveTarget ? 'JOBS ↓' : 'OVERHEATING';
+                scaleTilt.style.color = 'var(--accent-yellow)';
+            } else {
+                scaleTilt.textContent = 'NEAR BALANCE';
+                scaleTilt.style.color = 'var(--text-secondary)';
+            }
+
+            // Update policy stance indicator (based on Fed Funds Rate)
+            // Range 0-20%: High rates = TIGHT (left), Low rates = LOOSE (right)
+            const stancePosition = 100 - (state.fedFundsRate / 20) * 100;
+            const stanceIndicator = document.getElementById('stance-indicator');
+            stanceIndicator.style.left = stancePosition + '%';
+
+            // Add glow effect based on policy aggressiveness
+            if (state.fedFundsRate > 12) {
+                stanceIndicator.style.boxShadow = '0 0 12px var(--accent-blue-glow)'; // Very tight (high rates)
+            } else if (state.fedFundsRate < 3) {
+                stanceIndicator.style.boxShadow = '0 0 12px var(--accent-red-glow)'; // Very loose (low rates)
+            } else {
+                stanceIndicator.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)'; // Normal range
+            }
+
+            // Update sweet spot badge
+            const inSweetSpot = inflationDist <= 0.5 && unemploymentDist <= 0.5;
+            const nearSweetSpot = inflationDist <= 1 && unemploymentDist <= 1;
+            const badge = document.getElementById('sweet-spot-badge');
+
+            if (inSweetSpot) {
+                badge.innerHTML = 'Sweet Spot: &#10003;';
+                badge.className = 'sweet-spot-badge achieved';
+            } else if (nearSweetSpot) {
+                badge.innerHTML = 'Sweet Spot: ~';
+                badge.className = 'sweet-spot-badge';
+            } else {
+                badge.innerHTML = 'Sweet Spot: &#10007;';
+                badge.className = 'sweet-spot-badge';
+            }
+
+            // Update panel border based on status
+            const panel = document.getElementById('dual-mandate-panel');
+            panel.className = 'dual-mandate-panel';
+            if (inSweetSpot) {
+                panel.classList.add('sweet-spot');
+            } else if (inflationDist > 3 || unemploymentDist > 3) {
+                panel.classList.add('danger');
+            } else if (inflationDist > 1.5 || unemploymentDist > 1.5) {
+                panel.classList.add('warning');
+            }
+
+            // Update secondary indicators with color coding
+            const gdpValue = document.getElementById('gdp-value');
+            const stabilityValue = document.getElementById('stability-value');
+
+            gdpValue.textContent = formatPercent(state.gdpGrowth);
+            if (state.gdpGrowth >= 2 && state.gdpGrowth <= 3) {
+                gdpValue.style.color = 'var(--accent-green)';
+            } else if (state.gdpGrowth < 0 || state.gdpGrowth > 4) {
+                gdpValue.style.color = 'var(--accent-red)';
+            } else {
+                gdpValue.style.color = 'var(--accent-yellow)';
+            }
+
+            stabilityValue.textContent = Math.round(state.financialStability);
+            if (state.financialStability >= 80) {
+                stabilityValue.style.color = 'var(--accent-green)';
+            } else if (state.financialStability >= 50) {
+                stabilityValue.style.color = 'var(--accent-yellow)';
+            } else {
+                stabilityValue.style.color = 'var(--accent-red)';
+            }
+        }
+
+        // Show trade-off hint when adjusting rates
+        function showTradeoffHint(direction) {
+            const hint = document.getElementById('tradeoff-hint');
+            hint.className = 'tradeoff-hint';
+
+            if (direction === 'raise') {
+                hint.classList.add('raising');
+                hint.innerHTML = '<span class="hint-icon">&#128200;</span><span class="hint-text">Raising rates: Inflation &#8595; but Unemployment &#8593;</span>';
+            } else if (direction === 'lower') {
+                hint.classList.add('lowering');
+                hint.innerHTML = '<span class="hint-icon">&#128201;</span><span class="hint-text">Lowering rates: Unemployment &#8595; but Inflation &#8593;</span>';
+            } else {
+                hint.innerHTML = '<span class="hint-icon">&#128161;</span><span class="hint-text">Adjust Fed Funds Rate to balance inflation vs. unemployment</span>';
+            }
+        }
+
+        // ============ UI UPDATES ============
+        function updateDisplay() {
+            const m1 = calculateM1();
+            const m2 = calculateM2();
+            const m3 = calculateM3();
+            const m4 = calculateM4();
+            const simpleSum = calculateSimpleSum();
+            const divisia = calculateDivisia();
+
+            // Update aggregate cards
+            document.getElementById('m1-value').textContent = formatTrillion(m1);
+            document.getElementById('m2-value').textContent = formatTrillion(m2);
+            document.getElementById('m3-value').textContent = formatTrillion(m3);
+            document.getElementById('m4-value').textContent = formatTrillion(m4);
+
+            // Update comparison view
+            document.getElementById('simple-sum-value').textContent = formatTrillion(simpleSum);
+            document.getElementById('divisia-value').textContent = formatTrillion(divisia);
+
+            // Growth calculations
+            if (state.prevSimpleSum > 0) {
+                const simpleGrowth = ((simpleSum - state.prevSimpleSum) / state.prevSimpleSum * 100);
+                const divisiaGrowth = ((divisia - state.prevDivisia) / state.prevDivisia * 100);
+
+                document.getElementById('simple-sum-growth').innerHTML =
+                    `QoQ Growth: <span class="${simpleGrowth >= 0 ? 'change-up' : 'change-down'}">${simpleGrowth >= 0 ? '+' : ''}${simpleGrowth.toFixed(1)}%</span>`;
+                document.getElementById('divisia-growth').innerHTML =
+                    `QoQ Growth: <span class="${divisiaGrowth >= 0 ? 'change-up' : 'change-down'}">${divisiaGrowth >= 0 ? '+' : ''}${divisiaGrowth.toFixed(1)}%</span>`;
+
+                // Divergence alert
+                const divergence = Math.abs(simpleGrowth - divisiaGrowth);
+                const alert = document.getElementById('divergence-alert');
+                if (divergence > 3 && simpleGrowth > 0 && divisiaGrowth < 0) {
+                    alert.classList.remove('hidden', 'warning');
+                    alert.innerHTML = `<span class="divergence-icon">🚨</span><span><strong>Critical Divergence:</strong> Simple sum shows +${simpleGrowth.toFixed(1)}% but Divisia shows ${divisiaGrowth.toFixed(1)}%!</span>`;
+                } else if (divergence > 2) {
+                    alert.classList.remove('hidden');
+                    alert.classList.add('warning');
+                    alert.innerHTML = `<span class="divergence-icon">⚠️</span><span><strong>Divergence Alert:</strong> ${divergence.toFixed(1)}% gap between measures.</span>`;
+                } else {
+                    alert.classList.add('hidden');
+                }
+            }
+
+            // Update stock market
+            document.getElementById('stock-value').textContent = formatNumber(Math.round(state.stockMarket.index));
+            const stockPrev = state.history.stock.length > 1 ? state.history.stock[state.history.stock.length - 2] : state.stockMarket.index;
+            const stockChange = ((state.stockMarket.index - stockPrev) / stockPrev * 100);
+            const stockChangeEl = document.getElementById('stock-change');
+            stockChangeEl.textContent = `${stockChange >= 0 ? '+' : ''}${stockChange.toFixed(1)}%`;
+            stockChangeEl.className = 'market-change ' + (stockChange >= 0 ? 'change-up' : 'change-down');
+
+            // Update balance sheet
+            document.getElementById('balance-value').textContent = formatTrillion(state.balanceSheet);
+            const bsChange = state.balanceSheet - 8.9;
+            const bsChangeEl = document.getElementById('balance-change');
+            if (Math.abs(bsChange) < 0.1) {
+                bsChangeEl.textContent = 'Base';
+                bsChangeEl.className = 'market-change change-neutral';
+            } else {
+                bsChangeEl.textContent = `${bsChange >= 0 ? '+' : ''}${formatTrillion(bsChange)}`;
+                bsChangeEl.className = 'market-change ' + (bsChange >= 0 ? 'change-up' : 'change-down');
+            }
+
+            // Update VIX
+            document.getElementById('vix-value').textContent = Math.round(state.stockMarket.volatility);
+            const vixLabel = document.getElementById('vix-label');
+            if (state.stockMarket.volatility < 15) {
+                vixLabel.textContent = 'Calm';
+                vixLabel.className = 'market-change change-up';
+            } else if (state.stockMarket.volatility < 25) {
+                vixLabel.textContent = 'Normal';
+                vixLabel.className = 'market-change change-neutral';
+            } else if (state.stockMarket.volatility < 35) {
+                vixLabel.textContent = 'Elevated';
+                vixLabel.className = 'market-change change-down';
+            } else {
+                vixLabel.textContent = 'FEAR';
+                vixLabel.className = 'market-change change-down';
+            }
+
+            // Update dual mandate visualization
+            updateDualMandate();
+
+            // Update components
+            document.getElementById('comp-currency').textContent = formatTrillion(state.components.currency);
+            document.getElementById('comp-demand').textContent = formatTrillion(state.components.demandDeposits);
+            document.getElementById('comp-savings').textContent = formatTrillion(state.components.savingsDeposits);
+            document.getElementById('comp-smallcd').textContent = formatTrillion(state.components.smallTimeDeposits);
+            document.getElementById('comp-largecd').textContent = formatTrillion(state.components.largeTimeDeposits);
+            document.getElementById('comp-mmf').textContent = formatTrillion(state.components.moneyMarketFunds);
+            document.getElementById('comp-tbills').textContent = formatTrillion(state.components.tbillsCommercialPaper);
+
+            // Update turn info
+            document.getElementById('current-turn').textContent = state.turn;
+            document.getElementById('max-turns').textContent = state.maxTurns;
+            document.getElementById('current-quarter').textContent = 'Q' + state.quarter;
+            document.getElementById('current-year').textContent = state.year;
+
+            // Update QE status
+            updateProgramStatus();
+
+            // Update rating
+            updateRating();
+
+            // Update sparklines
+            renderSparkline('sparkline-m1', state.history.m1.concat([m1]), '#3fb950');
+            renderSparkline('sparkline-m2', state.history.m2.concat([m2]), '#58a6ff');
+            renderSparkline('sparkline-m3', state.history.m3.concat([m3]), '#a371f7');
+            renderSparkline('sparkline-m4', state.history.m4.concat([m4]), '#39c5cf');
+            renderSparkline('sparkline-stock', state.history.stock.concat([state.stockMarket.index]), '#3fb950');
+
+            // Update main chart
+            renderMainChart();
+        }
+
+        function updateIndicatorBar(id, value, min, max, target) {
+            const bar = document.getElementById(id + '-bar');
+            const percent = ((value - min) / (max - min)) * 100;
+            bar.style.width = Math.min(100, Math.max(0, percent)) + '%';
+
+            const distance = Math.abs(value - target);
+            if (id === 'stability') {
+                bar.style.background = value >= 70 ? 'var(--accent-green)' : value >= 50 ? 'var(--accent-yellow)' : 'var(--accent-red)';
+            } else if (id === 'inflation') {
+                bar.style.background = distance <= 0.5 ? 'var(--accent-green)' : distance <= 2 ? 'var(--accent-yellow)' : 'var(--accent-red)';
+            } else if (id === 'unemployment') {
+                bar.style.background = distance <= 1 ? 'var(--accent-green)' : distance <= 2 ? 'var(--accent-yellow)' : 'var(--accent-red)';
+            } else {
+                bar.style.background = (value >= 2 && value <= 3.5) ? 'var(--accent-green)' : (value >= 0 && value <= 5) ? 'var(--accent-yellow)' : 'var(--accent-red)';
+            }
+        }
+
+        function updateProgramStatus() {
+            const statusEl = document.getElementById('qe-status');
+            const badgeEl = document.getElementById('qe-badge');
+            const detailsEl = document.getElementById('qe-details');
+            const fillEl = document.getElementById('qe-fill');
+
+            if (state.programs.qe.active) {
+                statusEl.classList.remove('inactive');
+                badgeEl.classList.remove('inactive');
+                badgeEl.textContent = 'Active';
+                const deployed = state.programs.qe.totalDeployed;
+                const total = state.programs.qe.totalPlanned;
+                detailsEl.textContent = `$${state.programs.qe.monthlyPace}B/mo | ${state.programs.qe.quartersRemaining}Q left | $${deployed.toFixed(0)}B deployed`;
+                fillEl.style.width = (deployed / total * 100) + '%';
+            } else if (state.programs.qt.active) {
+                statusEl.classList.remove('inactive');
+                statusEl.style.borderColor = 'var(--accent-red)';
+                badgeEl.classList.remove('inactive');
+                badgeEl.style.background = 'var(--accent-red)';
+                badgeEl.textContent = 'QT Active';
+                const reduced = state.programs.qt.totalReduced;
+                const total = state.programs.qt.totalPlanned;
+                detailsEl.textContent = `$${state.programs.qt.monthlyPace}B/mo | ${state.programs.qt.quartersRemaining}Q left`;
+                fillEl.style.width = (reduced / total * 100) + '%';
+                fillEl.style.background = 'var(--accent-red)';
+            } else {
+                statusEl.classList.add('inactive');
+                statusEl.style.borderColor = '';
+                badgeEl.classList.add('inactive');
+                badgeEl.style.background = '';
+                badgeEl.textContent = 'Inactive';
+                detailsEl.textContent = 'No active program';
+                fillEl.style.width = '0%';
+                fillEl.style.background = '';
+            }
+        }
+
+        function updateRating() {
+            let score = 100;
+
+            const inflationDist = Math.abs(state.inflation - 2);
+            score -= inflationDist * 10;
+
+            const unemploymentDist = Math.abs(state.unemployment - 4);
+            score -= unemploymentDist * 8;
+
+            if (state.gdpGrowth < 0) score -= 20;
+            else if (state.gdpGrowth < 1) score -= 10;
+            else if (state.gdpGrowth > 5) score -= 5;
+
+            if (state.financialStability < 50) score -= 30;
+            else if (state.financialStability < 70) score -= 15;
+
+            let rating, ratingClass;
+            if (score >= 85) { rating = 'A+'; ratingClass = 'rating-a'; }
+            else if (score >= 75) { rating = 'A'; ratingClass = 'rating-a'; }
+            else if (score >= 65) { rating = 'B+'; ratingClass = 'rating-b'; }
+            else if (score >= 55) { rating = 'B'; ratingClass = 'rating-b'; }
+            else if (score >= 45) { rating = 'C+'; ratingClass = 'rating-c'; }
+            else if (score >= 35) { rating = 'C'; ratingClass = 'rating-c'; }
+            else if (score >= 25) { rating = 'D'; ratingClass = 'rating-d'; }
+            else { rating = 'F'; ratingClass = 'rating-f'; }
+
+            const ratingEl = document.getElementById('current-rating');
+            ratingEl.textContent = rating;
+            ratingEl.className = 'rating-badge ' + ratingClass;
+
+            return { rating, score };
+        }
+
+        function updateRateDisplay() {
+            const value = parseFloat(document.getElementById('rate-slider').value);
+            const prevRate = state.fedFundsRate;
+            document.getElementById('rate-value').textContent = value.toFixed(2) + '%';
+            state.fedFundsRate = value;
+
+            // Update stance indicator position: High rates = TIGHT (left), Low rates = LOOSE (right)
+            const stancePosition = 100 - (value / 20) * 100;
+            const stanceIndicator = document.getElementById('stance-indicator');
+            if (stanceIndicator) {
+                stanceIndicator.style.left = stancePosition + '%';
+            }
+
+            // Show trade-off hint based on direction
+            if (value > prevRate) {
+                showTradeoffHint('raise');
+            } else if (value < prevRate) {
+                showTradeoffHint('lower');
+            }
+        }
+
+        function updateReserveDisplay() {
+            const value = parseInt(document.getElementById('reserve-slider').value);
+            document.getElementById('reserve-value').textContent = value + '%';
+            state.reserveRequirement = value;
+        }
+
+        // ============ POLICY ACTIONS ============
+        function openMarketOperation(type) {
+            if (state.omoUsed) {
+                addNews('OMO already conducted this quarter.', 'warning');
+                return;
+            }
+
+            const amount = 0.3;
+            if (type === 'buy') {
+                state.components.demandDeposits += amount * 0.5;
+                state.components.savingsDeposits += amount * 0.3;
+                state.components.moneyMarketFunds += amount * 0.2;
+                state.balanceSheet += amount;
+                addNews('Fed purchases $300B in securities. Liquidity injected.');
+            } else {
+                state.components.demandDeposits -= amount * 0.4;
+                state.components.savingsDeposits -= amount * 0.3;
+                state.components.moneyMarketFunds -= amount * 0.3;
+                state.balanceSheet -= amount;
+                addNews('Fed sells $300B in securities. Liquidity drained.');
+            }
+            state.omoUsed = true;
+            updateDisplay();
+        }
+
+        function showQEConfig() {
+            if (state.programs.qe.active || state.programs.qt.active) {
+                addNews('A program is already active.', 'warning');
+                return;
+            }
+            configType = 'qe';
+            document.getElementById('config-title').textContent = 'Configure QE Program';
+            document.getElementById('config-confirm').textContent = 'Start QE';
+            document.getElementById('qe-config-modal').classList.add('active');
+            updateConfigPreview();
+        }
+
+        function showQTConfig() {
+            if (state.programs.qe.active || state.programs.qt.active) {
+                addNews('A program is already active.', 'warning');
+                return;
+            }
+            configType = 'qt';
+            document.getElementById('config-title').textContent = 'Configure QT Program';
+            document.getElementById('config-confirm').textContent = 'Start QT';
+            document.getElementById('qe-config-modal').classList.add('active');
+            updateConfigPreview();
+        }
+
+        function updateConfigPreview() {
+            const pace = parseInt(document.getElementById('config-pace').value);
+            const duration = parseInt(document.getElementById('config-duration').value);
+            const total = pace * 3 * duration;
+
+            document.getElementById('config-pace-value').textContent = '$' + pace + 'B/mo';
+            document.getElementById('config-duration-value').textContent = duration + ' quarters';
+            document.getElementById('config-total').textContent = '$' + total + 'B';
+        }
+
+        function closeConfigModal() {
+            document.getElementById('qe-config-modal').classList.remove('active');
+        }
+
+        function confirmProgram() {
+            const pace = parseInt(document.getElementById('config-pace').value);
+            const duration = parseInt(document.getElementById('config-duration').value);
+            const total = pace * 3 * duration;
+
+            if (configType === 'qe') {
+                state.programs.qe = {
+                    active: true,
+                    monthlyPace: pace,
+                    quartersRemaining: duration,
+                    totalDeployed: 0,
+                    totalPlanned: total
+                };
+                addNews(`Fed announces $${total}B QE program: $${pace}B/month for ${duration} quarters.`, 'positive');
+            } else {
+                state.programs.qt = {
+                    active: true,
+                    monthlyPace: pace,
+                    quartersRemaining: duration,
+                    totalReduced: 0,
+                    totalPlanned: total
+                };
+                addNews(`Fed announces $${total}B balance sheet reduction over ${duration} quarters.`, 'warning');
+            }
+
+            closeConfigModal();
+            updateDisplay();
+        }
+
+        function processActivePrograms() {
+            if (state.programs.qe.active) {
+                const quarterlyAmount = state.programs.qe.monthlyPace * 3 / 1000; // Convert to trillions
+                state.components.demandDeposits += quarterlyAmount * 0.3;
+                state.components.savingsDeposits += quarterlyAmount * 0.4;
+                state.components.tbillsCommercialPaper += quarterlyAmount * 0.3;
+                state.balanceSheet += quarterlyAmount;
+                state.financialStability += 3;
+
+                state.programs.qe.totalDeployed += state.programs.qe.monthlyPace * 3;
+                state.programs.qe.quartersRemaining--;
+
+                if (state.programs.qe.quartersRemaining <= 0) {
+                    state.programs.qe.active = false;
+                    addNews(`QE program complete. $${state.programs.qe.totalDeployed}B deployed.`, 'positive');
+                }
+            }
+
+            if (state.programs.qt.active) {
+                const quarterlyAmount = state.programs.qt.monthlyPace * 3 / 1000;
+                state.components.demandDeposits -= quarterlyAmount * 0.3;
+                state.components.savingsDeposits -= quarterlyAmount * 0.3;
+                state.components.moneyMarketFunds -= quarterlyAmount * 0.2;
+                state.components.tbillsCommercialPaper -= quarterlyAmount * 0.2;
+                state.balanceSheet -= quarterlyAmount;
+
+                state.programs.qt.totalReduced += state.programs.qt.monthlyPace * 3;
+                state.programs.qt.quartersRemaining--;
+
+                if (state.programs.qt.quartersRemaining <= 0) {
+                    state.programs.qt.active = false;
+                    addNews(`QT program complete. Balance sheet reduced by $${state.programs.qt.totalReduced}B.`);
+                }
+            }
+        }
+
+        // ============ NEWS SYSTEM ============
+        function addNews(text, type = '') {
+            const feed = document.getElementById('news-feed');
+            const item = document.createElement('div');
+            item.className = 'news-item';
+            item.innerHTML = `
+                <span class="news-quarter">Q${state.quarter} ${state.year}</span>
+                <span class="news-text ${type}">${text}</span>
+            `;
+            feed.insertBefore(item, feed.firstChild);
+
+            while (feed.children.length > 30) {
+                feed.removeChild(feed.lastChild);
+            }
+        }
+
+        // ============ SIMULATION ENGINE ============
+        function simulateEconomy() {
+            // Store previous values
+            state.prevSimpleSum = calculateSimpleSum();
+            state.prevDivisia = calculateDivisia();
+
+            // Process active programs first
+            processActivePrograms();
+
+            const divisia = calculateDivisia();
+            const divisiaGrowth = state.prevDivisia > 0 ? (divisia - state.prevDivisia) / state.prevDivisia : 0;
+
+            // Difficulty multiplier
+            const diffMult = state.difficulty === 'easy' ? 0.7 : state.difficulty === 'hard' ? 1.5 : 1;
+
+            // Rate effect
+            const rateEffect = (state.fedFundsRate - 5) / 100;
+
+            // Inflation
+            state.inflation += (divisiaGrowth * 30 - rateEffect * 2) * diffMult;
+            state.inflation = Math.max(-2, Math.min(15, state.inflation));
+
+            // Unemployment
+            state.unemployment -= divisiaGrowth * 10 - rateEffect * 1.5;
+            state.unemployment += (Math.random() - 0.5) * 0.3 * diffMult;
+            state.unemployment = Math.max(2, Math.min(15, state.unemployment));
+
+            // GDP
+            state.gdpGrowth = 2.5 + divisiaGrowth * 20 - rateEffect * 3;
+            state.gdpGrowth += (Math.random() - 0.5) * 0.5 * diffMult;
+            state.gdpGrowth = Math.max(-5, Math.min(8, state.gdpGrowth));
+
+            // Financial stability
+            if (state.inflation > 6 || state.inflation < 0) state.financialStability -= 5 * diffMult;
+            if (state.unemployment > 8) state.financialStability -= 3 * diffMult;
+            if (state.gdpGrowth < 0) state.financialStability -= 5 * diffMult;
+            state.financialStability += (Math.random() - 0.3) * 2;
+            state.financialStability = Math.max(0, Math.min(100, state.financialStability));
+
+            // Natural money supply movement
+            const baseGrowth = 0.02;
+            for (const key of Object.keys(state.components)) {
+                state.components[key] *= (1 + baseGrowth + (Math.random() - 0.5) * 0.01);
+                state.components[key] = Math.max(0.1, state.components[key]);
+            }
+
+            // High rates shift to time deposits
+            if (state.fedFundsRate > 5) {
+                const shift = (state.fedFundsRate - 5) * 0.02;
+                state.components.savingsDeposits -= shift;
+                state.components.smallTimeDeposits += shift * 0.6;
+                state.components.largeTimeDeposits += shift * 0.4;
+            }
+
+            // Stock market simulation
+            simulateStockMarket();
+
+            // Record history
+            state.history.m1.push(calculateM1());
+            state.history.m2.push(calculateM2());
+            state.history.m3.push(calculateM3());
+            state.history.m4.push(calculateM4());
+            state.history.simpleSum.push(calculateSimpleSum());
+            state.history.divisia.push(calculateDivisia());
+            state.history.inflation.push(state.inflation);
+            state.history.unemployment.push(state.unemployment);
+            state.history.gdp.push(state.gdpGrowth);
+            state.history.stability.push(state.financialStability);
+            state.history.fedFunds.push(state.fedFundsRate);
+            state.history.stock.push(state.stockMarket.index);
+            state.history.balanceSheet.push(state.balanceSheet);
+        }
+
+        function simulateStockMarket() {
+            const rateEffect = (5 - state.fedFundsRate) * 0.3;
+            const inflationEffect = (2 - state.inflation) * 0.2;
+            const gdpEffect = (state.gdpGrowth - 2) * 0.3;
+            const qeEffect = state.programs.qe.active ? 0.5 : (state.programs.qt.active ? -0.3 : 0);
+            const stabilityEffect = (state.financialStability - 70) * 0.05;
+
+            const baseChange = rateEffect + inflationEffect + gdpEffect + qeEffect + stabilityEffect;
+            const volatility = state.stockMarket.volatility / 100;
+            const randomness = (Math.random() - 0.5) * volatility * 10;
+
+            state.stockMarket.index *= (1 + (baseChange + randomness) / 100);
+            state.stockMarket.index = Math.max(1000, state.stockMarket.index);
+
+            // Volatility adjustment
+            if (state.financialStability < 60 || Math.abs(state.inflation - 2) > 3) {
+                state.stockMarket.volatility = Math.min(50, state.stockMarket.volatility + 2);
+            } else {
+                state.stockMarket.volatility = Math.max(10, state.stockMarket.volatility - 1);
+            }
+        }
+
+        function checkForCrisis() {
+            const crisisChance = Math.random();
+            const diffMult = state.difficulty === 'easy' ? 0.5 : state.difficulty === 'hard' ? 1.5 : 1;
+
+            if (crisisChance < 0.08 * diffMult && state.financialStability < 70) {
+                triggerCrisis('bank_run');
+            } else if (crisisChance < 0.05 * diffMult && state.inflation > 5) {
+                triggerCrisis('inflation_spiral');
+            } else if (crisisChance < 0.03 * diffMult && calculateDivisia() / calculateSimpleSum() < 0.65) {
+                triggerCrisis('liquidity_crisis');
+            } else if (crisisChance < 0.04 * diffMult && state.stockMarket.volatility > 30) {
+                triggerCrisis('market_crash');
+            }
+        }
+
+        function triggerCrisis(type) {
+            let title, text, icon;
+
+            switch (type) {
+                case 'bank_run':
+                    title = 'Bank Run Developing';
+                    text = 'Depositors are withdrawing funds en masse. Money is fleeing from savings to currency.';
+                    icon = '🏦';
+                    state.components.currency += 0.5;
+                    state.components.savingsDeposits -= 0.8;
+                    state.financialStability -= 15;
+                    state.stockMarket.index *= 0.95;
+                    state.stockMarket.volatility += 10;
+                    break;
+
+                case 'inflation_spiral':
+                    title = 'Inflation Expectations Unanchored';
+                    text = 'Consumers expect higher prices, creating a self-fulfilling prophecy.';
+                    icon = '📈';
+                    state.inflation += 2;
+                    state.financialStability -= 10;
+                    state.stockMarket.index *= 0.97;
+                    break;
+
+                case 'liquidity_crisis':
+                    title = 'Shadow Banking Stress';
+                    text = 'Money market funds face redemption pressure. The Divisia-Simple Sum divergence is critical.';
+                    icon = '⚠️';
+                    state.components.moneyMarketFunds -= 0.4;
+                    state.components.tbillsCommercialPaper -= 0.3;
+                    state.financialStability -= 12;
+                    state.stockMarket.volatility += 15;
+                    break;
+
+                case 'market_crash':
+                    title = 'Market Crash';
+                    text = 'Equity markets are in freefall. Volatility has spiked to extreme levels.';
+                    icon = '📉';
+                    state.stockMarket.index *= 0.85;
+                    state.stockMarket.volatility += 20;
+                    state.financialStability -= 8;
+                    break;
+            }
+
+            showModal(icon, title, text, true);
+            addNews('CRISIS: ' + title, 'crisis');
+            state.crisesAvoided++;
+        }
+
+        // ============ MODALS ============
+        function showModal(icon, title, text, isCrisis = false) {
+            document.getElementById('modal-icon').textContent = icon;
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-title').className = 'modal-title ' + (isCrisis ? 'crisis' : 'success');
+            document.getElementById('modal-text').textContent = text;
+            document.getElementById('crisis-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('crisis-modal').classList.remove('active');
+        }
+
+        function showHelp() {
+            document.getElementById('help-modal').classList.add('active');
+        }
+
+        function closeHelp() {
+            document.getElementById('help-modal').classList.remove('active');
+        }
+
+        // ============ TUTORIAL ============
+        const tutorialSteps = [
+            { title: "Welcome, Chair!", text: "You've just been appointed Federal Reserve Chair. Your job: keep the economy stable for the next 5 years.", target: null },
+            { title: "Money Supply", text: "These cards show M1-M4 aggregates. M1 is most liquid (cash), M4 includes everything. Watch the sparklines for trends.", target: '.aggregate-grid' },
+            { title: "The Divisia Secret", text: "Simple Sum treats all dollars equally. Divisia weights by liquidity. When they diverge, Simple Sum is lying to you!", target: '.comparison-view' },
+            { title: "Your Main Tool", text: "The Fed Funds Rate is your primary weapon. Raise it to fight inflation, lower it to stimulate growth.", target: '.policy-tool' },
+            { title: "Emergency Powers", text: "QE injects massive liquidity. QT drains it. Use these for crises, but beware side effects.", target: '.action-buttons' },
+            { title: "Stock Market", text: "The market reacts to your policies. Low rates = higher stocks. Watch VIX for stress signals.", target: '.market-row' },
+            { title: "Your Goal", text: "Keep inflation near 2%, unemployment around 4%, and avoid financial collapse. Good luck, Chair!", target: null }
+        ];
+
+        function startTutorial() {
+            state.tutorial.active = true;
+            state.tutorial.step = 0;
+            startGame();
+            showTutorialStep();
+        }
+
+        function showTutorialStep() {
+            const step = tutorialSteps[state.tutorial.step];
+            const overlay = document.getElementById('tutorial-overlay');
+            const tooltip = document.getElementById('tutorial-tooltip');
+
+            overlay.classList.add('active');
+
+            document.getElementById('tutorial-step-num').textContent = `Step ${state.tutorial.step + 1} of ${tutorialSteps.length}`;
+            document.getElementById('tutorial-title').textContent = step.title;
+            document.getElementById('tutorial-text').textContent = step.text;
+
+            // Position tooltip
+            tooltip.style.top = '50%';
+            tooltip.style.left = '50%';
+            tooltip.style.transform = 'translate(-50%, -50%)';
+        }
+
+        function nextTutorialStep() {
+            state.tutorial.step++;
+            if (state.tutorial.step >= tutorialSteps.length) {
+                skipTutorial();
+            } else {
+                showTutorialStep();
+            }
+        }
+
+        function skipTutorial() {
+            state.tutorial.active = false;
+            document.getElementById('tutorial-overlay').classList.remove('active');
+        }
+
+        // ============ GAME FLOW ============
+        function startGame() {
+            // Apply settings
+            state.maxTurns = parseInt(document.getElementById('setting-length').value);
+            state.difficulty = document.getElementById('setting-difficulty').value;
+            const scenario = document.getElementById('setting-scenario').value;
+
+            // Apply scenario
+            switch (scenario) {
+                case 'inflation':
+                    state.inflation = 6;
+                    state.fedFundsRate = 3;
+                    document.getElementById('rate-slider').value = 3;
+                    break;
+                case 'recession':
+                    state.unemployment = 8;
+                    state.gdpGrowth = -1;
+                    state.stockMarket.index = 3500;
+                    break;
+                case 'zerobound':
+                    state.fedFundsRate = 0;
+                    document.getElementById('rate-slider').value = 0;
+                    state.inflation = 0.5;
+                    break;
+            }
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-container').classList.add('active');
+
+            state.prevSimpleSum = calculateSimpleSum();
+            state.prevDivisia = calculateDivisia();
+
+            // Initialize history with starting values (need 2+ points for sparklines)
+            const m1Init = calculateM1();
+            const m2Init = calculateM2();
+            const m3Init = calculateM3();
+            const m4Init = calculateM4();
+            const simpleSumInit = calculateSimpleSum();
+            const divisiaInit = calculateDivisia();
+
+            // Push initial values twice to have starting baseline
+            state.history.m1.push(m1Init, m1Init);
+            state.history.m2.push(m2Init, m2Init);
+            state.history.m3.push(m3Init, m3Init);
+            state.history.m4.push(m4Init, m4Init);
+            state.history.simpleSum.push(simpleSumInit, simpleSumInit);
+            state.history.divisia.push(divisiaInit, divisiaInit);
+            state.history.inflation.push(state.inflation, state.inflation);
+            state.history.unemployment.push(state.unemployment, state.unemployment);
+            state.history.gdp.push(state.gdpGrowth, state.gdpGrowth);
+            state.history.stability.push(state.financialStability, state.financialStability);
+            state.history.fedFunds.push(state.fedFundsRate, state.fedFundsRate);
+            state.history.stock.push(state.stockMarket.index, state.stockMarket.index);
+            state.history.balanceSheet.push(state.balanceSheet, state.balanceSheet);
+
+            updateDisplay();
+            updateRateDisplay();
+            updateReserveDisplay();
+
+            // Re-render charts after DOM layout settles
+            requestAnimationFrame(() => {
+                renderMainChart();
+                renderSparkline('sparkline-m1', state.history.m1, '#3fb950');
+                renderSparkline('sparkline-m2', state.history.m2, '#58a6ff');
+                renderSparkline('sparkline-m3', state.history.m3, '#a371f7');
+                renderSparkline('sparkline-m4', state.history.m4, '#39c5cf');
+                renderSparkline('sparkline-stock', state.history.stock, '#3fb950');
+            });
+        }
+
+        function endTurn() {
+            simulateEconomy();
+            checkForCrisis();
+
+            state.turn++;
+            state.quarter++;
+            if (state.quarter > 4) {
+                state.quarter = 1;
+                state.year++;
+            }
+
+            state.omoUsed = false;
+
+            if (state.turn > state.maxTurns) {
+                endGame();
+                return;
+            }
+
+            // Failure conditions
+            if (state.inflation > 12) {
+                showModal('💥', 'Hyperinflation', 'Inflation has spiraled out of control.', true);
+                setTimeout(endGame, 2000);
+                return;
+            }
+            if (state.unemployment > 12) {
+                showModal('📉', 'Depression', 'Unemployment has reached depression levels.', true);
+                setTimeout(endGame, 2000);
+                return;
+            }
+            if (state.financialStability < 20) {
+                showModal('🏚️', 'Financial Collapse', 'The banking system has collapsed.', true);
+                setTimeout(endGame, 2000);
+                return;
+            }
+
+            updateDisplay();
+            generateQuarterlyNews();
+        }
+
+        function generateQuarterlyNews() {
+            const headlines = [
+                `Markets ${state.gdpGrowth > 2 ? 'rally on strong growth' : 'cautious amid weak growth'}.`,
+                `Inflation at ${state.inflation.toFixed(1)}%. ${state.inflation > 3 ? 'Concerns mount.' : 'Prices stable.'}`,
+                `Labor market ${state.unemployment < 5 ? 'remains robust' : 'shows strain'}.`,
+                `Fed Chair's ratings ${updateRating().score > 60 ? 'hold steady' : 'slip'}.`,
+                `S&P 500 ${state.stockMarket.index > 4500 ? 'hits new highs' : 'under pressure'}.`
+            ];
+            addNews(headlines[Math.floor(Math.random() * headlines.length)]);
+        }
+
+        function endGame() {
+            const { rating, score } = updateRating();
+
+            const avgInflation = state.history.inflation.reduce((a, b) => a + b, 0) / state.history.inflation.length || state.inflation;
+            const avgUnemployment = state.history.unemployment.reduce((a, b) => a + b, 0) / state.history.unemployment.length || state.unemployment;
+            const avgGdp = state.history.gdp.reduce((a, b) => a + b, 0) / state.history.gdp.length || state.gdpGrowth;
+
+            document.getElementById('final-rating').textContent = rating;
+            document.getElementById('final-rating').className = 'final-rating ' + (score >= 55 ? 'rating-a' : score >= 35 ? 'rating-c' : 'rating-f');
+
+            let title;
+            if (score >= 85) title = 'Legendary Fed Chair';
+            else if (score >= 70) title = 'Excellent Stewardship';
+            else if (score >= 55) title = 'Adequate Performance';
+            else if (score >= 40) title = 'Troubled Tenure';
+            else title = 'Economic Disaster';
+
+            document.getElementById('final-title').textContent = title;
+            document.getElementById('final-inflation').textContent = avgInflation.toFixed(1) + '%';
+            document.getElementById('final-unemployment').textContent = avgUnemployment.toFixed(1) + '%';
+            document.getElementById('final-gdp').textContent = avgGdp.toFixed(1) + '%';
+            document.getElementById('final-crises').textContent = state.crisesAvoided;
+
+            // Render final chart
+            renderFinalChart();
+
+            document.getElementById('game-over').classList.add('active');
+        }
+
+        function renderFinalChart() {
+            const canvas = document.getElementById('final-chart');
+            if (!canvas || state.history.inflation.length === 0) return;
+
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * 2;
+            canvas.height = 300;
+            ctx.scale(2, 2);
+
+            const width = rect.width;
+            const height = 150;
+            const padding = { top: 20, right: 20, bottom: 25, left: 40 };
+
+            ctx.clearRect(0, 0, width, height);
+
+            const datasets = [
+                { data: state.history.inflation, color: '#f85149', label: 'Inflation' },
+                { data: state.history.unemployment, color: '#58a6ff', label: 'Unemployment' },
+                { data: state.history.gdp, color: '#3fb950', label: 'GDP' }
+            ];
+
+            // Find scale
+            let allValues = [];
+            datasets.forEach(d => allValues = allValues.concat(d.data));
+            const min = Math.min(...allValues, -2);
+            const max = Math.max(...allValues, 10);
+            const range = max - min;
+
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+
+            // Draw zero line
+            const zeroY = padding.top + ((max - 0) / range) * chartHeight;
+            ctx.strokeStyle = '#30363d';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padding.left, zeroY);
+            ctx.lineTo(width - padding.right, zeroY);
+            ctx.stroke();
+
+            // Draw lines
+            datasets.forEach(dataset => {
+                ctx.beginPath();
+                ctx.strokeStyle = dataset.color;
+                ctx.lineWidth = 2;
+
+                dataset.data.forEach((value, i) => {
+                    const x = padding.left + (i / (dataset.data.length - 1 || 1)) * chartWidth;
+                    const y = padding.top + ((max - value) / range) * chartHeight;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+
+                ctx.stroke();
+            });
+
+            // Legend
+            ctx.font = '10px SF Mono, monospace';
+            ctx.fillStyle = '#f85149';
+            ctx.fillText('Inflation', padding.left, height - 5);
+            ctx.fillStyle = '#58a6ff';
+            ctx.fillText('Unemployment', padding.left + 70, height - 5);
+            ctx.fillStyle = '#3fb950';
+            ctx.fillText('GDP', padding.left + 160, height - 5);
+        }
+
+        function restartGame() {
+            // Reset all state
+            state.turn = 1;
+            state.year = 2024;
+            state.quarter = 1;
+            state.fedFundsRate = 5.25;
+            state.reserveRequirement = 10;
+            state.inflation = 2.4;
+            state.unemployment = 3.8;
+            state.gdpGrowth = 2.5;
+            state.financialStability = 85;
+            state.stockMarket = { index: 4500, volatility: 15, sentiment: 50 };
+            state.balanceSheet = 8.9;
+            state.components = {
+                currency: 2.3,
+                demandDeposits: 1.9,
+                savingsDeposits: 12.4,
+                smallTimeDeposits: 2.1,
+                largeTimeDeposits: 1.8,
+                moneyMarketFunds: 1.6,
+                tbillsCommercialPaper: 6.3
+            };
+            state.history = {
+                m1: [], m2: [], m3: [], m4: [],
+                simpleSum: [], divisia: [],
+                inflation: [], unemployment: [], gdp: [], stability: [],
+                fedFunds: [], stock: [], balanceSheet: []
+            };
+            state.programs = {
+                qe: { active: false, monthlyPace: 0, quartersRemaining: 0, totalDeployed: 0, totalPlanned: 0 },
+                qt: { active: false, monthlyPace: 0, quartersRemaining: 0, totalReduced: 0, totalPlanned: 0 }
+            };
+            state.crisesAvoided = 0;
+            state.omoUsed = false;
+
+            document.getElementById('rate-slider').value = 5.25;
+            document.getElementById('reserve-slider').value = 10;
+            document.getElementById('news-feed').innerHTML = `
+                <div class="news-item">
+                    <span class="news-quarter">Q1 2024</span>
+                    <span class="news-text">You have been appointed as the new Federal Reserve Chair.</span>
+                </div>
+            `;
+
+            document.getElementById('game-over').classList.remove('active');
+            document.getElementById('game-container').classList.remove('active');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+
+        // Initialize
+        updateRateDisplay();
+        updateReserveDisplay();
+    </script>
+</body>
+</html>

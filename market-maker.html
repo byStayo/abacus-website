@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Market Maker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .back-link { color: #7d8590; text-decoration: none; font-size: 14px; }
+        .back-link:hover { color: #58a6ff; }
+        h1 { font-size: 22px; font-weight: 600; color: #e6edf3; }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .stat-box {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .stat-box.flash-green {
+            animation: flashGreen 0.5s ease;
+        }
+        .stat-box.flash-red {
+            animation: flashRed 0.5s ease;
+        }
+        @keyframes flashGreen {
+            0%, 100% { background-color: #161b22; }
+            50% { background-color: rgba(63, 185, 80, 0.3); border-color: #3fb950; }
+        }
+        @keyframes flashRed {
+            0%, 100% { background-color: #161b22; }
+            50% { background-color: rgba(248, 81, 73, 0.3); border-color: #f85149; }
+        }
+        .stat-label { font-size: 10px; color: #7d8590; text-transform: uppercase; }
+        .stat-value { font-size: 18px; font-weight: 700; color: #58a6ff; }
+        .stat-value.profit { color: #3fb950; }
+        .stat-value.loss { color: #f85149; }
+        .stat-value.bounce {
+            animation: bounce 0.4s ease;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        .chart-container {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .ticker-info { display: flex; align-items: baseline; gap: 12px; }
+        .ticker-symbol { font-size: 14px; color: #7d8590; font-weight: 600; }
+        .ticker-price { font-size: 28px; font-weight: 700; color: #e6edf3; transition: all 0.2s; }
+        .ticker-price.price-up { animation: priceUp 0.3s ease; }
+        .ticker-price.price-down { animation: priceDown 0.3s ease; }
+        @keyframes priceUp {
+            50% { color: #3fb950; transform: scale(1.05); }
+        }
+        @keyframes priceDown {
+            50% { color: #f85149; transform: scale(1.05); }
+        }
+        .ticker-change { font-size: 16px; font-weight: 600; }
+        .ticker-change.up { color: #3fb950; }
+        .ticker-change.down { color: #f85149; }
+
+        .chart-controls {
+            display: flex;
+            gap: 6px;
+        }
+        .chart-btn {
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            color: #7d8590;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .chart-btn:hover { background-color: #30363d; color: #c9d1d9; }
+        .chart-btn.active { background-color: #238636; border-color: #238636; color: white; }
+
+        .chart-wrapper {
+            position: relative;
+            background-color: #0d1117;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #chart-canvas {
+            display: block;
+            width: 100%;
+            height: 200px;
+        }
+
+        .timer-bar {
+            height: 6px;
+            background-color: #21262d;
+            border-radius: 3px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #58a6ff, #79b8ff);
+            transition: width 0.1s linear;
+            border-radius: 3px;
+        }
+        .timer-fill.urgent {
+            background: linear-gradient(90deg, #d29922, #f0883e);
+            animation: timerPulse 0.5s ease-in-out infinite;
+        }
+        .timer-fill.critical {
+            background: linear-gradient(90deg, #f85149, #ff6b6b);
+            animation: timerPulse 0.25s ease-in-out infinite;
+        }
+        @keyframes timerPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .trade-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .trade-btn {
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+        .trade-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .trade-btn:active:not(:disabled) { transform: scale(0.98); }
+        .trade-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .trade-btn.buy { background-color: #238636; color: white; }
+        .trade-btn.buy:hover:not(:disabled) { background-color: #2ea043; }
+        .trade-btn.hold { background-color: #30363d; color: #e6edf3; }
+        .trade-btn.hold:hover:not(:disabled) { background-color: #3d444d; }
+        .trade-btn.sell { background-color: #da3633; color: white; }
+        .trade-btn.sell:hover:not(:disabled) { background-color: #f85149; }
+
+        .history {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .history-title { font-size: 12px; font-weight: 600; color: #7d8590; margin-bottom: 8px; text-transform: uppercase; }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #21262d;
+            font-size: 12px;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-action { color: #7d8590; }
+        .history-result.profit { color: #3fb950; }
+        .history-result.loss { color: #f85149; }
+
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(13, 17, 23, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .overlay.active { display: flex; }
+        .overlay-content { text-align: center; padding: 40px; }
+        .overlay-title { font-size: 42px; font-weight: 800; margin-bottom: 16px; }
+        .overlay-title.win { color: #3fb950; animation: winTitle 0.5s ease; }
+        .overlay-title.lose { color: #f85149; }
+        @keyframes winTitle {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .overlay-stats { font-size: 16px; color: #7d8590; margin-bottom: 24px; line-height: 1.8; }
+        .overlay-stats strong { color: #e6edf3; }
+        .overlay-btn {
+            background-color: #238636;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .overlay-btn:hover { background-color: #2ea043; transform: scale(1.05); }
+
+        .start-screen { text-align: center; padding: 40px 20px; }
+        .start-title { font-size: 28px; font-weight: 700; color: #e6edf3; margin-bottom: 12px; }
+        .start-desc { font-size: 14px; color: #7d8590; margin-bottom: 24px; line-height: 1.6; }
+        .difficulty { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+        .diff-btn {
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .diff-btn:hover { background-color: #30363d; }
+        .diff-btn.active { background-color: #238636; border-color: #238636; color: white; }
+        .start-btn {
+            background-color: #238636;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .start-btn:hover { background-color: #2ea043; transform: scale(1.05); }
+        .best-score { margin-top: 20px; font-size: 13px; color: #7d8590; }
+        .best-score strong { color: #58a6ff; }
+
+        .screen-flash {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 50;
+            animation: flashIn 0.4s ease-out forwards;
+        }
+        @keyframes flashIn { 0% { opacity: 0.4; } 100% { opacity: 0; } }
+
+        /* Streak popup */
+        .streak-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #238636, #2ea043);
+            border-radius: 12px;
+            padding: 16px 32px;
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+            z-index: 80;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            animation: streakPop 0.8s ease forwards;
+        }
+        @keyframes streakPop {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
+            30% { transform: translate(-50%, -50%) scale(1.2) rotate(5deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(0deg) translateY(-30px); opacity: 0; }
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 200;
+            animation: confettiFall 2s ease-out forwards;
+        }
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(400px) rotate(720deg); }
+        }
+
+        /* Shake */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+        .shake { animation: shake 0.4s ease; }
+
+        footer { text-align: center; margin-top: 20px; font-size: 11px; color: #484f58; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="position:absolute;top:20px;left:20px;display:flex;align-items:center;gap:8px;font-size:14px;"><a href="/" style="color:#7d8590;text-decoration:none;">Abacus</a><span style="color:#7d8590;opacity:0.5;">/</span><a href="/" style="color:#7d8590;text-decoration:none;">Games</a><span style="color:#7d8590;opacity:0.5;">/</span><span style="color:#e6edf3;">Market Maker</span></div>
+            <h1>Market Maker</h1>
+        </header>
+
+        <div id="start-screen" class="start-screen">
+            <div class="start-title">Market Maker</div>
+            <div class="start-desc">
+                Watch the chart. React to price movements.<br>
+                Buy low, sell high. 20 rounds. Don't go bankrupt!
+            </div>
+            <div class="difficulty">
+                <button class="diff-btn" data-time="4000">Easy</button>
+                <button class="diff-btn active" data-time="3000">Normal</button>
+                <button class="diff-btn" data-time="2000">Hard</button>
+            </div>
+            <button class="start-btn" id="start-btn">Start Trading</button>
+            <div class="best-score">Best: <strong id="best-display">$0</strong></div>
+        </div>
+
+        <div id="game-area" style="display: none;">
+            <div class="stats-bar">
+                <div class="stat-box" id="portfolio-box">
+                    <div class="stat-label">Portfolio</div>
+                    <div class="stat-value" id="portfolio">$10,000</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Round</div>
+                    <div class="stat-value" id="round">1/20</div>
+                </div>
+                <div class="stat-box" id="streak-box">
+                    <div class="stat-label">Streak</div>
+                    <div class="stat-value" id="streak">0</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="ticker-info">
+                        <span class="ticker-symbol" id="ticker-symbol">AAPL</span>
+                        <span class="ticker-price" id="ticker-price">$150.00</span>
+                        <span class="ticker-change" id="ticker-change">+0.00%</span>
+                    </div>
+                    <div class="chart-controls">
+                        <button class="chart-btn active" data-type="line">Line</button>
+                        <button class="chart-btn" data-type="candle">Candle</button>
+                        <button class="chart-btn" data-type="area">Area</button>
+                        <button class="chart-btn" data-type="bar">Bar</button>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="chart-canvas"></canvas>
+                </div>
+                <div class="timer-bar">
+                    <div class="timer-fill" id="timer-fill"></div>
+                </div>
+            </div>
+
+            <div class="trade-buttons">
+                <button class="trade-btn buy" id="buy-btn">Buy</button>
+                <button class="trade-btn hold" id="hold-btn">Hold</button>
+                <button class="trade-btn sell" id="sell-btn">Sell</button>
+            </div>
+
+            <div class="history">
+                <div class="history-title">Trade History</div>
+                <div id="history-list"></div>
+            </div>
+        </div>
+
+        <div class="overlay" id="overlay">
+            <div class="overlay-content">
+                <div class="overlay-title" id="overlay-title">Game Over</div>
+                <div class="overlay-stats" id="overlay-stats"></div>
+                <button class="overlay-btn" id="restart-btn">Trade Again</button>
+            </div>
+        </div>
+
+        <footer>Market Maker — Watch the chart, beat the market</footer>
+    </div>
+
+    <script>
+        // Audio System
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(freq, duration = 0.1, type = 'sine', volume = 0.3) {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain).connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function playBuy() {
+            playTone(500, 0.08, 'square', 0.15);
+            setTimeout(() => playTone(600, 0.1, 'square', 0.15), 60);
+        }
+
+        function playSell() {
+            playTone(600, 0.08, 'square', 0.15);
+            setTimeout(() => playTone(500, 0.1, 'square', 0.15), 60);
+        }
+
+        function playHold() {
+            playTone(400, 0.1, 'triangle', 0.1);
+        }
+
+        function playProfit() {
+            playTone(523, 0.1, 'sine', 0.25);
+            setTimeout(() => playTone(659, 0.1, 'sine', 0.25), 80);
+            setTimeout(() => playTone(784, 0.15, 'sine', 0.3), 160);
+        }
+
+        function playLoss() {
+            playTone(300, 0.15, 'sawtooth', 0.15);
+            setTimeout(() => playTone(200, 0.2, 'sawtooth', 0.12), 150);
+        }
+
+        function playStreak() {
+            [523, 659, 784, 1047].forEach((f, i) => {
+                setTimeout(() => playTone(f, 0.12, 'sine', 0.2), i * 80);
+            });
+        }
+
+        function playBigWin() {
+            [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => {
+                setTimeout(() => playTone(f, 0.15, 'sine', 0.25), i * 100);
+            });
+        }
+
+        function playClick() {
+            playTone(600, 0.05, 'square', 0.1);
+        }
+
+        // Visual Effects
+        function confetti(count = 50) {
+            const colors = ['#3fb950', '#58a6ff', '#d29922', '#f0883e', '#a371f7', '#f85149'];
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'confetti';
+                particle.style.left = (Math.random() * window.innerWidth) + 'px';
+                particle.style.top = '-20px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDelay = (Math.random() * 0.5) + 's';
+                particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 2500);
+            }
+        }
+
+        function screenFlash(color) {
+            const flash = document.createElement('div');
+            flash.className = 'screen-flash';
+            flash.style.backgroundColor = color;
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 400);
+        }
+
+        function screenShake() {
+            document.body.classList.add('shake');
+            setTimeout(() => document.body.classList.remove('shake'), 400);
+        }
+
+        function showStreakPopup(streak) {
+            const popup = document.createElement('div');
+            popup.className = 'streak-popup';
+            const bonus = Math.floor(streak * 10);
+            popup.textContent = `${streak}x STREAK! +${bonus}% BONUS`;
+            document.body.appendChild(popup);
+            setTimeout(() => popup.remove(), 800);
+        }
+
+        // Animate number
+        function animateNumber(element, target, prefix = '$', duration = 400) {
+            const startText = element.textContent.replace(/[^0-9.-]/g, '');
+            const start = parseFloat(startText) || 0;
+            const startTime = performance.now();
+
+            function update(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = start + (target - start) * eased;
+                element.textContent = prefix + Math.floor(current).toLocaleString();
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+
+        const canvas = document.getElementById('chart-canvas');
+        const ctx = canvas.getContext('2d');
+
+        // High DPI support
+        const dpr = window.devicePixelRatio || 1;
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = 200 * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = '200px';
+            ctx.scale(dpr, dpr);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const TICKERS = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'META', 'NVDA', 'TSLA', 'JPM', 'V', 'MA'];
+        const ROUNDS = 20;
+        const START_MONEY = 10000;
+        const CHART_POINTS = 30;
+
+        let roundTime = 3000;
+        let chartType = 'line';
+        let priceHistory = [];
+        let candleData = [];
+
+        let gameState = {
+            portfolio: START_MONEY,
+            round: 0,
+            streak: 0,
+            bestStreak: 0,
+            currentPrice: 100,
+            previousPrice: 100,
+            ticker: 'AAPL',
+            history: [],
+            timerStart: 0,
+            gameActive: false
+        };
+
+        let best = parseInt(localStorage.getItem('marketMakerBest')) || 0;
+        let roundTimer = null;
+        let priceTimer = null;
+
+        const startScreen = document.getElementById('start-screen');
+        const gameArea = document.getElementById('game-area');
+        const portfolioEl = document.getElementById('portfolio');
+        const portfolioBox = document.getElementById('portfolio-box');
+        const roundEl = document.getElementById('round');
+        const streakEl = document.getElementById('streak');
+        const streakBox = document.getElementById('streak-box');
+        const tickerSymbol = document.getElementById('ticker-symbol');
+        const tickerPrice = document.getElementById('ticker-price');
+        const tickerChange = document.getElementById('ticker-change');
+        const timerFill = document.getElementById('timer-fill');
+        const historyList = document.getElementById('history-list');
+        const overlay = document.getElementById('overlay');
+        const overlayTitle = document.getElementById('overlay-title');
+        const overlayStats = document.getElementById('overlay-stats');
+        const bestDisplay = document.getElementById('best-display');
+
+        bestDisplay.textContent = formatMoney(best);
+
+        const COLORS = {
+            bg: '#0d1117',
+            grid: '#21262d',
+            up: '#3fb950',
+            down: '#f85149',
+            line: '#58a6ff',
+            area: 'rgba(88, 166, 255, 0.2)',
+            text: '#7d8590'
+        };
+
+        function formatMoney(value) {
+            return '$' + Math.floor(value).toLocaleString();
+        }
+
+        function drawChart() {
+            const w = canvas.width / dpr;
+            const h = canvas.height / dpr;
+
+            ctx.fillStyle = COLORS.bg;
+            ctx.fillRect(0, 0, w, h);
+
+            ctx.strokeStyle = COLORS.grid;
+            ctx.lineWidth = 1;
+            for (let i = 1; i < 4; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, h * i / 4);
+                ctx.lineTo(w, h * i / 4);
+                ctx.stroke();
+            }
+
+            if (priceHistory.length < 2) return;
+
+            const minPrice = Math.min(...priceHistory) * 0.98;
+            const maxPrice = Math.max(...priceHistory) * 1.02;
+            const priceRange = maxPrice - minPrice;
+
+            const getY = (price) => h - ((price - minPrice) / priceRange) * (h - 20) - 10;
+            const getX = (i) => (i / (CHART_POINTS - 1)) * (w - 20) + 10;
+
+            switch (chartType) {
+                case 'line': drawLineChart(w, h, getX, getY); break;
+                case 'candle': drawCandleChart(w, h, getX, getY, minPrice, maxPrice); break;
+                case 'area': drawAreaChart(w, h, getX, getY); break;
+                case 'bar': drawBarChart(w, h, getX, getY); break;
+            }
+
+            ctx.fillStyle = COLORS.text;
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText('$' + maxPrice.toFixed(0), w - 5, 15);
+            ctx.fillText('$' + minPrice.toFixed(0), w - 5, h - 5);
+        }
+
+        function drawLineChart(w, h, getX, getY) {
+            ctx.strokeStyle = COLORS.line;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+
+            priceHistory.forEach((price, i) => {
+                const x = getX(i);
+                const y = getY(price);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            if (priceHistory.length > 0) {
+                const lastX = getX(priceHistory.length - 1);
+                const lastY = getY(priceHistory[priceHistory.length - 1]);
+                const isUp = gameState.currentPrice >= gameState.previousPrice;
+
+                // Glow effect
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = isUp ? COLORS.up : COLORS.down;
+                ctx.fillStyle = isUp ? COLORS.up : COLORS.down;
+                ctx.beginPath();
+                ctx.arc(lastX, lastY, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function drawAreaChart(w, h, getX, getY) {
+            ctx.fillStyle = COLORS.area;
+            ctx.beginPath();
+            ctx.moveTo(getX(0), h);
+            priceHistory.forEach((price, i) => {
+                ctx.lineTo(getX(i), getY(price));
+            });
+            ctx.lineTo(getX(priceHistory.length - 1), h);
+            ctx.closePath();
+            ctx.fill();
+
+            drawLineChart(w, h, getX, getY);
+        }
+
+        function drawBarChart(w, h, getX, getY) {
+            const barWidth = Math.max(4, (w - 20) / CHART_POINTS - 2);
+
+            priceHistory.forEach((price, i) => {
+                if (i === 0) return;
+                const prevPrice = priceHistory[i - 1];
+                const x = getX(i) - barWidth / 2;
+                const isUp = price >= prevPrice;
+
+                ctx.fillStyle = isUp ? COLORS.up : COLORS.down;
+                const top = getY(Math.max(price, prevPrice));
+                const bottom = getY(Math.min(price, prevPrice));
+                const barHeight = Math.max(2, bottom - top);
+                ctx.fillRect(x, top, barWidth, barHeight);
+            });
+        }
+
+        function drawCandleChart(w, h, getX, getY, minPrice, maxPrice) {
+            if (candleData.length < 1) return;
+
+            const candleWidth = Math.max(6, (w - 20) / candleData.length - 4);
+
+            candleData.forEach((candle, i) => {
+                const x = getX(i * (CHART_POINTS / candleData.length));
+                const isUp = candle.close >= candle.open;
+                const color = isUp ? COLORS.up : COLORS.down;
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x, getY(candle.high));
+                ctx.lineTo(x, getY(candle.low));
+                ctx.stroke();
+
+                ctx.fillStyle = color;
+                const top = getY(Math.max(candle.open, candle.close));
+                const bottom = getY(Math.min(candle.open, candle.close));
+                const bodyHeight = Math.max(2, bottom - top);
+                ctx.fillRect(x - candleWidth / 2, top, candleWidth, bodyHeight);
+            });
+        }
+
+        function initPriceHistory() {
+            priceHistory = [];
+            candleData = [];
+            const basePrice = gameState.currentPrice;
+
+            let price = basePrice * (0.9 + Math.random() * 0.2);
+            for (let i = 0; i < CHART_POINTS; i++) {
+                price = price * (1 + (Math.random() - 0.5) * 0.04);
+                priceHistory.push(price);
+            }
+
+            gameState.currentPrice = priceHistory[priceHistory.length - 1];
+            gameState.previousPrice = priceHistory[priceHistory.length - 2] || gameState.currentPrice;
+
+            for (let i = 0; i < priceHistory.length; i += 5) {
+                const slice = priceHistory.slice(i, i + 5);
+                if (slice.length > 0) {
+                    candleData.push({
+                        open: slice[0],
+                        close: slice[slice.length - 1],
+                        high: Math.max(...slice),
+                        low: Math.min(...slice)
+                    });
+                }
+            }
+        }
+
+        function updatePrice() {
+            gameState.previousPrice = gameState.currentPrice;
+            const change = (Math.random() - 0.5) * 4;
+            gameState.currentPrice = Math.max(1, gameState.currentPrice * (1 + change / 100));
+
+            priceHistory.push(gameState.currentPrice);
+            if (priceHistory.length > CHART_POINTS) {
+                priceHistory.shift();
+            }
+
+            if (candleData.length > 0) {
+                const lastCandle = candleData[candleData.length - 1];
+                lastCandle.close = gameState.currentPrice;
+                lastCandle.high = Math.max(lastCandle.high, gameState.currentPrice);
+                lastCandle.low = Math.min(lastCandle.low, gameState.currentPrice);
+            }
+
+            updateUI();
+            drawChart();
+        }
+
+        function startGame() {
+            initAudio();
+            playClick();
+
+            gameState = {
+                portfolio: START_MONEY,
+                round: 0,
+                streak: 0,
+                bestStreak: 0,
+                currentPrice: 50 + Math.random() * 150,
+                previousPrice: 100,
+                ticker: TICKERS[Math.floor(Math.random() * TICKERS.length)],
+                history: [],
+                timerStart: Date.now(),
+                gameActive: true
+            };
+
+            startScreen.style.display = 'none';
+            gameArea.style.display = 'block';
+            overlay.classList.remove('active');
+
+            // Resize canvas now that game area is visible
+            resizeCanvas();
+
+            historyList.innerHTML = '';
+            initPriceHistory();
+            updateUI();
+            drawChart();
+            nextRound();
+        }
+
+        function nextRound() {
+            if (gameState.round >= ROUNDS || gameState.portfolio <= 0) {
+                endGame();
+                return;
+            }
+
+            gameState.round++;
+            gameState.timerStart = Date.now();
+
+            if (Math.random() < 0.3) {
+                gameState.ticker = TICKERS[Math.floor(Math.random() * TICKERS.length)];
+                gameState.currentPrice = 50 + Math.random() * 200;
+                initPriceHistory();
+            }
+
+            updateUI();
+            drawChart();
+
+            if (priceTimer) clearInterval(priceTimer);
+            priceTimer = setInterval(updatePrice, 400);
+
+            if (roundTimer) clearTimeout(roundTimer);
+            roundTimer = setTimeout(() => {
+                clearInterval(priceTimer);
+                resolveRound('hold');
+            }, roundTime);
+
+            updateTimerBar();
+        }
+
+        function updateTimerBar() {
+            const elapsed = Date.now() - gameState.timerStart;
+            const remaining = Math.max(0, roundTime - elapsed);
+            const percent = remaining / roundTime * 100;
+            timerFill.style.width = percent + '%';
+
+            // Update urgency
+            timerFill.classList.remove('urgent', 'critical');
+            if (percent < 20) {
+                timerFill.classList.add('critical');
+            } else if (percent < 40) {
+                timerFill.classList.add('urgent');
+            }
+
+            if (remaining > 0 && gameState.gameActive) {
+                requestAnimationFrame(updateTimerBar);
+            }
+        }
+
+        function resolveRound(action) {
+            if (!gameState.gameActive) return;
+
+            initAudio();
+            clearInterval(priceTimer);
+            clearTimeout(roundTimer);
+
+            // Play action sound
+            if (action === 'buy') playBuy();
+            else if (action === 'sell') playSell();
+            else playHold();
+
+            const startIdx = Math.max(0, priceHistory.length - 10);
+            const recentPrices = priceHistory.slice(startIdx);
+            const avgStart = recentPrices.slice(0, 3).reduce((a, b) => a + b, 0) / 3;
+            const avgEnd = recentPrices.slice(-3).reduce((a, b) => a + b, 0) / 3;
+            const trend = ((avgEnd - avgStart) / avgStart) * 100;
+
+            let profit = 0;
+
+            if (action === 'buy') {
+                profit = gameState.portfolio * 0.1 * (trend / 2);
+            } else if (action === 'sell') {
+                profit = gameState.portfolio * 0.1 * (-trend / 2);
+            } else {
+                profit = -Math.abs(trend) * gameState.portfolio * 0.005;
+            }
+
+            const prevStreak = gameState.streak;
+
+            if (profit > 0) {
+                gameState.streak++;
+                if (gameState.streak > gameState.bestStreak) {
+                    gameState.bestStreak = gameState.streak;
+                }
+                profit *= (1 + gameState.streak * 0.1);
+
+                // Streak effects
+                if (gameState.streak >= 3 && gameState.streak > prevStreak) {
+                    showStreakPopup(gameState.streak);
+                    playStreak();
+
+                    streakEl.classList.add('bounce');
+                    setTimeout(() => streakEl.classList.remove('bounce'), 400);
+                }
+
+                playProfit();
+                screenFlash('rgba(63, 185, 80, 0.3)');
+                portfolioBox.classList.add('flash-green');
+            } else {
+                gameState.streak = 0;
+                playLoss();
+                screenFlash('rgba(248, 81, 73, 0.3)');
+                screenShake();
+                portfolioBox.classList.add('flash-red');
+            }
+
+            setTimeout(() => {
+                portfolioBox.classList.remove('flash-green', 'flash-red');
+            }, 500);
+
+            gameState.portfolio += profit;
+            animateNumber(portfolioEl, gameState.portfolio, '$');
+
+            const historyEntry = {
+                round: gameState.round,
+                action: action.toUpperCase(),
+                ticker: gameState.ticker,
+                profit: profit
+            };
+            gameState.history.unshift(historyEntry);
+            addHistoryItem(historyEntry);
+            updateUI(true);
+
+            if (gameState.portfolio <= 0) {
+                gameState.portfolio = 0;
+                endGame();
+            } else {
+                setTimeout(nextRound, 800);
+            }
+        }
+
+        function addHistoryItem(entry) {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `
+                <span class="history-action">R${entry.round}: ${entry.action} ${entry.ticker}</span>
+                <span class="history-result ${entry.profit >= 0 ? 'profit' : 'loss'}">
+                    ${entry.profit >= 0 ? '+' : ''}${formatMoney(entry.profit)}
+                </span>
+            `;
+            historyList.insertBefore(div, historyList.firstChild);
+        }
+
+        function endGame() {
+            gameState.gameActive = false;
+            clearInterval(priceTimer);
+            clearTimeout(roundTimer);
+
+            initAudio();
+
+            const finalValue = Math.floor(gameState.portfolio);
+            const isWin = finalValue > START_MONEY;
+            const profit = finalValue - START_MONEY;
+            const isNewBest = finalValue > best;
+
+            if (isNewBest) {
+                best = finalValue;
+                localStorage.setItem('marketMakerBest', best);
+                bestDisplay.textContent = formatMoney(best);
+                playBigWin();
+                confetti(80);
+            } else if (isWin) {
+                playProfit();
+                confetti(40);
+            } else {
+                playLoss();
+            }
+
+            overlayTitle.textContent = finalValue <= 0 ? 'BANKRUPT' : (isWin ? 'PROFIT!' : 'LOSS');
+            overlayTitle.className = 'overlay-title ' + (isWin ? 'win' : 'lose');
+            overlayStats.innerHTML = `
+                Final Portfolio: <strong>${formatMoney(finalValue)}</strong><br>
+                ${profit >= 0 ? 'Profit' : 'Loss'}: <strong style="color: ${profit >= 0 ? '#3fb950' : '#f85149'}">${profit >= 0 ? '+' : ''}${formatMoney(profit)}</strong><br>
+                Best Streak: <strong>${gameState.bestStreak}</strong>
+                ${isNewBest ? '<br><span style="color: #d29922;">New Personal Best!</span>' : ''}
+            `;
+            overlay.classList.add('active');
+        }
+
+        function updateUI(skipPortfolio = false) {
+            if (!skipPortfolio) {
+                portfolioEl.textContent = formatMoney(gameState.portfolio);
+            }
+            portfolioEl.className = 'stat-value ' + (gameState.portfolio >= START_MONEY ? 'profit' : 'loss');
+            roundEl.textContent = gameState.round + '/' + ROUNDS;
+            streakEl.textContent = gameState.streak;
+            tickerSymbol.textContent = gameState.ticker;
+            tickerPrice.textContent = '$' + gameState.currentPrice.toFixed(2);
+
+            const change = ((gameState.currentPrice - gameState.previousPrice) / gameState.previousPrice) * 100;
+            tickerChange.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+            tickerChange.className = 'ticker-change ' + (change >= 0 ? 'up' : 'down');
+
+            // Price animation
+            tickerPrice.classList.remove('price-up', 'price-down');
+            if (change > 0.5) {
+                tickerPrice.classList.add('price-up');
+            } else if (change < -0.5) {
+                tickerPrice.classList.add('price-down');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('start-btn').addEventListener('click', startGame);
+        document.getElementById('restart-btn').addEventListener('click', startGame);
+        document.getElementById('buy-btn').addEventListener('click', () => resolveRound('buy'));
+        document.getElementById('hold-btn').addEventListener('click', () => resolveRound('hold'));
+        document.getElementById('sell-btn').addEventListener('click', () => resolveRound('sell'));
+
+        document.querySelectorAll('.chart-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                initAudio();
+                playClick();
+                document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                chartType = btn.dataset.type;
+                localStorage.setItem('marketMakerChartType', chartType);
+                drawChart();
+            });
+        });
+
+        document.querySelectorAll('.diff-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                initAudio();
+                playClick();
+                document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                roundTime = parseInt(btn.dataset.time);
+            });
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (!gameState.gameActive) return;
+            if (e.key === 'b' || e.key === 'B' || e.key === '1') resolveRound('buy');
+            if (e.key === 'h' || e.key === 'H' || e.key === '2') resolveRound('hold');
+            if (e.key === 's' || e.key === 'S' || e.key === '3') resolveRound('sell');
+        });
+
+        const savedChartType = localStorage.getItem('marketMakerChartType');
+        if (savedChartType) {
+            chartType = savedChartType;
+            document.querySelectorAll('.chart-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.type === chartType);
+            });
+        }
+
+        // Don't initialize chart until game starts (game area is hidden initially)
+    </script>
+</body>
+</html>

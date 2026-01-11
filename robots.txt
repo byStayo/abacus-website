@@ -1,5 +1,5 @@
-# Abacus Wealth Group - robots.txt
+# Abacus Games - robots.txt
 User-agent: *
 Allow: /
 
-Sitemap: https://abacuswealthgroup.com/sitemap.xml
+Sitemap: https://games.abacuswealthgroup.com/sitemap.xml
