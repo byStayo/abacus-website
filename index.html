@@ -2,799 +2,1435 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Abacus Games - Finance-Themed Games & Simulations</title>
-    <meta name="description" content="Play free finance-themed games. Master trading, build hedge funds, dominate global markets. Learn financial concepts through interactive gameplay.">
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-
-    <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Abacus Games - Finance-Themed Games">
-    <meta property="og:description" content="Master trading, build hedge funds, dominate global markets. Free finance games and simulations.">
-    <meta property="og:url" content="https://games.abacuswealthgroup.com/">
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Abacus Games">
-    <meta name="twitter:description" content="Free finance-themed games. Learn while you play.">
-
-    <meta name="theme-color" content="#0d1117">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Abacus Wealth Group - Systematic capital allocation through quantitative strategies engineered for long-term wealth preservation.">
+    <title>Abacus Wealth Group | Quantitative Investment Strategies</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <style>
-        * {
+        /* ============ CSS RESET & VARIABLES ============ */
+        *, *::before, *::after {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+        }
+
+        :root {
+            --navy-deep: #0a1628;
+            --navy-medium: #1a2744;
+            --slate-blue: #3d5a80;
+            --slate-light: #5d7a9a;
+            --steel-gray: #6b7d8d;
+            --white: #ffffff;
+            --off-white: #f8f9fa;
+            --black: #0d1117;
+            --text-muted: #6c757d;
+            --accent-gold: #c9a227;
+            --success: #2e7d32;
+            --danger: #c62828;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            background-color: #0d1117;
-            color: #c9d1d9;
-            min-height: 100vh;
-            padding: 40px 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background: var(--white);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+        /* ============ TYPOGRAPHY ============ */
+        h1, h2, h3, h4 {
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
         }
 
-        /* Sticky Navigation */
-        .top-nav {
+        h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
+        h2 { font-size: clamp(1.75rem, 3vw, 2.5rem); }
+        h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); }
+
+        .mono {
+            font-family: 'SF Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+        }
+
+        /* ============ NAVIGATION ============ */
+        nav {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(13, 17, 23, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid #30363d;
-            padding: 12px 24px;
             z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        nav.scrolled {
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 72px;
         }
 
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            color: #e6edf3;
+        .logo {
+            font-size: 20px;
             font-weight: 700;
-            font-size: 18px;
-        }
-
-        .nav-brand-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #3fb950, #58a6ff);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: bold;
-            color: #0d1117;
+            letter-spacing: 0.15em;
+            color: var(--navy-deep);
+            text-decoration: none;
         }
 
         .nav-links {
             display: flex;
-            gap: 24px;
-            align-items: center;
+            gap: 40px;
+            list-style: none;
         }
 
-        .nav-link {
-            color: #7d8590;
+        .nav-links a {
+            color: var(--steel-gray);
             text-decoration: none;
             font-size: 14px;
             font-weight: 500;
+            letter-spacing: 0.02em;
             transition: color 0.2s;
         }
 
-        .nav-link:hover {
-            color: #e6edf3;
+        .nav-links a:hover {
+            color: var(--navy-deep);
         }
 
-        .nav-link-main {
-            background: #238636;
-            color: #fff !important;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 600;
+        .nav-cta {
+            padding: 10px 24px;
+            background: var(--navy-deep);
+            color: var(--white) !important;
+            border-radius: 4px;
+            transition: background 0.2s, transform 0.2s !important;
         }
 
-        .nav-link-main:hover {
-            background: #2ea043;
+        .nav-cta:hover {
+            background: var(--navy-medium);
+            transform: translateY(-1px);
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 48px;
-            padding-top: 80px; /* Account for fixed nav */
-        }
-
-        .logo {
-            font-size: 14px;
-            font-weight: 600;
-            color: #ff6b35;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        h1 {
-            font-size: 42px;
-            font-weight: 700;
-            color: #e6edf3;
-            letter-spacing: -1px;
-            margin-bottom: 12px;
-        }
-
-        .subtitle {
-            font-size: 16px;
-            color: #7d8590;
-        }
-
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 48px;
-        }
-
-        .game-card {
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.25s ease;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-            position: relative;
-        }
-
-        .game-card:hover,
-        .game-card:focus {
-            border-color: #58a6ff;
-            transform: translateY(-6px) scale(1.02);
-            box-shadow: 0 16px 48px rgba(88, 166, 255, 0.15);
-            outline: none;
-        }
-
-        .game-card:focus-visible {
-            box-shadow: 0 16px 48px rgba(88, 166, 255, 0.15), 0 0 0 3px #58a6ff;
-        }
-
-        .game-card:hover .game-preview {
-            filter: brightness(1.1);
-        }
-
-        .game-card:hover .game-icon {
-            transform: scale(1.1);
-        }
-
-        .new-badge {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: linear-gradient(135deg, #f85149 0%, #da3633 100%);
-            color: white;
-            font-size: 10px;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            z-index: 10;
-            animation: pulse-badge 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse-badge {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.4); }
-            50% { box-shadow: 0 0 0 8px rgba(248, 81, 73, 0); }
-        }
-
-        .game-preview {
-            height: 160px;
+        /* ============ HERO SECTION ============ */
+        .hero {
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
             position: relative;
             overflow: hidden;
-            transition: filter 0.25s ease;
+            background: linear-gradient(180deg,
+                var(--navy-deep) 0%,
+                var(--navy-medium) 40%,
+                var(--slate-blue) 70%,
+                var(--slate-light) 100%
+            );
         }
 
-        .game-preview.g2048 {
-            background: linear-gradient(135deg, #1a2f23 0%, #1a3a4a 100%);
+        /* Mountain silhouettes using CSS */
+        .mountains {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            pointer-events: none;
         }
 
-        .game-preview.tycoon {
-            background: linear-gradient(135deg, #2d2050 0%, #1a2f23 100%);
+        .mountain {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
         }
 
-        .game-preview.trading {
-            background: linear-gradient(135deg, #1a3a4a 0%, #0d1117 100%);
+        .mountain-back {
+            height: 55%;
+            background: linear-gradient(180deg,
+                rgba(61, 90, 128, 0.6) 0%,
+                rgba(26, 39, 68, 0.8) 100%
+            );
+            clip-path: polygon(
+                0% 100%,
+                5% 60%,
+                15% 75%,
+                25% 45%,
+                35% 65%,
+                45% 30%,
+                55% 50%,
+                65% 25%,
+                75% 55%,
+                85% 35%,
+                95% 60%,
+                100% 40%,
+                100% 100%
+            );
+            opacity: 0.7;
         }
 
-        .game-preview.flappy {
-            background: linear-gradient(135deg, #3d2a20 0%, #1a2f23 100%);
+        .mountain-mid {
+            height: 45%;
+            background: linear-gradient(180deg,
+                rgba(26, 39, 68, 0.8) 0%,
+                var(--navy-deep) 100%
+            );
+            clip-path: polygon(
+                0% 100%,
+                0% 70%,
+                10% 50%,
+                20% 70%,
+                30% 35%,
+                40% 55%,
+                50% 20%,
+                60% 45%,
+                70% 30%,
+                80% 60%,
+                90% 40%,
+                100% 55%,
+                100% 100%
+            );
+            opacity: 0.85;
         }
 
-        .game-preview.snake {
-            background: linear-gradient(135deg, #1a3a4a 0%, #1a2f4a 100%);
+        .mountain-front {
+            height: 35%;
+            background: var(--navy-deep);
+            clip-path: polygon(
+                0% 100%,
+                0% 80%,
+                8% 55%,
+                18% 75%,
+                28% 45%,
+                38% 65%,
+                48% 40%,
+                58% 60%,
+                68% 35%,
+                78% 55%,
+                88% 50%,
+                100% 65%,
+                100% 100%
+            );
         }
 
-        .game-preview.breakout {
-            background: linear-gradient(135deg, #3d2020 0%, #2d2050 100%);
-        }
-
-        .game-preview.memory {
-            background: linear-gradient(135deg, #1a2f23 0%, #2d2050 100%);
-        }
-
-        .game-preview.minesweeper {
-            background: linear-gradient(135deg, #2d1f20 0%, #1a3a4a 100%);
-        }
-
-        .game-preview.options {
-            background: linear-gradient(135deg, #1a4a2f 0%, #2d1f20 100%);
-        }
-
-        .game-preview.balancer {
-            background: linear-gradient(135deg, #1a2f4a 0%, #2d2050 100%);
-        }
-
-        .game-preview.ipo {
-            background: linear-gradient(135deg, #4a3a1a 0%, #2d2050 100%);
-        }
-
-        .game-preview.dividend {
-            background: linear-gradient(135deg, #1a4a3a 0%, #1a2f23 100%);
-        }
-
-        .game-preview.great-game {
-            background: linear-gradient(135deg, #2d2010 0%, #1a1510 100%);
-            border-bottom: 3px solid #d4a821;
-        }
-
-        /* Featured Game Section */
-        .featured-section {
-            margin-bottom: 48px;
-        }
-
-        .featured-label {
-            font-size: 12px;
-            color: #d4a821;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .featured-label::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(90deg, #d4a821, transparent);
-        }
-
-        .featured-card {
-            background: linear-gradient(135deg, #1a1510 0%, #161b22 100%);
-            border: 2px solid #d4a821;
-            border-radius: 16px;
-            overflow: hidden;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .featured-card::before {
+        /* Snow caps effect */
+        .mountain-front::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(212, 168, 33, 0.1), transparent);
-            pointer-events: none;
+            height: 15%;
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.15) 0%,
+                transparent 100%
+            );
+            clip-path: inherit;
         }
 
-        .featured-card:hover {
-            border-color: #f0c040;
-            transform: translateY(-4px);
-            box-shadow: 0 20px 60px rgba(212, 168, 33, 0.2);
-        }
-
-        .featured-preview {
-            height: 220px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 72px;
-            background: linear-gradient(135deg, #2d2010 0%, #1a1510 100%);
+        .hero-content {
             position: relative;
+            z-index: 10;
+            text-align: center;
+            color: var(--white);
+            padding: 0 20px;
+            max-width: 900px;
+            margin-top: -10vh;
         }
 
-        .featured-preview::after {
-            content: '👑';
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            font-size: 24px;
-            animation: float 3s ease-in-out infinite;
+        .hero-tagline {
+            font-size: 13px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 24px;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+        .hero h1 {
+            margin-bottom: 24px;
+            text-shadow: 0 2px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .featured-info {
-            padding: 32px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            opacity: 0.85;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
         }
 
-        .featured-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #d4a821;
-            font-family: 'Georgia', serif;
-        }
-
-        .featured-tagline {
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: var(--white);
+            text-decoration: none;
             font-size: 14px;
-            color: #8b949e;
-            font-style: italic;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .hero-cta:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        /* ============ SECTIONS ============ */
+        section {
+            padding: 120px 40px;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-label {
+            font-size: 12px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--slate-blue);
             margin-bottom: 16px;
         }
 
-        .featured-desc {
-            font-size: 15px;
-            color: #c9d1d9;
-            line-height: 1.6;
+        .section-header h2 {
+            color: var(--navy-deep);
             margin-bottom: 20px;
         }
 
-        .featured-cta {
-            display: inline-flex;
+        .section-desc {
+            color: var(--steel-gray);
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+
+        /* ============ PHILOSOPHY SECTION ============ */
+        .philosophy {
+            background: var(--white);
+        }
+
+        .philosophy-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 60px;
+        }
+
+        .philosophy-item {
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .philosophy-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .philosophy-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 24px;
+            display: flex;
             align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, #d4a821, #a17f1a);
-            color: #0d1117;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            width: fit-content;
-            transition: all 0.2s;
+            justify-content: center;
+            background: var(--off-white);
+            border-radius: 12px;
+            font-size: 28px;
         }
 
-        .featured-card:hover .featured-cta {
-            background: linear-gradient(135deg, #f0c040, #d4a821);
-        }
-
-        @media (max-width: 768px) {
-            .featured-card {
-                grid-template-columns: 1fr;
-            }
-
-            .featured-preview {
-                height: 160px;
-            }
-
-            .featured-info {
-                padding: 24px;
-            }
-
-            .featured-title {
-                font-size: 24px;
-            }
-        }
-
-        .game-icon {
-            font-size: 64px;
-            opacity: 0.9;
-            transition: transform 0.25s ease;
-        }
-
-        .game-info {
-            padding: 20px;
-        }
-
-        .game-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #e6edf3;
-            margin-bottom: 8px;
-        }
-
-        .game-desc {
-            font-size: 14px;
-            color: #7d8590;
-            line-height: 1.5;
+        .philosophy-item h3 {
+            color: var(--navy-deep);
             margin-bottom: 16px;
         }
 
-        .game-stats {
+        .philosophy-item p {
+            color: var(--steel-gray);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        /* ============ STRATEGIES SECTION ============ */
+        .strategies {
+            background: var(--off-white);
+        }
+
+        .strategy-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .strategy-card {
+            background: var(--white);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+            padding: 40px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .strategy-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .strategy-card:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .strategy-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--off-white);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--slate-blue);
+            margin-bottom: 20px;
+        }
+
+        .strategy-card h3 {
+            color: var(--navy-deep);
+            margin-bottom: 16px;
+        }
+
+        .strategy-card p {
+            color: var(--steel-gray);
+            font-size: 15px;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        .strategy-metrics {
             display: flex;
+            gap: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--off-white);
+        }
+
+        .metric {
+            flex: 1;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--navy-deep);
+        }
+
+        .metric-value.positive { color: var(--success); }
+        .metric-value.negative { color: var(--danger); }
+
+        .metric-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+
+        /* ============ PERFORMANCE SECTION ============ */
+        .performance {
+            background: var(--navy-deep);
+            color: var(--white);
+        }
+
+        .performance .section-label {
+            color: var(--slate-light);
+        }
+
+        .performance .section-header h2 {
+            color: var(--white);
+        }
+
+        .performance .section-desc {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .perf-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 32px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .perf-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .perf-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .perf-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .perf-name {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+        }
+
+        .perf-category {
+            font-size: 10px;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .perf-category.reactive { background: rgba(201, 162, 39, 0.2); color: var(--accent-gold); }
+        .perf-category.growth { background: rgba(46, 125, 50, 0.2); color: #81c784; }
+        .perf-category.safe { background: rgba(61, 90, 128, 0.3); color: var(--slate-light); }
+
+        .perf-return {
+            font-size: 36px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .perf-return.positive { color: #81c784; }
+        .perf-return.negative { color: #e57373; }
+
+        .perf-period {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 24px;
+        }
+
+        .perf-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 16px;
         }
 
-        .game-stat {
-            font-size: 12px;
-            color: #7d8590;
+        .perf-stat {
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
         }
 
-        .game-stat strong {
-            color: #58a6ff;
+        .perf-stat-value {
+            font-size: 16px;
             font-weight: 600;
         }
 
-        .play-btn {
+        .perf-stat-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+
+        /* Mini chart placeholder */
+        .perf-chart {
+            height: 60px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(129, 199, 132, 0.3) 50%,
+                rgba(129, 199, 132, 0.1) 100%
+            );
+            clip-path: polygon(
+                0% 80%,
+                10% 70%,
+                20% 75%,
+                30% 50%,
+                40% 55%,
+                50% 35%,
+                60% 40%,
+                70% 25%,
+                80% 30%,
+                90% 15%,
+                100% 10%,
+                100% 100%,
+                0% 100%
+            );
+        }
+
+        .chart-line.negative {
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(229, 115, 115, 0.3) 50%,
+                rgba(229, 115, 115, 0.1) 100%
+            );
+            clip-path: polygon(
+                0% 20%,
+                10% 30%,
+                20% 25%,
+                30% 45%,
+                40% 50%,
+                50% 60%,
+                60% 55%,
+                70% 70%,
+                80% 65%,
+                90% 80%,
+                100% 85%,
+                100% 100%,
+                0% 100%
+            );
+        }
+
+        .perf-disclaimer {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .explore-link {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background-color: #238636;
-            color: #ffffff;
-            border: none;
-            border-radius: 6px;
-            padding: 10px 20px;
+            color: var(--accent-gold);
+            text-decoration: none;
             font-size: 14px;
             font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.15s;
-            text-decoration: none;
+            margin-top: 40px;
+            transition: gap 0.2s;
         }
 
-        .play-btn:hover {
-            background-color: #2ea043;
+        .explore-link:hover {
+            gap: 12px;
         }
 
-        footer {
-            text-align: center;
-            padding-top: 24px;
-            border-top: 1px solid #21262d;
+        /* ============ RESEARCH SECTION ============ */
+        .research {
+            background: var(--white);
         }
 
-        .footer-text {
+        .research-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .research-card {
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .research-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .research-card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .research-image {
+            height: 180px;
+            background: linear-gradient(135deg, var(--navy-medium), var(--slate-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            opacity: 0.8;
+        }
+
+        .research-content {
+            padding: 28px;
+        }
+
+        .research-meta {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .research-tag {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--slate-blue);
+        }
+
+        .research-date {
             font-size: 12px;
-            color: #484f58;
+            color: var(--text-muted);
+        }
+
+        .research-card h3 {
+            color: var(--navy-deep);
+            font-size: 18px;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .research-card p {
+            color: var(--steel-gray);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .research-cta {
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: 1px solid var(--navy-deep);
+            color: var(--navy-deep);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            background: var(--navy-deep);
+            color: var(--white);
+        }
+
+        /* ============ FOOTER ============ */
+        footer {
+            background: var(--navy-deep);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 80px 40px 40px;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-top {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 60px;
+            padding-bottom: 60px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .footer-brand {
-            color: #ff6b35;
-            font-weight: 600;
+            max-width: 300px;
         }
 
-        @media (max-width: 600px) {
-            h1 { font-size: 32px; }
-            .games-grid { gap: 16px; }
-            .game-preview { height: 120px; }
-            .game-icon { font-size: 48px; }
+        .footer-logo {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: var(--white);
+            margin-bottom: 20px;
+        }
+
+        .footer-brand p {
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .footer-column h4 {
+            color: var(--white);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column li {
+            margin-bottom: 12px;
+        }
+
+        .footer-column a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .footer-column a:hover {
+            color: var(--white);
+        }
+
+        .footer-bottom {
+            padding-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 40px;
+        }
+
+        .footer-legal {
+            font-size: 11px;
+            line-height: 1.8;
+            max-width: 700px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .footer-copyright {
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        /* ============ MOBILE MENU ============ */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .menu-toggle span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: var(--navy-deep);
+            margin: 6px 0;
+            transition: all 0.3s;
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 1024px) {
+            .philosophy-grid,
+            .strategy-cards,
+            .performance-grid,
+            .research-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-top {
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            section {
+                padding: 80px 24px;
+            }
+
+            .nav-container {
+                padding: 0 24px;
+            }
+
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 72px;
+                left: 0;
+                right: 0;
+                background: var(--white);
+                flex-direction: column;
+                padding: 24px;
+                gap: 0;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links li {
+                padding: 12px 0;
+                border-bottom: 1px solid var(--off-white);
+            }
+
+            .nav-links li:last-child {
+                border-bottom: none;
+                padding-top: 20px;
+            }
+
+            .nav-cta {
+                display: block;
+                text-align: center;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .philosophy-grid,
+            .strategy-cards,
+            .performance-grid,
+            .research-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-top {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-legal {
+                max-width: 100%;
+            }
+
+            .hero-content {
+                margin-top: 0;
+            }
+
+            .mountains {
+                height: 50%;
+            }
+        }
+
+        /* ============ ANIMATIONS ============ */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-content {
+            animation: fadeInUp 1s ease 0.3s both;
+        }
+
+        .mountain-back {
+            animation: fadeInUp 1.2s ease 0s both;
+        }
+
+        .mountain-mid {
+            animation: fadeInUp 1.2s ease 0.2s both;
+        }
+
+        .mountain-front {
+            animation: fadeInUp 1.2s ease 0.4s both;
         }
     </style>
 </head>
 <body>
-    <!-- Sticky Navigation -->
-    <nav class="top-nav">
-        <a href="/" class="nav-brand">
-            <div class="nav-brand-icon">A</div>
-            Abacus Games
-        </a>
-        <div class="nav-links">
-            <a href="#games" class="nav-link">All Games</a>
-            <a href="#featured" class="nav-link">Featured</a>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">ABACUS</a>
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#philosophy">Philosophy</a></li>
+                <li><a href="#strategies">Strategies</a></li>
+                <li><a href="#performance">Performance</a></li>
+                <li><a href="#research">Research</a></li>
+                <li><a href="#contact" class="nav-cta">Contact</a></li>
+            </ul>
         </div>
     </nav>
 
-    <div class="container">
-        <header>
-            <div class="logo">Learn Finance Through Play</div>
-            <h1>Abacus Games</h1>
-            <p class="subtitle">Master trading, build empires, dominate markets — all for free</p>
-        </header>
-
-        <!-- Featured Game -->
-        <div id="featured" class="featured-section">
-            <div class="featured-label">Crown Jewel</div>
-            <a href="games/great-game.html" class="featured-card">
-                <div class="featured-preview">🏛️</div>
-                <div class="featured-info">
-                    <h2 class="featured-title">The Great Game</h2>
-                    <p class="featured-tagline">Global Dominance Through Strategic Capital</p>
-                    <p class="featured-desc">Command Apex Global Partners through geopolitical crises, seize opportunities, and shape the world order. Navigate Taiwan tensions, acquire Greenland, counter cyber attacks, and make the hard choices that define empires. Every decision ripples across continents.</p>
-                    <div class="featured-cta">Begin Your Term →</div>
-                </div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="mountains">
+            <div class="mountain mountain-back"></div>
+            <div class="mountain mountain-mid"></div>
+            <div class="mountain mountain-front"></div>
+        </div>
+        <div class="hero-content">
+            <p class="hero-tagline">Quantitative Investment Management</p>
+            <h1>Systematic Capital Allocation</h1>
+            <p class="hero-subtitle">Data-driven investment strategies built on quantitative rigor and disciplined risk management. Engineered for long-term wealth preservation.</p>
+            <a href="#philosophy" class="hero-cta">
+                Explore Our Approach
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 3v10M3 8l5 5 5-5"/>
+                </svg>
             </a>
         </div>
-
-        <div id="games" class="games-grid">
-            <a href="games/capital-compounding.html" class="game-card">
-                <div class="game-preview g2048">
-                    <span class="game-icon">$</span>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Capital Compounding</h2>
-                    <p class="game-desc">Merge assets to reach $10M. The classic 2048 with a finance twist.</p>
-                    <div class="game-stats">
-                        <span class="game-stat">Best: <strong id="cc-best">$0</strong></span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="games/hedge-fund-tycoon.html" class="game-card">
-                <div class="game-preview tycoon">
-                    <span class="game-icon">📈</span>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Hedge Fund Tycoon</h2>
-                    <p class="game-desc">Build your fund from $10K to $1B. Hire traders, unlock strategies.</p>
-                    <div class="game-stats">
-                        <span class="game-stat">AUM: <strong id="hft-aum">$0</strong></span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="games/market-maker.html" class="game-card">
-                <div class="game-preview trading">
-                    <span class="game-icon">⚡</span>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Market Maker</h2>
-                    <p class="game-desc">Fast-paced trading. React to price movements. Beat the market.</p>
-                    <div class="game-stats">
-                        <span class="game-stat">High Score: <strong id="bt-best">$0</strong></span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="games/flappy-markets.html" class="game-card">
-                <div class="game-preview flappy">
-                    <span class="game-icon">💵</span>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Flappy Markets</h2>
-                    <p class="game-desc">Navigate through volatile markets. Dodge the red candles.</p>
-                    <div class="game-stats">
-                        <span class="game-stat">Best: <strong id="fm-best">0</strong></span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="games/snake.html" class="game-card">
-                <div class="game-preview snake">
-                    <span class="game-icon">🐍</span>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Stock Snake</h2>
-                    <p class="game-desc">Collect ticker symbols to grow your portfolio. Don't hit the walls!</p>
-                    <div class="game-stats">
-                        <span class="game-stat">Best: <strong id="ss-best">0</strong></span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="games/breakout.html" class="game-card">
-                <div class="game-preview breakout">
-                    <span class="game-icon">🧱</span>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Market Breakout</h2>
-                    <p class="game-desc">Break through price levels. Smash resistance, ride support.</p>
-                    <div class="game-stats">
-                        <span class="game-stat">High Score: <strong id="mb-best">0</strong></span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="games/memory.html" class="game-card">
-                <div class="game-preview memory">
-                    <span class="game-icon">🃏</span>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Ticker Match</h2>
-                    <p class="game-desc">Match stock ticker pairs. Test your memory under pressure.</p>
-                    <div class="game-stats">
-                        <span class="game-stat">Best Moves: <strong id="tm-best">--</strong></span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="games/minesweeper.html" class="game-card">
-                <div class="game-preview minesweeper">
-                    <span class="game-icon">🔍</span>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Fraud Finder</h2>
-                    <p class="game-desc">Uncover fraudulent trades hidden in the data. Flag the suspicious ones.</p>
-                    <div class="game-stats">
-                        <span class="game-stat">Best Time: <strong id="ff-best">--</strong></span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="games/options-trader.html" class="game-card">
-                <span class="new-badge">New</span>
-                <div class="game-preview options">
-                    <span class="game-icon">📊</span>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Options Trader</h2>
-                    <p class="game-desc">Predict if stocks go up or down. Binary options-style trading game.</p>
-                    <div class="game-stats">
-                        <span class="game-stat">Best: <strong id="ot-best">$10K</strong></span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="games/portfolio-balancer.html" class="game-card">
-                <span class="new-badge">New</span>
-                <div class="game-preview balancer">
-                    <span class="game-icon">🎯</span>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Portfolio Balancer</h2>
-                    <p class="game-desc">Match target allocations with sliders. Speed and accuracy matter.</p>
-                    <div class="game-stats">
-                        <span class="game-stat">Best: <strong id="pb-best">0</strong></span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="games/ipo-frenzy.html" class="game-card">
-                <span class="new-badge">New</span>
-                <div class="game-preview ipo">
-                    <span class="game-icon">🚀</span>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">IPO Frenzy</h2>
-                    <p class="game-desc">Buy hot IPOs and sell before they crash. Time your exits perfectly.</p>
-                    <div class="game-stats">
-                        <span class="game-stat">Best: <strong id="if-best">$50K</strong></span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="games/dividend-dynasty.html" class="game-card">
-                <span class="new-badge">New</span>
-                <div class="game-preview dividend">
-                    <span class="game-icon">💰</span>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Dividend Dynasty</h2>
-                    <p class="game-desc">Build passive income. Buy dividend stocks and watch your wealth grow.</p>
-                    <div class="game-stats">
-                        <span class="game-stat">Income: <strong id="dd-income">$0/s</strong></span>
-                    </div>
-                </div>
-            </a>
-
-            <a href="games/liquidity.html" class="game-card">
-                <span class="new-badge">New</span>
-                <div class="game-preview" style="background: linear-gradient(135deg, #1a2f4a 0%, #2d2050 100%);">
-                    <span class="game-icon">🏦</span>
-                </div>
-                <div class="game-info">
-                    <h2 class="game-title">Liquidity</h2>
-                    <p class="game-desc">Fed Chair simulator. Manage M1-M4 money supply using Divisia aggregates.</p>
-                    <div class="game-stats">
-                        <span class="game-stat">Rating: <strong id="lq-rating">A</strong></span>
-                    </div>
-                </div>
-            </a>
+        <div class="scroll-indicator">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
         </div>
+    </section>
 
-        <footer>
-            <p class="footer-text">
-                <span class="footer-brand">Abacus Games</span> — Toy models. Real markets are harder.
-            </p>
-            <p class="footer-text" style="margin-top: 12px; font-size: 13px;">
-                A project by <span style="color: #58a6ff;">Abacus Wealth Group</span>
-            </p>
-        </footer>
-    </div>
+    <!-- Philosophy Section -->
+    <section class="philosophy" id="philosophy">
+        <div class="section-container">
+            <div class="section-header">
+                <p class="section-label">Investment Philosophy</p>
+                <h2>Principles That Guide Us</h2>
+                <p class="section-desc">Our approach combines rigorous quantitative analysis with disciplined execution, removing emotion from investment decisions.</p>
+            </div>
+            <div class="philosophy-grid">
+                <div class="philosophy-item">
+                    <div class="philosophy-icon">📊</div>
+                    <h3>Quantitative Foundation</h3>
+                    <p>Every investment decision is backed by data. We analyze market signals, factor exposures, and statistical patterns to identify opportunities invisible to traditional analysis.</p>
+                </div>
+                <div class="philosophy-item">
+                    <div class="philosophy-icon">⚙️</div>
+                    <h3>Rules-Based Execution</h3>
+                    <p>Systematic processes remove human bias from trading. Our algorithms execute with precision, maintaining discipline through all market conditions.</p>
+                </div>
+                <div class="philosophy-item">
+                    <div class="philosophy-icon">🛡️</div>
+                    <h3>Risk-First Approach</h3>
+                    <p>Capital preservation precedes capital appreciation. We continuously monitor and manage risk exposures, protecting against tail events and drawdowns.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Strategies Section -->
+    <section class="strategies" id="strategies">
+        <div class="section-container">
+            <div class="section-header">
+                <p class="section-label">Strategy Overview</p>
+                <h2>Systematic Investment Strategies</h2>
+                <p class="section-desc">Diversified approaches designed to generate returns across market environments while managing downside risk.</p>
+            </div>
+            <div class="strategy-cards">
+                <div class="strategy-card">
+                    <span class="strategy-tag">Reactive</span>
+                    <h3>OMNI Strategy</h3>
+                    <p>Multi-asset momentum strategy with dynamic allocation across global markets. Designed to capture trends while limiting drawdowns through systematic rebalancing.</p>
+                    <div class="strategy-metrics">
+                        <div class="metric">
+                            <div class="metric-value positive">125.9%</div>
+                            <div class="metric-label">1Y Return</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">1.92</div>
+                            <div class="metric-label">Sharpe</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="strategy-card">
+                    <span class="strategy-tag">Defensive</span>
+                    <h3>SHIELD Strategy</h3>
+                    <p>Capital preservation strategy optimized for volatile markets. Emphasizes downside protection with systematic hedging and volatility targeting.</p>
+                    <div class="strategy-metrics">
+                        <div class="metric">
+                            <div class="metric-value positive">18.9%</div>
+                            <div class="metric-label">1Y Return</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">1.26</div>
+                            <div class="metric-label">Sharpe</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="strategy-card">
+                    <span class="strategy-tag">Growth</span>
+                    <h3>ALPHA Strategy</h3>
+                    <p>Factor-based equity strategy targeting systematic alpha through exposure to proven return drivers: value, momentum, quality, and low volatility.</p>
+                    <div class="strategy-metrics">
+                        <div class="metric">
+                            <div class="metric-value positive">49.6%</div>
+                            <div class="metric-label">1Y Return</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">1.01</div>
+                            <div class="metric-label">Sharpe</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Performance Section -->
+    <section class="performance" id="performance">
+        <div class="section-container">
+            <div class="section-header">
+                <p class="section-label">Algorithm Performance</p>
+                <h2>Data-Driven Results</h2>
+                <p class="section-desc">Historical performance of our systematic strategies compared to traditional benchmarks.</p>
+            </div>
+            <div class="performance-grid">
+                <!-- Reactive Vehicles -->
+                <div class="perf-card">
+                    <div class="perf-header">
+                        <span class="perf-name">OMNI</span>
+                        <span class="perf-category reactive">Reactive</span>
+                    </div>
+                    <div class="perf-chart">
+                        <div class="chart-line"></div>
+                    </div>
+                    <div class="perf-return positive">+125.9%</div>
+                    <div class="perf-period">1-Year Annualized Return</div>
+                    <div class="perf-stats">
+                        <div class="perf-stat">
+                            <div class="perf-stat-value">1.92</div>
+                            <div class="perf-stat-label">Sharpe Ratio</div>
+                        </div>
+                        <div class="perf-stat">
+                            <div class="perf-stat-value">-25.1%</div>
+                            <div class="perf-stat-label">Max Drawdown</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="perf-card">
+                    <div class="perf-header">
+                        <span class="perf-name">SHIELD</span>
+                        <span class="perf-category reactive">Reactive</span>
+                    </div>
+                    <div class="perf-chart">
+                        <div class="chart-line"></div>
+                    </div>
+                    <div class="perf-return positive">+18.9%</div>
+                    <div class="perf-period">1-Year Annualized Return</div>
+                    <div class="perf-stats">
+                        <div class="perf-stat">
+                            <div class="perf-stat-value">1.26</div>
+                            <div class="perf-stat-label">Sharpe Ratio</div>
+                        </div>
+                        <div class="perf-stat">
+                            <div class="perf-stat-value">-7.1%</div>
+                            <div class="perf-stat-label">Max Drawdown</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="perf-card">
+                    <div class="perf-header">
+                        <span class="perf-name">ALPHA</span>
+                        <span class="perf-category reactive">Reactive</span>
+                    </div>
+                    <div class="perf-chart">
+                        <div class="chart-line"></div>
+                    </div>
+                    <div class="perf-return positive">+49.6%</div>
+                    <div class="perf-period">1-Year Annualized Return</div>
+                    <div class="perf-stats">
+                        <div class="perf-stat">
+                            <div class="perf-stat-value">1.01</div>
+                            <div class="perf-stat-label">Sharpe Ratio</div>
+                        </div>
+                        <div class="perf-stat">
+                            <div class="perf-stat-value">-40.0%</div>
+                            <div class="perf-stat-label">Max Drawdown</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Growth Benchmarks -->
+                <div class="perf-card">
+                    <div class="perf-header">
+                        <span class="perf-name">SPY</span>
+                        <span class="perf-category growth">Benchmark</span>
+                    </div>
+                    <div class="perf-chart">
+                        <div class="chart-line"></div>
+                    </div>
+                    <div class="perf-return positive">+39.9%</div>
+                    <div class="perf-period">1-Year Annualized Return</div>
+                    <div class="perf-stats">
+                        <div class="perf-stat">
+                            <div class="perf-stat-value">2.84</div>
+                            <div class="perf-stat-label">Sharpe Ratio</div>
+                        </div>
+                        <div class="perf-stat">
+                            <div class="perf-stat-value">-8.4%</div>
+                            <div class="perf-stat-label">Max Drawdown</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="perf-card">
+                    <div class="perf-header">
+                        <span class="perf-name">QQQ</span>
+                        <span class="perf-category growth">Benchmark</span>
+                    </div>
+                    <div class="perf-chart">
+                        <div class="chart-line"></div>
+                    </div>
+                    <div class="perf-return positive">+42.2%</div>
+                    <div class="perf-period">1-Year Annualized Return</div>
+                    <div class="perf-stats">
+                        <div class="perf-stat">
+                            <div class="perf-stat-value">2.13</div>
+                            <div class="perf-stat-label">Sharpe Ratio</div>
+                        </div>
+                        <div class="perf-stat">
+                            <div class="perf-stat-value">-13.6%</div>
+                            <div class="perf-stat-label">Max Drawdown</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safe Haven -->
+                <div class="perf-card">
+                    <div class="perf-header">
+                        <span class="perf-name">GLD</span>
+                        <span class="perf-category safe">Safe Haven</span>
+                    </div>
+                    <div class="perf-chart">
+                        <div class="chart-line"></div>
+                    </div>
+                    <div class="perf-return positive">+37.7%</div>
+                    <div class="perf-period">1-Year Annualized Return</div>
+                    <div class="perf-stats">
+                        <div class="perf-stat">
+                            <div class="perf-stat-value">2.35</div>
+                            <div class="perf-stat-label">Sharpe Ratio</div>
+                        </div>
+                        <div class="perf-stat">
+                            <div class="perf-stat-value">-5.8%</div>
+                            <div class="perf-stat-label">Max Drawdown</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="perf-disclaimer">Past performance is not indicative of future results. All returns shown are hypothetical backtested results and do not represent actual trading. See full disclaimers below.</p>
+
+            <div style="text-align: center;">
+                <a href="/games/" class="explore-link">
+                    Explore Interactive Simulations
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 8h10M9 4l4 4-4 4"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Research Section -->
+    <section class="research" id="research">
+        <div class="section-container">
+            <div class="section-header">
+                <p class="section-label">Research & Insights</p>
+                <h2>Quantitative Research</h2>
+                <p class="section-desc">Deep analysis and thought leadership from our research team.</p>
+            </div>
+            <div class="research-grid">
+                <div class="research-card">
+                    <div class="research-image">📈</div>
+                    <div class="research-content">
+                        <div class="research-meta">
+                            <span class="research-tag">Factor Analysis</span>
+                            <span class="research-date">January 2026</span>
+                        </div>
+                        <h3>Momentum Decay in Rising Rate Environments</h3>
+                        <p>An examination of how traditional momentum factors perform during Federal Reserve tightening cycles.</p>
+                    </div>
+                </div>
+                <div class="research-card">
+                    <div class="research-image">🔄</div>
+                    <div class="research-content">
+                        <div class="research-meta">
+                            <span class="research-tag">Risk Management</span>
+                            <span class="research-date">December 2025</span>
+                        </div>
+                        <h3>Tail Risk Hedging with Systematic Strategies</h3>
+                        <p>Cost-effective approaches to portfolio insurance using options and dynamic allocation.</p>
+                    </div>
+                </div>
+                <div class="research-card">
+                    <div class="research-image">🌐</div>
+                    <div class="research-content">
+                        <div class="research-meta">
+                            <span class="research-tag">Macro Signals</span>
+                            <span class="research-date">November 2025</span>
+                        </div>
+                        <h3>Cross-Asset Correlations During Regime Changes</h3>
+                        <p>How correlation structures break down during market stress and implications for diversification.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="research-cta">
+                <a href="#" class="btn-outline">
+                    View All Research
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 8h10M9 4l4 4-4 4"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <div class="footer-logo">ABACUS</div>
+                    <p>Quantitative investment strategies engineered for long-term wealth preservation. We combine rigorous data analysis with systematic execution.</p>
+                </div>
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#philosophy">Philosophy</a></li>
+                        <li><a href="#strategies">Strategies</a></li>
+                        <li><a href="#performance">Performance</a></li>
+                        <li><a href="#research">Research</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="/games/">Interactive Simulations</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Access</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:info@abacuswealthgroup.com">info@abacuswealthgroup.com</a></li>
+                        <li><a href="#">Schedule Consultation</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-legal">
+                    This website is for informational purposes only and does not constitute an offer to sell or a solicitation of an offer to buy any securities. Past performance is not indicative of future results. All investments involve risk, including the possible loss of principal. The information contained herein is not intended to provide, and should not be relied upon for, accounting, legal, or tax advice. Abacus Wealth Group is a registered investment adviser.
+                </p>
+                <p class="footer-copyright">&copy; 2026 Abacus Wealth Group</p>
+            </div>
+        </div>
+    </footer>
 
     <script>
-        // Load best scores from localStorage with error handling
-        function formatMoney(value) {
-            if (isNaN(value) || value === null) return '$0';
-            if (value >= 1000000000) return '$' + (value / 1000000000).toFixed(1) + 'B';
-            if (value >= 1000000) return '$' + (value / 1000000).toFixed(1) + 'M';
-            if (value >= 1000) return '$' + (value / 1000).toFixed(0) + 'K';
-            return '$' + value;
-        }
-
-        function safeGetNumber(key, fallback = 0) {
-            try {
-                const value = localStorage.getItem(key);
-                if (value === null) return fallback;
-                const num = parseInt(value);
-                return isNaN(num) ? fallback : num;
-            } catch (e) {
-                return fallback;
+        // Navigation scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
             }
-        }
+        });
 
-        function safeGetJSON(key) {
-            try {
-                const value = localStorage.getItem(key);
-                if (value === null) return null;
-                return JSON.parse(value);
-            } catch (e) {
-                return null;
-            }
-        }
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
 
-        // Capital Compounding
-        const ccBest = safeGetNumber('capitalCompoundingBest');
-        if (ccBest > 0) document.getElementById('cc-best').textContent = formatMoney(ccBest);
+        // Scroll reveal animation
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
 
-        // Hedge Fund Tycoon
-        const hftData = safeGetJSON('hedgeFundTycoon');
-        if (hftData && hftData.money > 0) {
-            document.getElementById('hft-aum').textContent = formatMoney(Math.floor(hftData.money));
-        }
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, index * 100);
+                }
+            });
+        }, observerOptions);
 
-        // Market Maker
-        const btBest = safeGetNumber('marketMakerBest');
-        if (btBest > 0) document.getElementById('bt-best').textContent = formatMoney(btBest);
+        // Observe all animatable elements
+        document.querySelectorAll('.philosophy-item, .strategy-card, .perf-card, .research-card').forEach(el => {
+            observer.observe(el);
+        });
 
-        // Flappy Markets
-        const fmBest = safeGetNumber('flappyMarketsBest');
-        if (fmBest > 0) document.getElementById('fm-best').textContent = fmBest + ' pts';
-
-        // Stock Snake
-        const ssBest = safeGetNumber('stockSnakeBest');
-        if (ssBest > 0) document.getElementById('ss-best').textContent = ssBest + ' pts';
-
-        // Market Breakout
-        const mbBest = safeGetNumber('marketBreakoutBest');
-        if (mbBest > 0) document.getElementById('mb-best').textContent = mbBest + ' pts';
-
-        // Ticker Match (store best moves - lower is better)
-        const tmBest = safeGetNumber('tickerMatchBest');
-        if (tmBest > 0) document.getElementById('tm-best').textContent = tmBest + ' moves';
-
-        // Fraud Finder (store best time - string format like "1:23")
-        const ffBest = localStorage.getItem('fraudFinderBest');
-        if (ffBest && ffBest !== '0' && ffBest !== '') {
-            document.getElementById('ff-best').textContent = ffBest;
-        }
-
-        // Options Trader
-        const otBest = safeGetNumber('optionsTraderBest');
-        if (otBest > 10000) document.getElementById('ot-best').textContent = formatMoney(otBest);
-
-        // Portfolio Balancer
-        const pbBest = safeGetNumber('portfolioBalancerBest');
-        if (pbBest > 0) document.getElementById('pb-best').textContent = pbBest + ' pts';
-
-        // IPO Frenzy
-        const ifBest = safeGetNumber('ipoFrenzyBest');
-        if (ifBest > 50000) document.getElementById('if-best').textContent = formatMoney(ifBest);
-
-        // Dividend Dynasty
-        const ddData = safeGetJSON('dividendDynastyData');
-        if (ddData && ddData.prestigeLevel > 1) {
-            document.getElementById('dd-income').textContent = ddData.prestigeLevel + 'x prestige';
-        }
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const navHeight = navbar.offsetHeight;
+                    const targetPosition = target.offsetTop - navHeight;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                    // Close mobile menu if open
+                    navLinks.classList.remove('active');
+                }
+            });
+        });
     </script>
 </body>
 </html>
